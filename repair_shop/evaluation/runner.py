@@ -5,7 +5,7 @@ from pathlib import Path
 from threading import Event
 import hashlib,json,subprocess,time,uuid
 from ..tasks import get_evaluation_suite
-from ..costs import estimate,total_cost,PRICE_DATE,PRICE_URL,COST_NOTE
+from ..costs import estimate,total_cost,PRICE_DATE,PRICE_URL,COST_NOTE,RATES
 from .config import EvaluationConfig,LOG_VERSION,MEMORY_VERSION
 from .models import LiveAgent,ScriptedWriter,PROMPTS
 from .service import ServiceDemo
@@ -51,7 +51,7 @@ class EvaluationRun:
             'condition_order':[c.id for c in config.conditions],'log_version':LOG_VERSION,'memory_version':MEMORY_VERSION,
             'supply_version':'newest-evidence-whole-record-v1','consolidation':'one-job-end-writer-v1',
             'prompts':deepcopy(PROMPTS),'task_instructions':self.suite.instructions,'tools':deepcopy(self.suite.tools),
-            'pricing':{'date':PRICE_DATE,'url':PRICE_URL,'note':COST_NOTE},
+            'pricing':{'date':PRICE_DATE,'url':PRICE_URL,'note':COST_NOTE,'usd_per_million_input_output':deepcopy(RATES)},
             'comparison_note':'Equal token caps are not equal dollar costs. Partial/unequal exposure is not a ranking.'}
         self._manifest['condition_order_by_repetition']=[[c.id for c in config.conditions[(r%len(config.conditions)):]+config.conditions[:(r%len(config.conditions))]] for r in range(config.repetitions)]
         self._manifest=json.loads(json.dumps(self._manifest))
@@ -63,7 +63,7 @@ class EvaluationRun:
                     self.attempts.append({'repetition':rep,'condition':c.id,'job':job.number,'status':'unattempted','certified':False,
                         'steps':0,'reason':'','writer_error':'','infrastructure_error':'','logging_error':'','elapsed_seconds':0,
                         'raw_events':[],'observation_log':[],'missing_entries':[],'memory_input':[],
-                        'memory_supply_audit':{},'memory_update_audit':{},'memory_after':[]})
+                        'memory_supply_audit':{},'memory_update_audit':{},'writer_output':None,'memory_after':[]})
     @property
     def manifest(self):return deepcopy(self._manifest)
     def emit(self,kind,**fields):
@@ -136,7 +136,8 @@ class EvaluationRun:
                             'job_tokens_remaining':max(0,c.job_total_token_allowance-totals['input']-totals['output']),
                             'current_job_results':deepcopy(row['raw_events']),
                             'current_job_log':supplied(row['observation_log']),'missing_log_entries':deepcopy(row['missing_entries']),
-                            'prior_memory':deepcopy(prior)}
+                            'prior_memory':deepcopy(prior),
+                            'partial_retained_jobs':deepcopy(audit.get('partial_jobs',[]))}
                         self.emit('repair_request')
                         reply,reason=self.request(c,row,'repair',context)
                         if reply is None:row['reason']=reason;break
@@ -171,6 +172,7 @@ class EvaluationRun:
                             reply,reason=self.request(c,row,'writer',payload)
                             if reply is None:row['memory_update_audit']={'skipped':reason}
                             else:
+                                row['writer_output']={'text':reply.text,'status':reply.status,'end_reason':reply.end_reason}
                                 try:
                                     if reply.status!='completed':raise ValueError(reply.end_reason or 'Incomplete writer response.')
                                     row['memory_update_audit']=mem.merge(reply.text,c)
@@ -225,6 +227,7 @@ def recovered(report):
         for c in d['calls']:
             if c['status']=='pending':c['status']='unknown'
         for row in d['attempts']:
+            row['usage']=aggregate([c for c in d['calls'] if all(c[k]==row[k] for k in ('condition','repetition','job'))])
             if row['status']=='running':
                 row['status']='success' if row['certified'] else 'interrupted'
                 row['reason']=row['reason'] or 'Interrupted; only saved evidence is available.'

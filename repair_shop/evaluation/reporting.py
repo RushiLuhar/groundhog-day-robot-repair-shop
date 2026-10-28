@@ -9,6 +9,7 @@ def render(data):
     if not data:return '<section><h2>Ready · offline evaluation</h2><p>Validate a condition list, then start explicitly.</p></section>'
     config=data['manifest']['config'];rows=data['attempts'];usage=data['usage']
     body=f'<h2>{esc(data["state"].upper())}</h2><p>{esc(data["error"] or data["stop_reason"])}</p>'
+    body+=f'<p>Recorded configuration: {esc(config["name"])} · Run {esc(data["run_id"][:8])}. Settings below belong to this snapshot.</p>'
     for k in ('persistence_error','export_error'):
         if data.get(k):body+=f'<p role="alert">{esc(data[k])}</p>'
     body+=f'<p>{"Live model calls" if config["live"] else "Scripted demonstration · no model calls"}. {sum(r["certified"] for r in rows)}/{len(rows)} scheduled attempts certified; {sum(r["status"]!="unattempted" for r in rows)} started. Elapsed execution: {data["elapsed_seconds"]:.2f}s.</p>'
@@ -29,13 +30,13 @@ def render(data):
         label=f"Repeat {r['repetition']} · {r['condition']} · ticket {r['job']} · {r['status']} · {r['steps']} steps"
         body+=f'<details><summary>{esc(label)}</summary><p>{esc(r["reason"])}</p>'
         body+=''.join('<p>'+esc(r[k])+'</p>' for k in ('writer_error','infrastructure_error','logging_error') if r[k])
-        for name,key in [('Raw events (ground truth)','raw_events'),('Literal observation entries','observation_log'),('Missing entries','missing_entries'),('Evidence supplied at job start','memory_input'),('Supply audit','memory_supply_audit'),('Retention audit','memory_update_audit'),('Evidence kept after job','memory_after')]:
-            body+=f'<details><summary>{name}</summary><pre>{esc(json.dumps(r[key],indent=2))}</pre></details>'
+        for name,key in [('Raw events (ground truth)','raw_events'),('Literal observation entries','observation_log'),('Missing entries','missing_entries'),('Evidence supplied at job start','memory_input'),('Supply audit','memory_supply_audit'),('Writer candidate response','writer_output'),('Retention audit','memory_update_audit'),('Evidence kept after job','memory_after')]:
+            body+=f'<details><summary>{name}</summary><pre>{esc(json.dumps(r.get(key),indent=2))}</pre></details>'
         body+='</details>'
     body+='<details><summary>Immutable run manifest</summary><pre>'+esc(json.dumps(data['manifest'],indent=2))+'</pre></details>'
     return '<section class="eval-report">'+body+'</section>'
 
-CSS='''.eval-report{line-height:1.5}.eval-scroll{overflow-x:auto} .eval-report table{border-collapse:collapse;min-width:900px} .eval-report td,.eval-report th{padding:10px;text-align:left;border:1px solid #68717b} .eval-report pre{white-space:pre-wrap;overflow-wrap:anywhere;max-height:550px;overflow:auto} .eval-report details{padding:10px;border:1px solid #68717b;margin:8px 0}'''
+CSS='''.eval-report{line-height:1.5}.eval-scroll,.eval-settings{overflow-x:auto} .eval-settings table{min-width:1000px} .eval-report table{border-collapse:collapse;min-width:900px} .eval-report td,.eval-report th{padding:10px;text-align:left;border:1px solid #68717b} .eval-report pre{white-space:pre-wrap;overflow-wrap:anywhere;max-height:550px;overflow:auto} .eval-report details{padding:10px;border:1px solid #68717b;margin:8px 0}'''
 
 def export(data,directory):
     root=Path(directory);root.mkdir(parents=True,exist_ok=True);base=root/f'evaluation-{data["run_id"]}'

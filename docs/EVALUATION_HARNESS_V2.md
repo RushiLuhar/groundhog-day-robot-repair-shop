@@ -48,10 +48,10 @@ Both vent and align must precede sealing. R1 requires vent first; R3's observabl
 Every repair request receives the current ticket, remaining tool/job limits, current-job raw tool results and literal logs, missing-log markers, and only its policy's admitted prior memory. The raw evaluation ledger is never a cross-job backup. The deterministic renderer preserves the action/result with a source ID and job boundary, adds only explicitly returned status, rejects unsupported schemas and bounded-length violations, and makes no API calls. Its text still costs input tokens when later supplied.
 
 - **None:** no cross-job memory store is populated. Current-job context remains available.
-- **Rolling:** newest whole entries, unchanged, within the entry count and stored-token ceiling; supplied context has its own ceiling. Eviction never truncates a field or entry. The supply audit marks jobs whose older entries are absent. Defaults (40 entries, 3,000 retained tokens, 2,000 supplied tokens) were not tuned to delete one specific lesson.
+- **Rolling:** newest whole entries, unchanged, within the entry count and stored-token ceiling; supplied context has its own ceiling. Eviction never truncates a field or entry. The supply audit and repair-context boundary metadata mark jobs whose older entries are absent. Boundary metadata is separate from the evidence-size ceiling and contributes to actual request input usage. Defaults (40 entries, 3,000 retained tokens, 2,000 supplied tokens) were not tuned to delete one specific lesson.
 - **Structured:** one job-end writer gets the condition's logs, missing-entry markers, previous records and source identity/pass metadata. It never gets raw historical events or private scoring state. Episodic/semantic/procedural records have component/revision/origin applicability, exact source IDs and tentative/test-supported/disputed status. Procedural or test-supported claims require a cited passing test. Validation does not prove semantic truth.
 
-Structured omission retains prior records. Exact statements deduplicate toward their most recent evidence; records sort by newest source ordinal, then procedural/semantic/episodic priority, then stable hash. Whole-record retention and supply enforce separate token ceilings. Audits report supplied, accepted, rejected, omitted, duplicate, evicted and retained IDs. Contradictory statements can coexist; semantic correction and causal-use grading remain human review tasks. Writer usage is counted even when its output is rejected. Writer settings stay fixed in the repair-model/reasoning/output-budget presets.
+Structured omission retains prior records. Exact statements deduplicate toward their most recent evidence; records sort by newest source ordinal, then procedural/semantic/episodic priority, then stable hash. Whole-record retention and supply enforce separate token ceilings. Audits report supplied, accepted, rejected, omitted, duplicate, evicted and retained IDs. The trace preserves the bounded writer response, including rejected or incomplete candidates. Contradictory statements can coexist; semantic correction and causal-use grading remain human review tasks. Writer usage is counted even when its output is rejected. Writer settings stay fixed in the repair-model/reasoning/output-budget presets.
 
 Ticket order is identical for all conditions. Condition order rotates by one across fresh repetitions, recorded explicitly in the manifest. Memory never crosses condition, repetition or run boundaries. A shared run fuse can still cause unequal exposure; reports preserve scheduled, started, unattempted and failure denominators and discourage ranking partial runs.
 
@@ -70,3 +70,27 @@ Manifests snapshot complete conditions, ordered tickets and condition order by r
 `examples/evaluation-memory-pilot.json` is an **offline** 8 × 3 = 24-attempt configuration. It proposes, but does not authorize, a later live pilot. Validate exact model/effort, role caps, job/run allowances and spend envelope with the owner before live use. No 648-run plan, vector retrieval, manuals, noisy sensors, additional reflection role or learned retrieval is included.
 
 Scripted successes establish simulator feasibility and harness behavior. They do not predict model behavior or establish memory superiority. In the default offline demonstration, rolling and structured memory can save the same actions on repeats; structured memory has no guaranteed advantage and a live writer can cost more or introduce errors. One small pilot cannot establish general rankings or significance. The intended next step is representative trace review, then a bounded choice of another experiment.
+
+## Final offline acceptance, 2026-10-28
+
+The final review covered the complete change from merged main and the proposal v2 acceptance criteria. It corrected per-attempt unknown-usage accounting during recovery (including a pending writer after a certified pass), retained writer candidates for trace review, exposed partial rolling-job boundaries to the repair agent, snapshotted numeric pricing, and synchronized export retry status. The UI now identifies the recorded configuration/run, selects the newly finished run in saved results, and scrolls wide settings tables on mobile.
+
+**96 tests passed**, including all 69 legacy tests and 27 v2 cases. Test processes disabled dotenv loading and socket connections; legacy export paths were redirected to temporary directories. Two benign pytest assertion-rewrite warnings concerned already-imported dependencies. No live responses or billing were tested.
+
+Browser verification used the production Gradio callbacks at **1280 × 900** and **390 × 844**, a temporary SQLite database/export directory and injected scripted agents. Paid clients were disabled. A small artificial delay made Stop/Reset observable; specially named temporary fixtures simulated token counts, truncation and API/writer failures. These injected counts are test data, not measured API usage.
+
+| Browser flow | Observed result |
+| --- | --- |
+| Three memory conditions, eight tickets | 24/24 certified; 77/67/67 steps; zero model calls. This verifies the scripted mechanics, not a memory ranking. |
+| Two reasoning conditions, eight tickets | Exactly 16/16 certified; no third condition. Writer settings remained fixed. |
+| Two conditions, two tickets, two repetitions | 8/8 certified; first ticket repeated its cold path; condition order rotated. |
+| Configuration persistence | Saved v1, edited/saved v2, restored unchanged v1; both versions remained after preview restart. |
+| Stop/reset/repeated start | In-flight return settled; interrupted attempt and unattempted remainder remained distinct; reset returned to Ready and a new run got a new identity. |
+| Trace/replay/history/export | Inspected supplied calibration and exact source IDs; replay made no calls and retained execution time; saved results loaded after restart; HTML/JSON/CSV exports worked. Export during execution was rejected. |
+| Simulated API failure | Error shown immediately; known 210 tokens retained, one unknown request and one unattempted ticket. No retry. |
+| Simulated run-token limit | One returned 210-token request crossed the 128-token limit; its tool action remained recorded; next ticket was unattempted. |
+| Simulated output truncation | Two attempts unfinished with zero tool steps; neither was certified. |
+| Simulated post-pass writer failure | Certified repair retained alongside writer/infrastructure error and unknown usage. |
+| Tool-step limit | Both selected conditions ended unfinished after one action. |
+
+The original workshop and its legacy data were not used for browser validation. Only the temporary port-7862 preview was started; it is stopped after verification. No paid run, push, PR, merge or deployment is part of this acceptance record.

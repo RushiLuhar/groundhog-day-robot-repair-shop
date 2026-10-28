@@ -25,7 +25,7 @@ def describe(c):
         a=cnd.repair;w=cnd.writer
         lines.append(f'| {cnd.id} / {cnd.memory} | {a.model} / {a.reasoning} / {a.prompt_version} / {a.response_output_cap} | {w.model} / {w.reasoning} / {w.prompt_version} / {w.response_output_cap} ({"active" if cnd.memory=="structured" else "inactive"}) | {cnd.rolling_entry_limit} / {cnd.retention_tokens} / {cnd.supply_tokens} | {cnd.tool_step_limit} / {cnd.job_total_token_allowance} |')
     lines.append('Equal token limits are not equal dollar costs. Presets isolate repair settings while holding writer configuration fixed. Scripted results are mechanism checks, not model comparisons.')
-    return '\n\n'.join(lines[:4])+'\n\n'+'\n'.join(lines[4:])
+    return '\n\n'.join(lines[:4])+'\n\n'+'\n'.join(lines[4:-1])+'\n\n'+lines[-1]
 
 class Controller:
     def __init__(self,store=None,export_directory=None,agent_factory=None):
@@ -71,7 +71,7 @@ class Controller:
                 yield render(d),'Running · '+d['state'],describe(c),gr.skip()
             d=run.report()
             status=' · '.join(x for x in (d['state'],d['error'] or d['stop_reason'],d['persistence_error'],d['export_error']) if x)
-            yield render(d),status,describe(c),gr.Dropdown(choices=self.run_choices())
+            yield render(d),status,describe(c),gr.Dropdown(choices=self.run_choices(),value=run.id)
         finally:
             if worker and worker.is_alive():s['stop'].set()
             else:
@@ -100,7 +100,10 @@ class Controller:
         d['export_error']=''
         try:paths=export(d,self.export_directory)
         except Exception:raise gr.Error('Export failed; execution evidence remains in memory.') from None
-        if s['run']:s['run'].export_error=''
+        if s['run']:
+            s['run'].export_error=''
+            try:self.store.checkpoint(s['run'])
+            except Exception:s['run'].persistence_error='Export succeeded; updating the saved export status failed.'
         else:s['saved']['export_error']=''
         return paths
     def replay(self,request:gr.Request):
@@ -138,7 +141,7 @@ def build_app(controller=None):
         gr.Markdown('Edit the explicit condition list below: add or remove conditions freely. Repair and writer settings, retention/supply limits, per-job allowance and run safety limits have separate names. Start uses the validated text as an immutable snapshot. Loading a preset does not run it.')
         config=gr.Code(value=json.dumps(initial.to_dict(),indent=2),language='json',label='Versioned configuration · editable JSON',lines=18)
         validate=gr.Button('Validate and inspect settings')
-        summary=gr.Markdown(describe(initial))
+        summary=gr.Markdown(describe(initial),elem_classes=['eval-settings'])
         with gr.Accordion('Save or load configuration versions',open=False):
             configs=gr.Dropdown(choices=ctl.config_choices(),label='Saved configurations')
             load=gr.Button('Load configuration');save=gr.Button('Save new version');save_new=gr.Button('Save as new configuration')

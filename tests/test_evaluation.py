@@ -181,6 +181,8 @@ def test_output_cap_and_writer_failure_preserve_certified_repair():
     r=finish(c,agent_factory=lambda a,role,s:Metered() if role=='repair' else Invalid())
     assert r.attempts[0]['certified'] and r.attempts[0]['writer_error']
     assert r.totals()['roles']['writer']['input']==20 and r.totals()['usage_complete']
+    assert r.attempts[0]['writer_output']['text']=='bad JSON'
+    assert 'bad JSON' in render(r.report())
 
 
 def test_config_rejection_presets_and_no_implicit_legacy_conversion():
@@ -219,6 +221,8 @@ def test_pending_crash_recovery_and_storage_immutability(tmp_path):
     assert d['state']=='interrupted' and d['attempts'][0]['steps']==1
     assert d['usage']['unknown_calls']==1 and not d['usage']['usage_complete']
     assert d['attempts'][0]['status']=='interrupted'
+    assert d['attempts'][0]['usage']['unknown_calls']==1
+    assert d['attempts'][0]['usage']['input']==10
     ref=db.save_config(c);v2=db.save_config(replace(c,name='Edited'),ref)
     assert v2['version']==2 and db.load_config(ref)==c
     with pytest.raises(ValueError):db.save_config(c,ref)
@@ -265,8 +269,9 @@ def test_production_ui_lifecycle_exports_and_request_injection(tmp_path):
     restored,_,_=ctl.load_config(f'{ref["id"]}:{ref["version"]}')
     assert parse_config(restored)==c
     assert '2 conditions' in describe(c) and 'output cap' in describe(c)
-    list(ctl.start(restored,False,req));first=ctl.session(req)['run'];calls=len(first.calls)
+    frames=list(ctl.start(restored,False,req));first=ctl.session(req)['run'];calls=len(first.calls)
     assert first.state=='completed' and len(first.attempts)==2
+    assert frames[-1][3].value==first.id
     files=ctl.download(req);data=json.loads(__import__('pathlib').Path(files[1]).read_text())
     assert data['manifest']==first.manifest and data['usage']['estimated_usd']==0
     assert 'Raw events (ground truth)' in __import__('pathlib').Path(files[0]).read_text()
@@ -335,3 +340,43 @@ def test_correct_calibration_does_not_fix_physical_heat_and_log_status_is_litera
                         ('operate',{'ok':False,'observation':'Service requires power off.'})]:
         log=observation('e',4,{'name':name,'arguments':{}},result)
         assert log['result']==result and 'false' in log['text']
+
+
+def test_partial_rolling_boundary_is_visible_in_repair_context():
+    seen=[]
+    class Observed(ServiceDemo):
+        def decide(self,c):seen.append(deepcopy(c));return super().decide(c)
+    c=EvaluationConfig(jobs=2,conditions=(Condition('rolling','rolling',rolling_entry_limit=2),))
+    r=finish(c,agent_factory=lambda *a:Observed())
+    second=next(c for c in seen if c['ticket']['job']==2)
+    assert second['partial_retained_jobs']==[1]
+    assert second['prior_memory']==supplied(r.attempts[0]['observation_log'][-2:])
+
+
+def test_export_retry_updates_saved_status_without_running_again(tmp_path,monkeypatch):
+    import repair_shop.evaluation.app as app
+    original=app.export
+    ctl=Controller(Store(tmp_path/'db'),tmp_path/'out')
+    req=N(session_hash='retry-export');c=EvaluationConfig(jobs=1,conditions=(Condition('a'),))
+    monkeypatch.setattr(app,'export',lambda *a: (_ for _ in ()).throw(OSError('disk full')))
+    list(ctl.start(json.dumps(c.to_dict()),False,req));run=ctl.session(req)['run']
+    assert ctl.store.load(run.id)['export_error']
+    calls=deepcopy(run.calls)
+    monkeypatch.setattr(app,'export',original)
+    files=ctl.download(req)
+    assert len(files)==3 and run.calls==calls and run.state=='completed'
+    assert not ctl.store.load(run.id)['export_error']
+    assert not json.loads(__import__('pathlib').Path(files[1]).read_text())['export_error']
+
+
+def test_recovery_of_pending_writer_preserves_pass_and_attempt_uncertainty(tmp_path):
+    store=Store(tmp_path/'db');saved=[]
+    class PendingWriter(ScriptedWriter):
+        def write(self,p):saved.append(store.load(run.id));return super().write(p)
+    run=EvaluationRun(EvaluationConfig(jobs=1,conditions=(Condition('a','structured'),)),
+        agent_factory=lambda a,role,s:Metered() if role=='repair' else PendingWriter(),on_checkpoint=store.checkpoint)
+    store.begin(run);list(run.run())
+    d=saved[0];row=d['attempts'][0]
+    assert d['state']=='interrupted' and row['status']=='success' and row['certified']
+    assert row['usage']['unknown_calls']==d['usage']['unknown_calls']==1
+    assert not row['usage']['usage_complete'] and row['usage']['input']==90
