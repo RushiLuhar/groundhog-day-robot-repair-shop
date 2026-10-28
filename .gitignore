@@ -37,3 +37,7 @@ artifacts/
 .idea/
 .vscode/
 .DS_Store
+*.sqlite3-wal
+*.sqlite3-shm
+*.sqlite-journal
+*.db-journal
