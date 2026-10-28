@@ -15,7 +15,7 @@ def scene(color, cls):
     return f'''<svg viewBox="0 0 320 180" class="scene {cls}" role="img" aria-label="Sarcastic robot mechanic repairing a robot customer; state {cls}" shape-rendering="crispEdges">
 <defs><pattern id="tiles-{color[1:]}" width="24" height="12" patternUnits="userSpaceOnUse"><path d="M0 12H24M24 0V12" stroke="#343746" fill="none"/></pattern></defs>
 <rect width="320" height="180" fill="#232634"/><path d="M0 32H320M32 0V32M90 32V65M160 0V32M250 32V65" stroke="#373949" stroke-width="2"/>
-<rect x="15" y="15" width="89" height="22" fill="#151822" stroke="#565b6e"/><text class="neon" x="21" y="30" fill="{color}" font-size="11" font-family="monospace">SPROCKET / 86</text>
+<rect x="15" y="15" width="89" height="22" fill="#151822" stroke="#565b6e"/><text class="neon" x="21" y="30" fill="{color}" font-size="11" font-family="monospace">SPROCKET</text>
 <path d="M280 0V55H305V15M290 0V43H315" fill="none" stroke="#555568" stroke-width="7"/>
 <rect x="20" y="48" width="55" height="40" fill="#111722" stroke="#555a69" stroke-width="4"/><path class="crt" d="M26 70H32L35 56L39 80L45 62L50 70H67" fill="none" stroke="{color}" stroke-width="2"/>
 <path d="M42 90V103M25 103H63" stroke="#6a6978" stroke-width="4"/><rect x="14" y="111" width="65" height="39" fill="#8b514d"/><path d="M18 125H74M18 138H74" stroke="#3d343c" stroke-width="3"/><path d="M40 118H52M40 131H52" stroke="#ccb58e" stroke-width="2"/>
@@ -34,6 +34,33 @@ def scene(color, cls):
 
 CSS += """
 .scene-stage{background:#232634;padding-top:12px}.scene-stage .quip{position:relative;margin:0 14px 0;padding:12px 14px;min-height:62px;border:2px solid var(--accent);border-radius:14px;background:#f2ead8;color:#282731;font-size:12px;line-height:1.5;z-index:1}.scene-stage .quip:before{content:"";position:absolute;left:28%;bottom:-15px;border-top:15px solid var(--accent);border-right:16px solid transparent}.scene-stage .quip:after{content:"";position:absolute;left:calc(28% + 2px);bottom:-10px;border-top:12px solid #f2ead8;border-right:12px solid transparent}.shift-banner{margin:0 0 22px;padding:22px;border:2px solid #666c83;border-radius:12px;background:#202637}.shift-banner h2{margin:0 0 8px;font-size:26px;color:#f4ead5}.shift-banner.completed{border-color:#c8ef89;background:#243329}.shift-banner.error,.shift-banner.stopped{border-color:#ff947d}.shift-banner p{margin:8px 0;line-height:1.5}.shift-banner progress{width:100%;height:12px;accent-color:#c8ef89}.metrics{display:flex;gap:26px;flex-wrap:wrap;margin:14px 0}.metrics b{font-size:23px;display:block;color:#c8ef89}.phase{padding:11px 16px;background:#2a3041;font-size:12px;color:#f1d392;min-height:44px}.done-sign{display:none}.clocked-out .done-sign{display:block}.clocked-out .mechanic{animation:lean 2s steps(3,end) infinite;transform-origin:103px 150px}.clocked-out .arm{transform:rotate(30deg);transform-origin:120px 94px}.clocked-out .customer{animation:depart 2.5s steps(8,end) forwards}.clocked-out .scanner,.passed .scanner,.break .scanner{display:none}.clocked-out .steam{animation:smoke 2s steps(5,end) infinite}.saving .crt{animation:blink .4s steps(2,end) infinite}.thinking .mechanic{animation:lean 1s steps(2,end) infinite;transform-origin:103px 150px}.tag{font-weight:bold}.completed .tag{border-color:#c8ef89}.shop a{color:#c8ef89}.report-info{padding:12px;border:1px solid #454958;overflow-wrap:anywhere}@keyframes lean{50%{transform:rotate(-3deg)}}@keyframes depart{to{transform:translateX(150px);opacity:0}}@media(prefers-reduced-motion:reduce){.shop *{animation:none!important}.clocked-out .customer{transform:translateX(35px)}}
+"""
+
+def experiment_description(live=False, model=None, count=3, phase='planned'):
+    """Describe only the selected setup or the actual run; no credential access."""
+    count=int(count)
+    heading={'planned':'Next shift', 'running':'Current shift', 'completed':'Completed shift',
+             'stopped':'Stopped shift', 'error':'Shift with an error', 'replay':'Recorded shift being replayed'}[phase]
+    engine=esc(model) if model else 'Server-configured OpenAI model · exact name appears when the shift starts' if live else 'Offline scripted demo · no language model'
+    mode_note=('This is a live model experiment. API calls cost money; the ledger includes repair calls and memory-writing calls.' if live else
+               'This is a free rehearsal using a scripted mechanic. It demonstrates the tools and display, but does not tell us which memory approach works better for an AI model.')
+    return f'''<section class="experiment-explainer">
+<h3>Does remembering earlier repairs help?</h3>
+<p>We give three mechanics the same repair jobs. The only difference is what each mechanic can remember from earlier jobs. We compare successful repairs, repair steps, tokens used and estimated dollar cost.</p>
+<p><strong>{heading}:</strong> {count} job{'s' if count!=1 else ''} per bay · {count*3} repair attempts in total · first {count} of the fixed ten-job baseline.<br><strong>Engine:</strong> {engine}</p>
+<p>{mode_note}</p>
+<div class="scroll"><table><thead><tr><th>Mechanic</th><th>What carries over to the next job?</th></tr></thead><tbody>
+<tr><td>Groundhog Day</td><td>Nothing. It starts each job without memories of previous repairs.</td></tr>
+<tr><td>Raw notebook</td><td>The last 12 complete action-and-result exchanges, copied verbatim.</td></tr>
+<tr><td>Four-level memory</td><td>Organized notes about past jobs, learned facts and repair procedures. Current-job working memory starts fresh.</td></tr>
+</tbody></table></div>
+<p><strong>What stays the same:</strong> model, reasoning defaults, tools, job order and a maximum of 12 tool steps per job. Every new shift starts with empty memory. Bays take turns; they do not share memories.</p>
+<p><strong>How to read the results:</strong> a repair passes only when its final test succeeds. Reaching the step limit leaves it unfinished. “Shift complete” means every scheduled attempt has ended, even if some repairs failed. Memory-writing tokens are included in the totals. A small run is a useful check, not a reliable model ranking.</p>
+<p class="subtle">Changing controls prepares the next shift; this description stays tied to the current or recorded results until you start again or reset. Sprocket is the fictional mechanic’s name.</p>
+</section>'''
+
+CSS += """
+.experiment-explainer{font-size:14px;line-height:1.65;max-width:1000px;color:#eee9df}.experiment-explainer h3{font-size:22px;color:#c8ef89;margin:0 0 12px}.experiment-explainer p{margin:12px 0}.experiment-explainer table{width:100%;border-collapse:collapse;min-width:460px}.experiment-explainer td,.experiment-explainer th{text-align:left;padding:10px;border-bottom:1px solid #48505f;vertical-align:top}.experiment-explainer td:first-child{min-width:150px;color:#c8ef89}
 """
 
 def render(events=None, results=None, live=False, model="offline scripted demo", running=False,

@@ -10,7 +10,7 @@ import gradio as gr
 from .engine import Run
 from .model import DemoModel, OpenAIModel, ModelError
 from .world import JOBS
-from .view import CSS, render
+from .view import CSS, render, experiment_description
 
 SESSIONS = {}
 LOCK = threading.Lock()
@@ -118,8 +118,40 @@ def download_results(request: gr.Request):
     if session['run'] is None: raise gr.Error('Run a shift first.')
     return export(session['run'])
 
+def describe_experiment(kind, count, request: gr.Request):
+    session=get_session(request)
+    run=session['run']
+    if run is not None:
+        phase='running' if session['busy'] else run_state(run)
+        return experiment_description(run.model.live,run.model.name,run.selected_jobs,phase)
+    return experiment_description(live=kind=='Live OpenAI (paid)',count=count)
+
+
+def start_described(kind, count, speed, request: gr.Request):
+    previous=get_session(request)['run']
+    for workshop,status in start(kind,count,speed,request):
+        run=get_session(request)['run']
+        phase=run_state(run) if run and (run.completed or run.error or status=='Stopped.') else 'running'
+        description=experiment_description(run.model.live,run.model.name,run.selected_jobs,phase) if run is not None and run is not previous else experiment_description(live=kind=='Live OpenAI (paid)',count=count)
+        yield workshop,status,description
+
+
+def reset_described(kind, count, request: gr.Request):
+    _,status=reset(request)
+    return render(selected_jobs=int(count)),status,describe_experiment(kind,count,request)
+
+
+def replay_described(speed, request: gr.Request):
+    for workshop,status in replay(speed,request):
+        run=get_session(request)['run']
+        phase=run_state(run) if status.startswith('Replay ended') else 'replay'
+        yield workshop,status,experiment_description(run.model.live,run.model.name,run.selected_jobs,phase)
+
+
 def build_app():
     with gr.Blocks(title='Groundhog Day • Robot Repair Shop',analytics_enabled=False) as app:
+        with gr.Accordion('About this experiment · what are we comparing?',open=False):
+            explanation=gr.HTML(experiment_description())
         gr.Markdown('### Workshop controls\nOffline rehearsal is free. Live mode uses your server-side configured OpenAI model and key. One shift uses identical jobs in all three bays.')
         with gr.Row():
             kind=gr.Radio(['Offline scripted demo','Live OpenAI (paid)'],value='Offline scripted demo',label='Engine')
@@ -136,10 +168,12 @@ def build_app():
         download.click(download_results,[],files,api_visibility='private')
         go.click(lambda: None,[],files,queue=False,api_visibility='private')
         clear.click(lambda: None,[],files,queue=False,api_visibility='private')
-        go.click(start,[kind,count,speed],[workshop,status],concurrency_limit=1,api_visibility='private')
+        kind.change(describe_experiment,[kind,count],explanation,queue=False,api_visibility='private')
+        count.change(describe_experiment,[kind,count],explanation,queue=False,api_visibility='private')
+        go.click(start_described,[kind,count,speed],[workshop,status,explanation],concurrency_limit=1,api_visibility='private')
         halt.click(stop,[],status,queue=False,api_visibility='private')
-        clear.click(reset,[],[workshop,status],queue=False,api_visibility='private')
-        again.click(replay,[speed],[workshop,status],concurrency_limit=1,api_visibility='private')
+        clear.click(reset_described,[kind,count],[workshop,status,explanation],queue=False,api_visibility='private')
+        again.click(replay_described,[speed],[workshop,status,explanation],concurrency_limit=1,api_visibility='private')
     return app
 
 if __name__=='__main__':
