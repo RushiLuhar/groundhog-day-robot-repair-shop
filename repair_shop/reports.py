@@ -15,10 +15,19 @@ def summary(run):
 
 
 def run_state(run):
-    return 'error' if run.error else 'completed' if run.completed else 'stopped'
+    return 'error' if run.error else 'completed' if run.completed else 'interrupted' if getattr(run,'interrupted',False) else 'stopped'
 
 
 def export(run, directory=None):
+    run.export_error=''
+    try:
+        return _export(run,directory)
+    except Exception:
+        run.export_error='Report export failed. Keep this page open and try Create report.'
+        raise
+
+
+def _export(run, directory=None):
     data=summary(run)
     target=Path(directory) if directory else Path(__file__).resolve().parents[1]/'runs'
     target.mkdir(exist_ok=True,parents=True)
@@ -27,10 +36,11 @@ def export(run, directory=None):
     document+=f'<style>{CSS} body{{padding:20px;max-width:1500px;margin:auto}} @media print{{.shop *{{animation:none!important}} details{{display:block}}}}</style><body>'
     document+=f'<p class="report-info">Shift results · job set {esc(run.suite.id)} · {esc(run.started_at)} · run {esc(run.id)}<br>Seed {esc(run.suite.seed)} · task fingerprint {esc(data["task_fingerprint"])}. A small run is not enough to rank models or memory approaches.</p>'
     document+=render(run.events,run.results,run.model.live,run.model.name,error=run.error,
-                     selected_jobs=run.selected_jobs,state=run_state(run),calls=run.calls,experiment=run.experiment.to_dict())+'<details class="report-info"><summary>Experiment setup</summary>'+configuration_description(run.experiment)+'</details><details class="report-info"><summary>Exact experiment configuration</summary><pre>'+esc(json.dumps(run.experiment.to_dict(),indent=2))+'</pre></details></body></html>'
+                     selected_jobs=run.selected_jobs,state=run_state(run),calls=run.calls,experiment=run.experiment.to_dict(),usage_complete=data.get('usage_complete',True),
+                     warnings=[getattr(run,'persistence_error',''),getattr(run,'export_error','')])+'<details class="report-info"><summary>Experiment setup</summary>'+configuration_description(run.experiment)+'</details><details class="report-info"><summary>Exact experiment configuration</summary><pre>'+esc(json.dumps(run.experiment.to_dict(),indent=2))+'</pre></details></body></html>'
     html_path=base.with_suffix('.html'); html_path.write_text(document)
     json_path=base.with_suffix('.json'); json_path.write_text(json.dumps(data,indent=2))
-    output=io.StringIO(); fields=['mode','model','reasoning','memory_policy','memory_update_policy','repetition','step_limit','job','passed','steps','input','output','maintenance','calls','cost_usd','phase','diagnostic_calls','failed_tests','calibration_writes','invalid_actions','parts_used','reason','warning']
+    output=io.StringIO(); fields=['mode','model','reasoning','memory_policy','memory_update_policy','repetition','step_limit','job','passed','interrupted','steps','input','output','maintenance','calls','cost_usd','phase','diagnostic_calls','failed_tests','calibration_writes','invalid_actions','parts_used','reason','warning']
     writer=csv.DictWriter(output,fieldnames=fields,extrasaction='ignore'); writer.writeheader(); writer.writerows({**r,**r.get('task_metrics',{})} for r in run.results)
     csv_path=base.with_suffix('.csv'); csv_path.write_text(output.getvalue())
     return [str(html_path),str(json_path),str(csv_path)]

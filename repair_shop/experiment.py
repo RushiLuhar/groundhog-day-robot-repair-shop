@@ -17,13 +17,18 @@ def run_config(config,reference=None,db=None):
     try:
         for _ in run.run():pass
     except KeyboardInterrupt:
-        run.stop.set();run.stop_reason='Interrupted from the command line.'
+        run.interrupt('Interrupted from the command line; any outstanding request may have unknown usage.')
     except Exception:
-        run.error='Local execution error; no automatic retry. Returned usage is retained.'
-        run.stop.set()
+        run.error=run.error or 'Local execution error; no automatic retry. Returned usage is retained.'
+        run.interrupt('Local execution error; known usage is retained.')
     finally:
-        db.checkpoint(run,True)
-        export(run)
+        try: db.checkpoint(run,True)
+        except Exception: run.persistence_error='Saving the run checkpoint failed.'
+        try: export(run)
+        except Exception: run.export_error='Report export failed.'
+        if run.export_error:
+            try: db.checkpoint(run,True)
+            except Exception: run.persistence_error='Saving the run checkpoint failed.'
     return run
 
 
@@ -39,7 +44,9 @@ def main():
     c=db.load_config(args.config,args.version)
     if c.live and not args.live:p.error('This saved version uses paid OpenAI calls. Add --live to run it, or save an offline version in the UI.')
     r=run_config(c,{'id':args.config,'version':args.version},db)
-    print(json.dumps({'run_id':r.id,'completed':r.completed,'attempts':len(r.results),'usage':r.totals(),'error':r.error},indent=2))
-    return 1 if r.error else 0
+    print(json.dumps({'run_id':r.id,'completed':r.completed,'attempts':len(r.results),'usage':r.totals(),
+        'usage_complete':r.report()['usage_complete'],'error':r.error,'persistence_error':r.persistence_error,
+        'export_error':r.export_error,'stop_reason':r.stop_reason},indent=2))
+    return 1 if r.error or r.interrupted or r.persistence_error or r.export_error else 0
 
 if __name__=='__main__':raise SystemExit(main())

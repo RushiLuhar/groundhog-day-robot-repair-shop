@@ -17,10 +17,14 @@ from .model import ModelError, OpenAIModel
 from .config import ExperimentConfig, default_mechanics, MODEL_EFFORTS
 from .tasks import get_suite
 from dataclasses import replace
+from .recovery import recover_report
 
 MODES = ("groundhog", "notebook", "structured")
 LABELS = {"groundhog":"Groundhog Day", "notebook":"Raw notebook", "structured":"Four-level memory"}
 from .memory import EMPTY_NOTES, note_tokens, validate_notes, merge_notes, source_jobs, memory_audit
+
+class RequestStopped(Exception):
+    """A stop arrived while preparing a request; no model call was made."""
 
 class State(TypedDict, total=False):
     mode: str
@@ -67,6 +71,12 @@ class Run:
         self.events,self.results,self.calls = [],[],[]
         self.world = None
         self.error = None
+        self.interrupted = False
+        self.usage_uncertain = False
+        self.active_attempt = None
+        self.active_request = None
+        self.persistence_error = ''
+        self.export_error = ''
         self.graph = self._graph()
 
     def namespace(self,mode):
@@ -77,6 +87,13 @@ class Run:
         return deepcopy(item.value) if item else {"history":[],"notes":deepcopy(EMPTY_NOTES),"observed":{}}
 
     def emit(self,kind,state,**extra):
+        if self.active_attempt is not None:
+            self.active_attempt.update({k:deepcopy(state[k]) for k in
+                ('steps','passed','reason','memory_audit') if k in state})
+            if 'memory_audit' in extra:
+                self.active_attempt['memory_audit']=deepcopy(extra['memory_audit'])
+            if hasattr(self.world,'metrics'):
+                self.active_attempt['task_metrics']=self.world.metrics()
         event = {"sequence":len(self.events)+1,"at":datetime.now(timezone.utc).isoformat(),"kind":kind,"mode":state["mode"],
                  "repetition":self.repetition,"step_limit":self.settings[state["mode"]].step_limit,
                  "memory_policy":self.settings[state["mode"]].memory,"model":self.models[state["mode"]].name,
@@ -85,12 +102,40 @@ class Run:
         if self.on_event:
             self.on_event(deepcopy(event))
 
+    def begin_request(self,state,kind):
+        if self.stop.is_set(): raise RequestStopped()
+        self.active_request={'mode':state['mode'],'job':state['ticket']['job'],
+            'repetition':self.repetition,'kind':kind,'status':'pending',
+            'live':self.models[state['mode']].live}
+        # Save the pending marker BEFORE a request can incur usage.
+        if self.on_checkpoint: self.on_checkpoint(self)
+        if self.stop.is_set():
+            self.active_request=None
+            if self.on_checkpoint: self.on_checkpoint(self)
+            raise RequestStopped()
+
+    def failed_request(self):
+        self.usage_uncertain=True
+        if self.active_request: self.active_request['status']='unknown'
+
+    def interrupt(self,reason):
+        pending=bool(self.active_request and self.active_request.get('live'))
+        data=recover_report(self.report(),reason,uncertain=self.usage_uncertain or pending)
+        self.results=data['results']
+        self.active_attempt=None
+        self.active_request=data.get('active_request')
+        self.usage_uncertain=not data['usage_complete']
+        self.interrupted=True
+        self.stop_reason=data['stop_reason']
+        self.stop.set()
+
     def bill(self,reply,state,kind):
         self.calls.append({"mode":state["mode"],"job":state["ticket"]["job"],"kind":kind,
                            "input":reply.input_tokens,"output":reply.output_tokens,
                            "response_id":reply.request_id,"status":reply.status,"end_reason":reply.end_reason,"model":self.models[state["mode"]].name,
                            "repetition":self.repetition,
                            "cost_usd":estimate(self.models[state["mode"]].name,reply.input_tokens,reply.output_tokens,self.models[state["mode"]].live)})
+        self.active_request=None
         if self.on_checkpoint: self.on_checkpoint(self)
         if self.totals()['input']+self.totals()['output'] >= self.experiment.max_total_tokens:
             self.stop_reason='Run token limit reached; returned usage recorded.'
@@ -120,8 +165,12 @@ class Run:
             if self.stop.is_set():
                 return {"done":True,"reason":self.stop_reason or "stopped by user"}
             try:
+                self.begin_request(s,'repair')
                 reply=self.models[s["mode"]].decide(deepcopy(context))
+            except RequestStopped:
+                return {"done":True,"reason":self.stop_reason or "stopped by user before request"}
             except ModelError as e:
+                self.failed_request()
                 self.error=str(e)
                 self.stop.set()
                 return {"done":True,"reason":self.error}
@@ -167,6 +216,7 @@ class Run:
                             if cfg.memory_update_policy=='merge_v2':
                                 payload['update_policy']='merge_v2: return additions/corrections; omission keeps prior notes'
                                 payload['source_catalog']=[{'job':i,**v} for i,v in sorted(records['observed'].items())]
+                            self.begin_request(s,'memory')
                             reply=self.models[s["mode"]].maintain(payload)
                             self.bill(reply,s,"memory")
                             if reply.status != "completed":
@@ -180,12 +230,15 @@ class Run:
                             else:
                                 records["notes"]=validate_notes(reply.text,records["observed"],cfg.memory_tokens)
                                 update_audit={'policy':'replace_v1','retained_source_jobs':source_jobs(records['notes'])}
+                        except RequestStopped:
+                            warning="Memory write skipped after stop."
                         except (ValueError,TypeError,KeyError) as exc:
                             validation_reason=str(exc) if type(exc) is ValueError else type(exc).__name__
                             update_audit={'policy':cfg.memory_update_policy,'rejected_response':validation_reason,'retained_source_jobs':source_jobs(records['notes'])}
                             self.emit("memory_rejected",s,validation_reason=validation_reason)
                             warning="Memory update rejected; previous validated notes retained. No retry."
                         except ModelError as e:
+                            self.failed_request()
                             self.error=str(e)
                             self.stop.set()
                             warning=self.error
@@ -197,6 +250,7 @@ class Run:
                                  "memory_policy":cfg.memory,"memory_update_policy":cfg.memory_update_policy,"reasoning":cfg.reasoning,"step_limit":cfg.step_limit,"job":job,"passed":s["passed"],"steps":s["steps"],
                                  "reason":s["reason"],"warning":warning,"memory_audit":s.get("memory_audit",{}),"memory_update":update_audit,**self.totals(s["mode"],job,self.repetition),
                                  "task_metrics":self.world.metrics() if hasattr(self.world,"metrics") else {}})
+            self.active_attempt=None
             self.emit("invoice",s,usage=self.totals(s["mode"],job,self.repetition),passed=s["passed"],live=self.models[s["mode"]].live)
             return {}
         builder=StateGraph(State)
@@ -215,8 +269,14 @@ class Run:
             raise ValueError("unknown mode")
         self.world=self.suite.create_world(job)
         state={"mode":mode,"ticket":job.ticket(),"steps":0,"exchanges":[],"done":False,"passed":False,"reason":""}
+        self.active_attempt={'mode':mode,'job':job.number,'ticket':job.ticket(),
+            'repetition':self.repetition,'steps':0,'passed':False}
         config={"configurable":{"thread_id":f"{self.id}:{self.repetition}:{mode}:{job.number}"},"recursion_limit":2*self.settings[mode].step_limit+10}
-        yield from self.graph.stream(state,config,stream_mode="updates")
+        try:
+            yield from self.graph.stream(state,config,stream_mode="updates")
+        except BaseException:
+            self.interrupt('Attempt interrupted; recorded steps and returned usage are retained.')
+            raise
 
     def run(self, jobs=None):
         if jobs is not None:
@@ -242,4 +302,11 @@ class Run:
                 "completed":self.completed,"stop_reason":self.stop_reason,
                 "pricing":{"date":PRICE_DATE,"source":PRICE_URL,"note":COST_NOTE},
                 "memory_implementation":"versioned-replace-v1-or-merge-v2","cap":self.cap,"results":deepcopy(self.results),"usage":self.totals(),"error":self.error,
-                "usage_complete":self.error is None,"events":deepcopy(self.events),"calls":deepcopy(self.calls)}
+                "usage_complete":self.usage_complete,
+                "interrupted":self.interrupted,"active_attempt":deepcopy(self.active_attempt),
+                "active_request":deepcopy(self.active_request),"persistence_error":self.persistence_error,
+                "export_error":self.export_error,"events":deepcopy(self.events),"calls":deepcopy(self.calls)}
+
+    @property
+    def usage_complete(self):
+        return not self.error and not self.usage_uncertain and not bool(self.active_request and self.active_request.get('live'))

@@ -22,8 +22,8 @@ The server binds only to localhost; no public Gradio link is created. The first 
 
 ## Put an experiment together
 
-1. Name the experiment and add notes or a hypothesis. Choose a task set, jobs per mechanic and repeated shifts.
-2. Click a robot to edit that mechanic. Choose its model, reasoning, memory policy, notebook window, structured-note budget, step limit and output-token caps. Select **Apply mechanic settings**.
+1. Name the experiment and add notes or a hypothesis. Choose a task set, jobs per mechanic and repeated shifts. The selected prefix is shown as “N of M jobs”; **Select all jobs in this task set** explicitly selects the full suite. Changing task sets preserves the chosen count where possible.
+2. Click a robot to edit that mechanic. Choose its model, reasoning, memory policy, notebook window, structured-note budget, step limit and output-token caps. Select **Apply mechanic settings**. The displayed experiment summary lists repair and memory output-token caps together for every mechanic.
 3. Use **Save as new experiment** for a new configuration identity. **Save new version** appends a version to the loaded configuration; previous versions stay available. Loading an older version is allowed; saving over a newer version is refused so concurrent edits cannot silently overwrite it.
 4. Leave **Use OpenAI (paid calls)** unchecked for a free demo. Start the experiment explicitly when ready. Paid runs use the model selected for each mechanic, including that mechanic’s memory writes.
 5. Review passes and unfinished attempts alongside steps and cost. Open **Saved runs and shareable reports** to revisit results or create HTML, JSON and CSV reports.
@@ -36,7 +36,7 @@ The original ten-job baseline remains selectable. The new **diagnostic-v1** set 
 
 The ignored local database is `runs/experiments.sqlite3`. Each run captures its exact configuration, task version, fingerprint and seed. Changing settings or saving a new version cannot change past results. Model settings remain separate from credentials.
 
-Returned API usage is checkpointed before another request; completed attempts and final status are also saved. The app never resumes a paid run automatically. A stored “running” status after a restart may mean the process stopped during a request: known usage is retained, but in-flight usage may be unknown. Earlier prototype reports remain in `runs/`; they are not automatically imported into the new database.
+A pending-request marker is checkpointed before each model call, and returned API usage is checkpointed before another request; completed attempts and final status are also saved. The app never resumes a paid run automatically. A stored “running” status after a restart may mean the process stopped during a request: known usage is retained, but in-flight usage may be unknown. Loading a stored running checkpoint creates a recovered view with an interrupted attempt and known steps/usage, without changing the stored row or resuming execution. Legacy checkpoints use only recorded events; missing observations and usage are never invented. A passing test already recorded before interrupted memory maintenance remains a pass with an interruption warning. Execution outcome, checkpoint-saving warnings and report-export warnings are separate; an export failure cannot overwrite the original API error. Earlier prototype reports remain in `runs/`; they are not automatically imported into the new database.
 
 **Stop** waits for an in-flight response to settle before starting no further requests. **Reset workshop** clears the displayed session after it stops. **Replay displayed run** uses saved events and makes no model calls. Loading saved results constructs no API client. Mechanic names and result rows stay tied to the recorded run even if you edit the next experiment.
 
