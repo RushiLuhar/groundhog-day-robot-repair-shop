@@ -149,10 +149,10 @@ def build_app():
             view=gr.Button('View saved run');download=gr.Button('Create report')
             files=gr.File(label='HTML / JSON / CSV reports',file_count='multiple',interactive=False)
         workshop=gr.HTML(render(selected_jobs=3,experiment=initial.to_dict()),js_on_load="""element.addEventListener('click', (event) => { const button=event.target.closest('[data-bay]'); if(button) trigger('click', {bay:button.dataset.bay}); });""")
-        with gr.Accordion('Mechanic settings — edit, then apply',open=False) as editor:
+        with gr.Accordion('Mechanic settings — edit, then apply',open=False,elem_id='mechanic-settings') as editor:
             bay=gr.Dropdown(choices=[('Bay 1','groundhog'),('Bay 2','notebook'),('Bay 3','structured')],value='groundhog',label='Mechanic bay')
             with gr.Row():
-                mname=gr.Textbox(label='Mechanic name',value=initial.mechanics[0].name)
+                mname=gr.Textbox(label='Mechanic name',value=initial.mechanics[0].name,elem_id='mechanic-name')
                 model=gr.Dropdown(choices=list(MODEL_EFFORTS),value='gpt-6-luna',label='OpenAI model')
                 reasoning=gr.Dropdown(choices=MODEL_EFFORTS['gpt-6-luna'],value='default',label='Reasoning effort')
             memory=gr.Dropdown(choices=[(LABELS[p],p) for p in POLICIES],value='groundhog',label='Memory between jobs')
@@ -172,7 +172,17 @@ def build_app():
             b=getattr(evt,'bay',None)
             if b not in BAY_IDS: return [gr.skip()]*(len(mfields)+2)
             return [b,gr.Accordion(open=True),*edit_mechanic(d,b)]
-        workshop.click(clicked,[draft],[bay,editor,*mfields],queue=False,scroll_to_output=True,api_visibility='private')
+        selected=workshop.click(clicked,[draft],[bay,editor,*mfields],queue=False,api_visibility='private')
+        # Gradio's scroll_to_output does not bring this dynamically opened accordion
+        # into view reliably. Wait for its output to render, then reveal and focus it.
+        selected.then(fn=None,inputs=[],outputs=[],queue=False,js="""async () => {
+            await new Promise(requestAnimationFrame);
+            const panel = document.getElementById('mechanic-settings');
+            if (!panel) return;
+            panel.scrollIntoView({block: 'start', behavior: 'instant'});
+            const field = panel.querySelector('#mechanic-name textarea, #mechanic-name input');
+            if (field) field.focus({preventScroll: true});
+        }""",api_visibility='private')
         bay.input(edit_mechanic,[draft,bay],mfields,queue=False,api_visibility='private')
         model.input(lambda m:gr.Dropdown(choices=MODEL_EFFORTS[m],value='default'),model,reasoning,queue=False,api_visibility='private')
         def apply_mechanic(d,b,n,m,r,p,w,budget,steps,out,mem,annotation):
