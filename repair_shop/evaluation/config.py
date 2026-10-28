@@ -7,6 +7,8 @@ from ..costs import RATES
 
 REPAIR_PROMPT='repair-objective-v1'
 WRITER_PROMPT='job-end-writer-v1'
+REPAIR_PROMPT_V2='repair-objective-v2'
+WRITER_PROMPT_V2='job-end-writer-v2'
 LOG_VERSION='literal-observation-en-v1'
 MEMORY_VERSION='typed-record-merge-v1'
 
@@ -20,8 +22,8 @@ class AgentConfig:
     def validate(self,role):
         if self.model not in MODEL_EFFORTS or self.reasoning not in MODEL_EFFORTS[self.model]:
             raise ValueError(f'Unsupported {role} model/reasoning combination.')
-        expected=REPAIR_PROMPT if role=='repair' else WRITER_PROMPT
-        if self.prompt_version!=expected: raise ValueError(f'Unsupported {role} prompt version.')
+        supported=(REPAIR_PROMPT,REPAIR_PROMPT_V2) if role=='repair' else (WRITER_PROMPT,WRITER_PROMPT_V2)
+        if self.prompt_version not in supported: raise ValueError(f'Unsupported {role} prompt version.')
         integer(self.response_output_cap,128,4096,f'{role} response output cap')
         return self
 
@@ -69,7 +71,7 @@ class EvaluationConfig:
     def validate(self):
         if self.schema_version!=2:raise ValueError('Use the legacy workshop for schema-v1 experiments; no implicit migration.')
         if not isinstance(self.name,str) or not self.name.strip() or len(self.name)>120:raise ValueError('Invalid experiment name.')
-        if self.task_set!='service-v1' or self.variant!='standard-v1':raise ValueError('Unknown task set or variant.')
+        if self.task_set not in ('service-v1','service-v2') or self.variant!='standard-v1':raise ValueError('Unknown task set or variant.')
         integer(self.jobs,1,8,'jobs');integer(self.repetitions,1,10,'repetitions')
         integer(self.run_total_token_limit,128,10000000,'run total token limit')
         if self.request_admission_policy not in ('returned-usage-v1','conservative-bytes-v1'):
@@ -102,6 +104,11 @@ class EvaluationConfig:
 
 def preset(name='memory'):
     c=EvaluationConfig()
+    if name=='tuned-v2':return replace(c,name='Unvalidated live: scoped facts / service-v2',task_set='service-v2',
+        run_total_token_limit=2000000,run_estimated_usd_limit=.5,request_admission_policy='conservative-bytes-v1',
+        conditions=tuple(replace(x,job_total_token_allowance=50000,
+            repair=replace(x.repair,prompt_version=REPAIR_PROMPT_V2,reasoning='medium'),
+            writer=replace(x.writer,prompt_version=WRITER_PROMPT_V2,reasoning='medium')) for x in c.conditions))
     if name=='reasoning':return replace(c,name='Paired reasoning comparison',conditions=tuple(
         Condition(e,'structured',repair=replace(AgentConfig(),reasoning=e)) for e in ('low','high')))
     if name=='model':return replace(c,name='Paired model comparison',run_estimated_usd_limit=None,conditions=(

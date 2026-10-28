@@ -1,0 +1,3482 @@
+{
+  "label": "Authorized exploratory live evaluation of a fixed synthetic suite; not a general ranking",
+  "started_at": "2026-10-28T22:15:57.794097+00:00",
+  "state": "completed",
+  "error": "",
+  "stop_reason": "",
+  "elapsed_seconds": 1745.0011478330125,
+  "manifest": {
+    "schema_version": 2,
+    "config": {
+      "schema_version": 2,
+      "name": "Luna medium memory pilot - 50k job allowance",
+      "task_set": "service-v1",
+      "variant": "standard-v1",
+      "jobs": 8,
+      "repetitions": 3,
+      "live": true,
+      "run_total_token_limit": 2000000,
+      "run_estimated_usd_limit": 0.5,
+      "request_admission_policy": "conservative-bytes-v1",
+      "conditions": [
+        {
+          "id": "none",
+          "memory": "none",
+          "repair": {
+            "model": "gpt-6-luna",
+            "reasoning": "medium",
+            "prompt_version": "repair-objective-v1",
+            "response_output_cap": 2048
+          },
+          "writer": {
+            "model": "gpt-6-luna",
+            "reasoning": "medium",
+            "prompt_version": "job-end-writer-v1",
+            "response_output_cap": 2048
+          },
+          "rolling_entry_limit": 40,
+          "retention_tokens": 3000,
+          "supply_tokens": 2000,
+          "tool_step_limit": 20,
+          "job_total_token_allowance": 50000
+        },
+        {
+          "id": "rolling",
+          "memory": "rolling",
+          "repair": {
+            "model": "gpt-6-luna",
+            "reasoning": "medium",
+            "prompt_version": "repair-objective-v1",
+            "response_output_cap": 2048
+          },
+          "writer": {
+            "model": "gpt-6-luna",
+            "reasoning": "medium",
+            "prompt_version": "job-end-writer-v1",
+            "response_output_cap": 2048
+          },
+          "rolling_entry_limit": 40,
+          "retention_tokens": 3000,
+          "supply_tokens": 2000,
+          "tool_step_limit": 20,
+          "job_total_token_allowance": 50000
+        },
+        {
+          "id": "structured",
+          "memory": "structured",
+          "repair": {
+            "model": "gpt-6-luna",
+            "reasoning": "medium",
+            "prompt_version": "repair-objective-v1",
+            "response_output_cap": 2048
+          },
+          "writer": {
+            "model": "gpt-6-luna",
+            "reasoning": "medium",
+            "prompt_version": "job-end-writer-v1",
+            "response_output_cap": 2048
+          },
+          "rolling_entry_limit": 40,
+          "retention_tokens": 3000,
+          "supply_tokens": 2000,
+          "tool_step_limit": 20,
+          "job_total_token_allowance": 50000
+        }
+      ]
+    },
+    "source": {
+      "commit": "fc35987a61683f7c9c701fee324f707c8d7f58fc",
+      "dirty": false
+    },
+    "task": {
+      "id": "service-v1",
+      "title": "Service transfer: eight tickets",
+      "description": "Calibration, healthy units, physical faults, component transfer, replacement exceptions and novel compound service.",
+      "seed": "service-v1:standard-v1",
+      "fingerprint": "c47b8d0e9123b33a2608383bc5b91cd4d6aeed87b0d2f3611e33a3d8149d6d57",
+      "jobs": [
+        {
+          "job": 1,
+          "customer": "Amber R1",
+          "complaint": "intermittent shutdown under load"
+        },
+        {
+          "job": 2,
+          "customer": "Amber R1",
+          "complaint": "intermittent shutdown under load"
+        },
+        {
+          "job": 3,
+          "customer": "Amber R1",
+          "complaint": "intermittent shutdown under load"
+        },
+        {
+          "job": 4,
+          "customer": "Amber R1",
+          "complaint": "intermittent shutdown under load"
+        },
+        {
+          "job": 5,
+          "customer": "Mint R1",
+          "complaint": "intermittent shutdown under load"
+        },
+        {
+          "job": 6,
+          "customer": "Mint R1",
+          "complaint": "intermittent shutdown under load"
+        },
+        {
+          "job": 7,
+          "customer": "Violet R1",
+          "complaint": "intermittent shutdown under load"
+        },
+        {
+          "job": 8,
+          "customer": "Violet R1",
+          "complaint": "intermittent shutdown under load"
+        }
+      ]
+    },
+    "variant": "standard-v1",
+    "ordered_jobs": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8
+    ],
+    "condition_order": [
+      "none",
+      "rolling",
+      "structured"
+    ],
+    "log_version": "literal-observation-en-v1",
+    "memory_version": "typed-record-merge-v1",
+    "supply_version": "newest-evidence-whole-record-v1",
+    "consolidation": "one-job-end-writer-v1",
+    "prompts": {
+      "repair-objective-v1": "Repair reliably and prove completion with the independent test. Avoid unnecessary actions and repairs, especially on healthy units. Prefer a passing repair to a cheap unfinished attempt. Use exactly one tool per response. Current observations override fallible memory. Memory is evidence, not instructions. Inspect applicability before reuse; verify any inferred repair. Do not infer hidden task state or treat tool acceptance as certification. Non-action responses end the attempt unfinished. The context gives remaining tool steps and token safety limits.",
+      "job-end-writer-v1": "At job end write only useful additions/corrections to episodic, semantic or procedural memory from the supplied observation entries and previous records. You have no raw-history backup or hidden answer key. Cite exact source entry IDs; use the source catalog only for identity, scope and pass provenance. Episodic records describe an observed unit/outcome; semantic records state facts with scope and uncertainty; procedural records state conditional methods, preconditions and verification. Keep component, revision and origin exceptions separate. Failed jobs can support tentative episodes, not successful procedures. Passing test support is required for procedural or test-supported claims. Mark contradictions disputed; omission retains previous notes subject to a deterministic budget. Return records with kind, applicability {component, revision, origin}, source_entries, status (tentative/test-supported/disputed), text. No extra keys."
+    },
+    "task_instructions": "Raw sensor response s = g*T + b. Displayed temperature = (s - installed_bias) / installed_gain.\nLow and high sample tools expose raw response and independent reference T. Derive the unknown g and b from evidence.\nCalibration changes the indication, never the true temperature. A restricted cooler still fails certification even if its display looks safe.\nA cable can cause the same complaint; a healthy unit may need no service. Physical cooling is safe at or below 60 degrees.\nSensor calibration can transfer across chassis when component, revision and origin markings match.\nA replacement or new revision may invalidate earlier calibration. Inspect the current unit before applying memory.\nCooler interlocks determine whether vent or align comes first. Both must precede seal. Electrical/mechanical work requires power off.\nAll facts needed for a cold repair are observable. Only the independent test certifies a repair.",
+    "tools": [
+      {
+        "type": "function",
+        "name": "inspect",
+        "description": "Read chassis, sensor component/revision/origin markings, installed calibration, indication, power and visible cooler work.",
+        "strict": true,
+        "parameters": {
+          "type": "object",
+          "properties": {},
+          "required": [],
+          "additionalProperties": false
+        }
+      },
+      {
+        "type": "function",
+        "name": "sample_sensor",
+        "description": "Read raw sensor response at a low or high reference temperature. Requires power on. The installed calibration does not change raw response.",
+        "strict": true,
+        "parameters": {
+          "type": "object",
+          "properties": {
+            "level": {
+              "type": "string",
+              "enum": [
+                "low",
+                "high"
+              ]
+            }
+          },
+          "required": [
+            "level"
+          ],
+          "additionalProperties": false
+        }
+      },
+      {
+        "type": "function",
+        "name": "probe",
+        "description": "Read thermal airflow and reference temperature, cable continuity, or cooler interlocks. No free sensor samples.",
+        "strict": true,
+        "parameters": {
+          "type": "object",
+          "properties": {
+            "channel": {
+              "type": "string",
+              "enum": [
+                "thermal",
+                "continuity",
+                "interlocks"
+              ]
+            }
+          },
+          "required": [
+            "channel"
+          ],
+          "additionalProperties": false
+        }
+      },
+      {
+        "type": "function",
+        "name": "power",
+        "description": "Switch power on or off. Mechanical service and calibration require power off; sampling and testing require power on.",
+        "strict": true,
+        "parameters": {
+          "type": "object",
+          "properties": {
+            "state": {
+              "type": "string",
+              "enum": [
+                "on",
+                "off"
+              ]
+            }
+          },
+          "required": [
+            "state"
+          ],
+          "additionalProperties": false
+        }
+      },
+      {
+        "type": "function",
+        "name": "operate",
+        "description": "With power off, align the controller, vent the loop, seal completed work, or reseat the cable. Probe interlocks to discover ordering constraints.",
+        "strict": true,
+        "parameters": {
+          "type": "object",
+          "properties": {
+            "operation": {
+              "type": "string",
+              "enum": [
+                "align",
+                "vent",
+                "seal",
+                "reseat_cable"
+              ]
+            }
+          },
+          "required": [
+            "operation"
+          ],
+          "additionalProperties": false
+        }
+      },
+      {
+        "type": "function",
+        "name": "calibrate",
+        "description": "Install gain (1..4) and bias (-20..20), with power off. A write is not proof of repair.",
+        "strict": true,
+        "parameters": {
+          "type": "object",
+          "properties": {
+            "gain": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 4
+            },
+            "bias": {
+              "type": "integer",
+              "minimum": -20,
+              "maximum": 20
+            }
+          },
+          "required": [
+            "gain",
+            "bias"
+          ],
+          "additionalProperties": false
+        }
+      },
+      {
+        "type": "function",
+        "name": "test",
+        "description": "Independently certify sensor accuracy at two references, true thermal safety, continuity, power and completed mechanical work.",
+        "strict": true,
+        "parameters": {
+          "type": "object",
+          "properties": {},
+          "required": [],
+          "additionalProperties": false
+        }
+      }
+    ],
+    "pricing": {
+      "date": "2026-10-28",
+      "url": "https://developers.openai.com/api/docs/models/gpt-6-luna",
+      "note": "Uses OpenAI standard text prices checked on 2026-10-28. Luna costs $0.10 per million input tokens and $0.50 per million output tokens. Requests above 272,000 input tokens use 2\u00d7 the input rate and 1.5\u00d7 the output rate. The estimate includes memory updates. It does not account for cache discounts, extra cache-write charges, regional or service-tier adjustments, or taxes. Your bill may differ. If a request fails, some usage and cost may be missing.",
+      "usd_per_million_input_output": {
+        "gpt-6-luna": [
+          0.1,
+          0.5
+        ]
+      }
+    },
+    "service_tier": "default",
+    "request_admission_policy": "conservative-bytes-v1",
+    "comparison_note": "Equal token caps are not equal dollar costs. Partial/unequal exposure is not a ranking.",
+    "condition_order_by_repetition": [
+      [
+        "none",
+        "rolling",
+        "structured"
+      ],
+      [
+        "rolling",
+        "structured",
+        "none"
+      ],
+      [
+        "structured",
+        "none",
+        "rolling"
+      ]
+    ],
+    "fingerprint": "f067590deeb7f569921622fd73d70835dd91649a5af099038a787e297f4d43de"
+  },
+  "provider": {
+    "configured_models": [
+      "gpt-6-luna"
+    ],
+    "returned_models": [
+      "gpt-6-luna"
+    ],
+    "returned_service_tiers": [
+      "default"
+    ]
+  },
+  "usage": {
+    "roles": {
+      "repair": {
+        "input": 1726222,
+        "output": 87109
+      },
+      "writer": {
+        "input": 91952,
+        "output": 17349
+      }
+    },
+    "input": 1818174,
+    "output": 104458,
+    "known_calls": 722,
+    "unknown_calls": 0,
+    "estimated_usd": 0.23404640000000002,
+    "usage_complete": true
+  },
+  "by_condition": {
+    "none": {
+      "scheduled": 24,
+      "started": 24,
+      "certified": 23,
+      "unfinished": 1,
+      "interrupted": 0,
+      "unattempted": 0,
+      "infrastructure_errors": 0,
+      "writer_errors": 0,
+      "logging_errors": 0,
+      "steps": 253,
+      "roles": {
+        "repair": {
+          "input": 413116,
+          "output": 35151
+        },
+        "writer": {
+          "input": 0,
+          "output": 0
+        }
+      },
+      "known_tokens": 448267,
+      "known_estimated_usd": 0.058887100000000005,
+      "unknown_calls": 0,
+      "elapsed_seconds": 630.1203124190797
+    },
+    "rolling": {
+      "scheduled": 24,
+      "started": 24,
+      "certified": 21,
+      "unfinished": 3,
+      "interrupted": 0,
+      "unattempted": 0,
+      "infrastructure_errors": 0,
+      "writer_errors": 0,
+      "logging_errors": 0,
+      "steps": 215,
+      "roles": {
+        "repair": {
+          "input": 665854,
+          "output": 26314
+        },
+        "writer": {
+          "input": 0,
+          "output": 0
+        }
+      },
+      "known_tokens": 692168,
+      "known_estimated_usd": 0.0797424,
+      "unknown_calls": 0,
+      "elapsed_seconds": 484.90802654105937
+    },
+    "structured": {
+      "scheduled": 24,
+      "started": 24,
+      "certified": 21,
+      "unfinished": 3,
+      "interrupted": 0,
+      "unattempted": 0,
+      "infrastructure_errors": 0,
+      "writer_errors": 0,
+      "logging_errors": 0,
+      "steps": 232,
+      "roles": {
+        "repair": {
+          "input": 647252,
+          "output": 25644
+        },
+        "writer": {
+          "input": 91952,
+          "output": 17349
+        }
+      },
+      "known_tokens": 782197,
+      "known_estimated_usd": 0.0954169,
+      "unknown_calls": 0,
+      "elapsed_seconds": 628.8603436221601
+    }
+  },
+  "by_shift": {
+    "1": {
+      "none": {
+        "scheduled": 8,
+        "started": 8,
+        "certified": 7,
+        "unfinished": 1,
+        "interrupted": 0,
+        "unattempted": 0,
+        "infrastructure_errors": 0,
+        "writer_errors": 0,
+        "logging_errors": 0,
+        "steps": 86,
+        "roles": {
+          "repair": {
+            "input": 144148,
+            "output": 15523
+          },
+          "writer": {
+            "input": 0,
+            "output": 0
+          }
+        },
+        "known_tokens": 159671,
+        "known_estimated_usd": 0.0221763,
+        "unknown_calls": 0,
+        "elapsed_seconds": 249.8983272939804
+      },
+      "rolling": {
+        "scheduled": 8,
+        "started": 8,
+        "certified": 7,
+        "unfinished": 1,
+        "interrupted": 0,
+        "unattempted": 0,
+        "infrastructure_errors": 0,
+        "writer_errors": 0,
+        "logging_errors": 0,
+        "steps": 70,
+        "roles": {
+          "repair": {
+            "input": 215480,
+            "output": 8452
+          },
+          "writer": {
+            "input": 0,
+            "output": 0
+          }
+        },
+        "known_tokens": 223932,
+        "known_estimated_usd": 0.025774000000000002,
+        "unknown_calls": 0,
+        "elapsed_seconds": 151.9435697500012
+      },
+      "structured": {
+        "scheduled": 8,
+        "started": 8,
+        "certified": 7,
+        "unfinished": 1,
+        "interrupted": 0,
+        "unattempted": 0,
+        "infrastructure_errors": 0,
+        "writer_errors": 0,
+        "logging_errors": 0,
+        "steps": 77,
+        "roles": {
+          "repair": {
+            "input": 215060,
+            "output": 8398
+          },
+          "writer": {
+            "input": 30609,
+            "output": 5836
+          }
+        },
+        "known_tokens": 259903,
+        "known_estimated_usd": 0.0316839,
+        "unknown_calls": 0,
+        "elapsed_seconds": 198.78619954094756
+      }
+    },
+    "2": {
+      "none": {
+        "scheduled": 8,
+        "started": 8,
+        "certified": 8,
+        "unfinished": 0,
+        "interrupted": 0,
+        "unattempted": 0,
+        "infrastructure_errors": 0,
+        "writer_errors": 0,
+        "logging_errors": 0,
+        "steps": 82,
+        "roles": {
+          "repair": {
+            "input": 130586,
+            "output": 9188
+          },
+          "writer": {
+            "input": 0,
+            "output": 0
+          }
+        },
+        "known_tokens": 139774,
+        "known_estimated_usd": 0.0176526,
+        "unknown_calls": 0,
+        "elapsed_seconds": 178.29659320705105
+      },
+      "rolling": {
+        "scheduled": 8,
+        "started": 8,
+        "certified": 7,
+        "unfinished": 1,
+        "interrupted": 0,
+        "unattempted": 0,
+        "infrastructure_errors": 0,
+        "writer_errors": 0,
+        "logging_errors": 0,
+        "steps": 74,
+        "roles": {
+          "repair": {
+            "input": 230973,
+            "output": 9474
+          },
+          "writer": {
+            "input": 0,
+            "output": 0
+          }
+        },
+        "known_tokens": 240447,
+        "known_estimated_usd": 0.0278343,
+        "unknown_calls": 0,
+        "elapsed_seconds": 172.30162304098485
+      },
+      "structured": {
+        "scheduled": 8,
+        "started": 8,
+        "certified": 7,
+        "unfinished": 1,
+        "interrupted": 0,
+        "unattempted": 0,
+        "infrastructure_errors": 0,
+        "writer_errors": 0,
+        "logging_errors": 0,
+        "steps": 76,
+        "roles": {
+          "repair": {
+            "input": 208316,
+            "output": 8845
+          },
+          "writer": {
+            "input": 30130,
+            "output": 5686
+          }
+        },
+        "known_tokens": 252977,
+        "known_estimated_usd": 0.0311101,
+        "unknown_calls": 0,
+        "elapsed_seconds": 203.51438412308926
+      }
+    },
+    "3": {
+      "none": {
+        "scheduled": 8,
+        "started": 8,
+        "certified": 8,
+        "unfinished": 0,
+        "interrupted": 0,
+        "unattempted": 0,
+        "infrastructure_errors": 0,
+        "writer_errors": 0,
+        "logging_errors": 0,
+        "steps": 85,
+        "roles": {
+          "repair": {
+            "input": 138382,
+            "output": 10440
+          },
+          "writer": {
+            "input": 0,
+            "output": 0
+          }
+        },
+        "known_tokens": 148822,
+        "known_estimated_usd": 0.0190582,
+        "unknown_calls": 0,
+        "elapsed_seconds": 201.92539191804826
+      },
+      "rolling": {
+        "scheduled": 8,
+        "started": 8,
+        "certified": 7,
+        "unfinished": 1,
+        "interrupted": 0,
+        "unattempted": 0,
+        "infrastructure_errors": 0,
+        "writer_errors": 0,
+        "logging_errors": 0,
+        "steps": 71,
+        "roles": {
+          "repair": {
+            "input": 219401,
+            "output": 8388
+          },
+          "writer": {
+            "input": 0,
+            "output": 0
+          }
+        },
+        "known_tokens": 227789,
+        "known_estimated_usd": 0.0261341,
+        "unknown_calls": 0,
+        "elapsed_seconds": 160.66283375007333
+      },
+      "structured": {
+        "scheduled": 8,
+        "started": 8,
+        "certified": 7,
+        "unfinished": 1,
+        "interrupted": 0,
+        "unattempted": 0,
+        "infrastructure_errors": 0,
+        "writer_errors": 0,
+        "logging_errors": 0,
+        "steps": 79,
+        "roles": {
+          "repair": {
+            "input": 223876,
+            "output": 8401
+          },
+          "writer": {
+            "input": 31213,
+            "output": 5827
+          }
+        },
+        "known_tokens": 269317,
+        "known_estimated_usd": 0.0326229,
+        "unknown_calls": 0,
+        "elapsed_seconds": 226.55975995812332
+      }
+    }
+  },
+  "matched_comparison": {
+    "selection": "Same repetition/ticket with every condition terminal as success or unfinished; excludes global-interruption/unattempted groups. Unfinished job-budget outcomes remain included.",
+    "ticket_groups": [
+      {
+        "repetition": 1,
+        "job": 1
+      },
+      {
+        "repetition": 1,
+        "job": 2
+      },
+      {
+        "repetition": 1,
+        "job": 3
+      },
+      {
+        "repetition": 1,
+        "job": 4
+      },
+      {
+        "repetition": 1,
+        "job": 5
+      },
+      {
+        "repetition": 1,
+        "job": 6
+      },
+      {
+        "repetition": 1,
+        "job": 7
+      },
+      {
+        "repetition": 1,
+        "job": 8
+      },
+      {
+        "repetition": 2,
+        "job": 1
+      },
+      {
+        "repetition": 2,
+        "job": 2
+      },
+      {
+        "repetition": 2,
+        "job": 3
+      },
+      {
+        "repetition": 2,
+        "job": 4
+      },
+      {
+        "repetition": 2,
+        "job": 5
+      },
+      {
+        "repetition": 2,
+        "job": 6
+      },
+      {
+        "repetition": 2,
+        "job": 7
+      },
+      {
+        "repetition": 2,
+        "job": 8
+      },
+      {
+        "repetition": 3,
+        "job": 1
+      },
+      {
+        "repetition": 3,
+        "job": 2
+      },
+      {
+        "repetition": 3,
+        "job": 3
+      },
+      {
+        "repetition": 3,
+        "job": 4
+      },
+      {
+        "repetition": 3,
+        "job": 5
+      },
+      {
+        "repetition": 3,
+        "job": 6
+      },
+      {
+        "repetition": 3,
+        "job": 7
+      },
+      {
+        "repetition": 3,
+        "job": 8
+      }
+    ],
+    "by_condition": {
+      "none": {
+        "scheduled": 24,
+        "started": 24,
+        "certified": 23,
+        "unfinished": 1,
+        "interrupted": 0,
+        "unattempted": 0,
+        "infrastructure_errors": 0,
+        "writer_errors": 0,
+        "logging_errors": 0,
+        "steps": 253,
+        "roles": {
+          "repair": {
+            "input": 413116,
+            "output": 35151
+          },
+          "writer": {
+            "input": 0,
+            "output": 0
+          }
+        },
+        "known_tokens": 448267,
+        "known_estimated_usd": 0.058887100000000005,
+        "unknown_calls": 0,
+        "elapsed_seconds": 630.1203124190797
+      },
+      "rolling": {
+        "scheduled": 24,
+        "started": 24,
+        "certified": 21,
+        "unfinished": 3,
+        "interrupted": 0,
+        "unattempted": 0,
+        "infrastructure_errors": 0,
+        "writer_errors": 0,
+        "logging_errors": 0,
+        "steps": 215,
+        "roles": {
+          "repair": {
+            "input": 665854,
+            "output": 26314
+          },
+          "writer": {
+            "input": 0,
+            "output": 0
+          }
+        },
+        "known_tokens": 692168,
+        "known_estimated_usd": 0.0797424,
+        "unknown_calls": 0,
+        "elapsed_seconds": 484.90802654105937
+      },
+      "structured": {
+        "scheduled": 24,
+        "started": 24,
+        "certified": 21,
+        "unfinished": 3,
+        "interrupted": 0,
+        "unattempted": 0,
+        "infrastructure_errors": 0,
+        "writer_errors": 0,
+        "logging_errors": 0,
+        "steps": 232,
+        "roles": {
+          "repair": {
+            "input": 647252,
+            "output": 25644
+          },
+          "writer": {
+            "input": 91952,
+            "output": 17349
+          }
+        },
+        "known_tokens": 782197,
+        "known_estimated_usd": 0.0954169,
+        "unknown_calls": 0,
+        "elapsed_seconds": 628.8603436221601
+      }
+    }
+  },
+  "attempts": [
+    {
+      "repetition": 1,
+      "condition": "none",
+      "job": 1,
+      "status": "success",
+      "certified": true,
+      "steps": 9,
+      "reason": "Independent test passed.",
+      "writer_error": "",
+      "infrastructure_error": "",
+      "logging_error": "",
+      "elapsed_seconds": 16.390001542051323,
+      "usage": {
+        "roles": {
+          "repair": {
+            "input": 12811,
+            "output": 731
+          },
+          "writer": {
+            "input": 0,
+            "output": 0
+          }
+        },
+        "input": 12811,
+        "output": 731,
+        "known_calls": 9,
+        "unknown_calls": 0,
+        "estimated_usd": 0.0016466,
+        "usage_complete": true
+      },
+      "sensor_samples": 2,
+      "memory_supplied_tokens": 1,
+      "memory_supplied_records_or_entries": 0,
+      "memory_writer_skipped": "",
+      "memory_rejected_candidates": 0
+    },
+    {
+      "repetition": 1,
+      "condition": "rolling",
+      "job": 1,
+      "status": "success",
+      "certified": true,
+      "steps": 9,
+      "reason": "Independent test passed.",
+      "writer_error": "",
+      "infrastructure_error": "",
+      "logging_error": "",
+      "elapsed_seconds": 16.997824666032102,
+      "usage": {
+        "roles": {
+          "repair": {
+            "input": 12904,
+            "output": 890
+          },
+          "writer": {
+            "input": 0,
+            "output": 0
+          }
+        },
+        "input": 12904,
+        "output": 890,
+        "known_calls": 9,
+        "unknown_calls": 0,
+        "estimated_usd": 0.0017354,
+        "usage_complete": true
+      },
+      "sensor_samples": 2,
+      "memory_supplied_tokens": 1,
+      "memory_supplied_records_or_entries": 0,
+      "memory_writer_skipped": "",
+      "memory_rejected_candidates": 0
+    },
+    {
+      "repetition": 1,
+      "condition": "structured",
+      "job": 1,
+      "status": "success",
+      "certified": true,
+      "steps": 9,
+      "reason": "Independent test passed.",
+      "writer_error": "",
+      "infrastructure_error": "",
+      "logging_error": "",
+      "elapsed_seconds": 20.724343874957412,
+      "usage": {
+        "roles": {
+          "repair": {
+            "input": 12908,
+            "output": 898
+          },
+          "writer": {
+            "input": 1680,
+            "output": 495
+          }
+        },
+        "input": 14588,
+        "output": 1393,
+        "known_calls": 10,
+        "unknown_calls": 0,
+        "estimated_usd": 0.0021553,
+        "usage_complete": true
+      },
+      "sensor_samples": 2,
+      "memory_supplied_tokens": 4,
+      "memory_supplied_records_or_entries": 0,
+      "memory_writer_skipped": "",
+      "memory_rejected_candidates": 0
+    },
+    {
+      "repetition": 1,
+      "condition": "none",
+      "job": 2,
+      "status": "success",
+      "certified": true,
+      "steps": 7,
+      "reason": "Independent test passed.",
+      "writer_error": "",
+      "infrastructure_error": "",
+      "logging_error": "",
+      "elapsed_seconds": 13.864364416978788,
+      "usage": {
+        "roles": {
+          "repair": {
+            "input": 8881,
+            "output": 778
+          },
+          "writer": {
+            "input": 0,
+            "output": 0
+          }
+        },
+        "input": 8881,
+        "output": 778,
+        "known_calls": 7,
+        "unknown_calls": 0,
+        "estimated_usd": 0.0012771,
+        "usage_complete": true
+      },
+      "sensor_samples": 2,
+      "memory_supplied_tokens": 1,
+      "memory_supplied_records_or_entries": 0,
+      "memory_writer_skipped": "",
+      "memory_rejected_candidates": 0
+    },
+    {
+      "repetition": 1,
+      "condition": "rolling",
+      "job": 2,
+      "status": "success",
+      "certified": true,
+      "steps": 4,
+      "reason": "Independent test passed.",
+      "writer_error": "",
+      "infrastructure_error": "",
+      "logging_error": "",
+      "elapsed_seconds": 7.834419624996372,
+      "usage": {
+        "roles": {
+          "repair": {
+            "input": 7517,
+            "output": 406
+          },
+          "writer": {
+            "input": 0,
+            "output": 0
+          }
+        },
+        "input": 7517,
+        "output": 406,
+        "known_calls": 4,
+        "unknown_calls": 0,
+        "estimated_usd": 0.0009547,
+        "usage_complete": true
+      },
+      "sensor_samples": 0,
+      "memory_supplied_tokens": 807,
+      "memory_supplied_records_or_entries": 9,
+      "memory_writer_skipped": "",
+      "memory_rejected_candidates": 0
+    },
+    {
+      "repetition": 1,
+      "condition": "structured",
+      "job": 2,
+      "status": "success",
+      "certified": true,
+      "steps": 6,
+      "reason": "Independent test passed.",
+      "writer_error": "",
+      "infrastructure_error": "",
+      "logging_error": "",
+      "elapsed_seconds": 15.6967185420217,
+      "usage": {
+        "roles": {
+          "repair": {
+            "input": 8836,
+            "output": 682
+          },
+          "writer": {
+            "input": 1997,
+            "output": 430
+          }
+        },
+        "input": 10833,
+        "output": 1112,
+        "known_calls": 7,
+        "unknown_calls": 0,
+        "estimated_usd": 0.0016393000000000002,
+        "usage_complete": true
+      },
+      "sensor_samples": 2,
+      "memory_supplied_tokens": 255,
+      "memory_supplied_records_or_entries": 1,
+      "memory_writer_skipped": "",
+      "memory_rejected_candidates": 0
+    },
+    {
+      "repetition": 1,
+      "condition": "none",
+      "job": 3,
+      "status": "success",
+      "certified": true,
+      "steps": 9,
+      "reason": "Independent test passed.",
+      "writer_error": "",
+      "infrastructure_error": "",
+      "logging_error": "",
+      "elapsed_seconds": 18.648670583963394,
+      "usage": {
+        "roles": {
+          "repair": {
+            "input": 12828,
+            "output": 1000
+          },
+          "writer": {
+            "input": 0,
+            "output": 0
+          }
+        },
+        "input": 12828,
+        "output": 1000,
+        "known_calls": 9,
+        "unknown_calls": 0,
+        "estimated_usd": 0.0017828000000000002,
+        "usage_complete": true
+      },
+      "sensor_samples": 2,
+      "memory_supplied_tokens": 1,
+      "memory_supplied_records_or_entries": 0,
+      "memory_writer_skipped": "",
+      "memory_rejected_candidates": 0
+    },
+    {
+      "repetition": 1,
+      "condition": "rolling",
+      "job": 3,
+      "status": "success",
+      "certified": true,
+      "steps": 7,
+      "reason": "Independent test passed.",
+      "writer_error": "",
+      "infrastructure_error": "",
+      "logging_error": "",
+      "elapsed_seconds": 19.683163042005617,
+      "usage": {
+        "roles": {
+          "repair": {
+            "input": 17429,
+            "output": 1248
+          },
+          "writer": {
+            "input": 0,
+            "output": 0
+          }
+        },
+        "input": 17429,
+        "output": 1248,
+        "known_calls": 7,
+        "unknown_calls": 0,
+        "estimated_usd": 0.0023669,
+        "usage_complete": true
+      },
+      "sensor_samples": 0,
+      "memory_supplied_tokens": 1167,
+      "memory_supplied_records_or_entries": 13,
+      "memory_writer_skipped": "",
+      "memory_rejected_candidates": 0
+    },
+    {
+      "repetition": 1,
+      "condition": "structured",
+      "job": 3,
+      "status": "success",
+      "certified": true,
+      "steps": 9,
+      "reason": "Independent test passed.",
+      "writer_error": "",
+      "infrastructure_error": "",
+      "logging_error": "",
+      "elapsed_seconds": 23.212616291013546,
+      "usage": {
+        "roles": {
+          "repair": {
+            "input": 17217,
+            "output": 888
+          },
+          "writer": {
+            "input": 2974,
+            "output": 971
+          }
+        },
+        "input": 20191,
+        "output": 1859,
+        "known_calls": 10,
+        "unknown_calls": 0,
+        "estimated_usd": 0.0029486,
+        "usage_complete": true
+      },
+      "sensor_samples": 2,
+      "memory_supplied_tokens": 444,
+      "memory_supplied_records_or_entries": 2,
+      "memory_writer_skipped": "",
+      "memory_rejected_candidates": 0
+    },
+    {
+      "repetition": 1,
+      "condition": "none",
+      "job": 4,
+      "status": "success",
+      "certified": true,
+      "steps": 12,
+      "reason": "Independent test passed.",
+      "writer_error": "",
+      "infrastructure_error": "",
+      "logging_error": "",
+      "elapsed_seconds": 36.92754891701043,
+      "usage": {
+        "roles": {
+          "repair": {
+            "input": 19799,
+            "output": 2471
+          },
+          "writer": {
+            "input": 0,
+            "output": 0
+          }
+        },
+        "input": 19799,
+        "output": 2471,
+        "known_calls": 12,
+        "unknown_calls": 0,
+        "estimated_usd": 0.0032154,
+        "usage_complete": true
+      },
+      "sensor_samples": 2,
+      "memory_supplied_tokens": 1,
+      "memory_supplied_records_or_entries": 0,
+      "memory_writer_skipped": "",
+      "memory_rejected_candidates": 0
+    },
+    {
+      "repetition": 1,
+      "condition": "rolling",
+      "job": 4,
+      "status": "success",
+      "certified": true,
+      "steps": 10,
+      "reason": "Independent test passed.",
+      "writer_error": "",
+      "infrastructure_error": "",
+      "logging_error": "",
+      "elapsed_seconds": 23.00977037503617,
+      "usage": {
+        "roles": {
+          "repair": {
+            "input": 33827,
+            "output": 1278
+          },
+          "writer": {
+            "input": 0,
+            "output": 0
+          }
+        },
+        "input": 33827,
+        "output": 1278,
+        "known_calls": 10,
+        "unknown_calls": 0,
+        "estimated_usd": 0.0040217000000000004,
+        "usage_complete": true
+      },
+      "sensor_samples": 0,
+      "memory_supplied_tokens": 1798,
+      "memory_supplied_records_or_entries": 20,
+      "memory_writer_skipped": "",
+      "memory_rejected_candidates": 0
+    },
+    {
+      "repetition": 1,
+      "condition": "structured",
+      "job": 4,
+      "status": "success",
+      "certified": true,
+      "steps": 13,
+      "reason": "Independent test passed.",
+      "writer_error": "",
+      "infrastructure_error": "",
+      "logging_error": "",
+      "elapsed_seconds": 38.76577912498033,
+      "usage": {
+        "roles": {
+          "repair": {
+            "input": 36264,
+            "output": 1902
+          },
+          "writer": {
+            "input": 4621,
+            "output": 832
+          }
+        },
+        "input": 40885,
+        "output": 2734,
+        "known_calls": 14,
+        "unknown_calls": 0,
+        "estimated_usd": 0.0054555,
+        "usage_complete": true
+      },
+      "sensor_samples": 2,
+      "memory_supplied_tokens": 971,
+      "memory_supplied_records_or_entries": 4,
+      "memory_writer_skipped": "",
+      "memory_rejected_candidates": 0
+    },
+    {
+      "repetition": 1,
+      "condition": "none",
+      "job": 5,
+      "status": "success",
+      "certified": true,
+      "steps": 8,
+      "reason": "Independent test passed.",
+      "writer_error": "",
+      "infrastructure_error": "",
+      "logging_error": "",
+      "elapsed_seconds": 18.14551629195921,
+      "usage": {
+        "roles": {
+          "repair": {
+            "input": 10802,
+            "output": 978
+          },
+          "writer": {
+            "input": 0,
+            "output": 0
+          }
+        },
+        "input": 10802,
+        "output": 978,
+        "known_calls": 8,
+        "unknown_calls": 0,
+        "estimated_usd": 0.0015692000000000002,
+        "usage_complete": true
+      },
+      "sensor_samples": 2,
+      "memory_supplied_tokens": 1,
+      "memory_supplied_records_or_entries": 0,
+      "memory_writer_skipped": "",
+      "memory_rejected_candidates": 0
+    },
+    {
+      "repetition": 1,
+      "condition": "rolling",
+      "job": 5,
+      "status": "success",
+      "certified": true,
+      "steps": 9,
+      "reason": "Independent test passed.",
+      "writer_error": "",
+      "infrastructure_error": "",
+      "logging_error": "",
+      "elapsed_seconds": 19.175305374956224,
+      "usage": {
+        "roles": {
+          "repair": {
+            "input": 31299,
+            "output": 1054
+          },
+          "writer": {
+            "input": 0,
+            "output": 0
+          }
+        },
+        "input": 31299,
+        "output": 1054,
+        "known_calls": 9,
+        "unknown_calls": 0,
+        "estimated_usd": 0.0036569000000000003,
+        "usage_complete": true
+      },
+      "sensor_samples": 2,
+      "memory_supplied_tokens": 1963,
+      "memory_supplied_records_or_entries": 22,
+      "memory_writer_skipped": "",
+      "memory_rejected_candidates": 0
+    },
+    {
+      "repetition": 1,
+      "condition": "structured",
+      "job": 5,
+      "status": "success",
+      "certified": true,
+      "steps": 9,
+      "reason": "Independent test passed.",
+      "writer_error": "",
+      "infrastructure_error": "",
+      "logging_error": "",
+      "elapsed_seconds": 25.64618254202651,
+      "usage": {
+        "roles": {
+          "repair": {
+            "input": 27647,
+            "output": 955
+          },
+          "writer": {
+            "input": 5324,
+            "output": 1019
+          }
+        },
+        "input": 32971,
+        "output": 1974,
+        "known_calls": 10,
+        "unknown_calls": 0,
+        "estimated_usd": 0.004284100000000001,
+        "usage_complete": true
+      },
+      "sensor_samples": 2,
+      "memory_supplied_tokens": 1506,
+      "memory_supplied_records_or_entries": 6,
+      "memory_writer_skipped": "",
+      "memory_rejected_candidates": 0
+    },
+    {
+      "repetition": 1,
+      "condition": "none",
+      "job": 6,
+      "status": "unfinished",
+      "certified": false,
+      "steps": 17,
+      "reason": "response output limit",
+      "writer_error": "",
+      "infrastructure_error": "",
+      "logging_error": "",
+      "elapsed_seconds": 95.32013574999291,
+      "usage": {
+        "roles": {
+          "repair": {
+            "input": 38116,
+            "output": 6716
+          },
+          "writer": {
+            "input": 0,
+            "output": 0
+          }
+        },
+        "input": 38116,
+        "output": 6716,
+        "known_calls": 18,
+        "unknown_calls": 0,
+        "estimated_usd": 0.0071696,
+        "usage_complete": true
+      },
+      "sensor_samples": 2,
+      "memory_supplied_tokens": 1,
+      "memory_supplied_records_or_entries": 0,
+      "memory_writer_skipped": "",
+      "memory_rejected_candidates": 0
+    },
+    {
+      "repetition": 1,
+      "condition": "rolling",
+      "job": 6,
+      "status": "success",
+      "certified": true,
+      "steps": 9,
+      "reason": "Independent test passed.",
+      "writer_error": "",
+      "infrastructure_error": "",
+      "logging_error": "",
+      "elapsed_seconds": 21.09283558401512,
+      "usage": {
+        "roles": {
+          "repair": {
+            "input": 31267,
+            "output": 1193
+          },
+          "writer": {
+            "input": 0,
+            "output": 0
+          }
+        },
+        "input": 31267,
+        "output": 1193,
+        "known_calls": 9,
+        "unknown_calls": 0,
+        "estimated_usd": 0.0037232000000000003,
+        "usage_complete": true
+      },
+      "sensor_samples": 2,
+      "memory_supplied_tokens": 1957,
+      "memory_supplied_records_or_entries": 22,
+      "memory_writer_skipped": "",
+      "memory_rejected_candidates": 0
+    },
+    {
+      "repetition": 1,
+      "condition": "structured",
+      "job": 6,
+      "status": "success",
+      "certified": true,
+      "steps": 9,
+      "reason": "Independent test passed.",
+      "writer_error": "",
+      "infrastructure_error": "",
+      "logging_error": "",
+      "elapsed_seconds": 22.572419958014507,
+      "usage": {
+        "roles": {
+          "repair": {
+            "input": 31578,
+            "output": 857
+          },
+          "writer": {
+            "input": 6513,
+            "output": 726
+          }
+        },
+        "input": 38091,
+        "output": 1583,
+        "known_calls": 10,
+        "unknown_calls": 0,
+        "estimated_usd": 0.004600600000000001,
+        "usage_complete": true
+      },
+      "sensor_samples": 2,
+      "memory_supplied_tokens": 1896,
+      "memory_supplied_records_or_entries": 7,
+      "memory_writer_skipped": "",
+      "memory_rejected_candidates": 0
+    },
+    {
+      "repetition": 1,
+      "condition": "none",
+      "job": 7,
+      "status": "success",
+      "certified": true,
+      "steps": 9,
+      "reason": "Independent test passed.",
+      "writer_error": "",
+      "infrastructure_error": "",
+      "logging_error": "",
+      "elapsed_seconds": 18.4137490420253,
+      "usage": {
+        "roles": {
+          "repair": {
+            "input": 12775,
+            "output": 953
+          },
+          "writer": {
+            "input": 0,
+            "output": 0
+          }
+        },
+        "input": 12775,
+        "output": 953,
+        "known_calls": 9,
+        "unknown_calls": 0,
+        "estimated_usd": 0.001754,
+        "usage_complete": true
+      },
+      "sensor_samples": 2,
+      "memory_supplied_tokens": 1,
+      "memory_supplied_records_or_entries": 0,
+      "memory_writer_skipped": "",
+      "memory_rejected_candidates": 0
+    },
+    {
+      "repetition": 1,
+      "condition": "rolling",
+      "job": 7,
+      "status": "success",
+      "certified": true,
+      "steps": 9,
+      "reason": "Independent test passed.",
+      "writer_error": "",
+      "infrastructure_error": "",
+      "logging_error": "",
+      "elapsed_seconds": 19.193888290959876,
+      "usage": {
+        "roles": {
+          "repair": {
+            "input": 31162,
+            "output": 1023
+          },
+          "writer": {
+            "input": 0,
+            "output": 0
+          }
+        },
+        "input": 31162,
+        "output": 1023,
+        "known_calls": 9,
+        "unknown_calls": 0,
+        "estimated_usd": 0.0036277,
+        "usage_complete": true
+      },
+      "sensor_samples": 2,
+      "memory_supplied_tokens": 1945,
+      "memory_supplied_records_or_entries": 22,
+      "memory_writer_skipped": "",
+      "memory_rejected_candidates": 0
+    },
+    {
+      "repetition": 1,
+      "condition": "structured",
+      "job": 7,
+      "status": "success",
+      "certified": true,
+      "steps": 9,
+      "reason": "Independent test passed.",
+      "writer_error": "",
+      "infrastructure_error": "",
+      "logging_error": "",
+      "elapsed_seconds": 24.42744695796864,
+      "usage": {
+        "roles": {
+          "repair": {
+            "input": 31954,
+            "output": 688
+          },
+          "writer": {
+            "input": 7500,
+            "output": 1363
+          }
+        },
+        "input": 39454,
+        "output": 2051,
+        "known_calls": 10,
+        "unknown_calls": 0,
+        "estimated_usd": 0.0049709,
+        "usage_complete": true
+      },
+      "sensor_samples": 2,
+      "memory_supplied_tokens": 1932,
+      "memory_supplied_records_or_entries": 7,
+      "memory_writer_skipped": "",
+      "memory_rejected_candidates": 0
+    },
+    {
+      "repetition": 1,
+      "condition": "none",
+      "job": 8,
+      "status": "success",
+      "certified": true,
+      "steps": 15,
+      "reason": "Independent test passed.",
+      "writer_error": "",
+      "infrastructure_error": "",
+      "logging_error": "",
+      "elapsed_seconds": 32.18834074999904,
+      "usage": {
+        "roles": {
+          "repair": {
+            "input": 28136,
+            "output": 1896
+          },
+          "writer": {
+            "input": 0,
+            "output": 0
+          }
+        },
+        "input": 28136,
+        "output": 1896,
+        "known_calls": 15,
+        "unknown_calls": 0,
+        "estimated_usd": 0.0037616000000000004,
+        "usage_complete": true
+      },
+      "sensor_samples": 2,
+      "memory_supplied_tokens": 1,
+      "memory_supplied_records_or_entries": 0,
+      "memory_writer_skipped": "",
+      "memory_rejected_candidates": 0
+    },
+    {
+      "repetition": 1,
+      "condition": "rolling",
+      "job": 8,
+      "status": "unfinished",
+      "certified": false,
+      "steps": 13,
+      "reason": "Job total-token safety allowance reached.",
+      "writer_error": "",
+      "infrastructure_error": "",
+      "logging_error": "",
+      "elapsed_seconds": 24.95636279199971,
+      "usage": {
+        "roles": {
+          "repair": {
+            "input": 50075,
+            "output": 1360
+          },
+          "writer": {
+            "input": 0,
+            "output": 0
+          }
+        },
+        "input": 50075,
+        "output": 1360,
+        "known_calls": 13,
+        "unknown_calls": 0,
+        "estimated_usd": 0.005687500000000001,
+        "usage_complete": true
+      },
+      "sensor_samples": 2,
+      "memory_supplied_tokens": 1956,
+      "memory_supplied_records_or_entries": 22,
+      "memory_writer_skipped": "",
+      "memory_rejected_candidates": 0
+    },
+    {
+      "repetition": 1,
+      "condition": "structured",
+      "job": 8,
+      "status": "unfinished",
+      "certified": false,
+      "steps": 13,
+      "reason": "Job total-token safety allowance reached.",
+      "writer_error": "",
+      "infrastructure_error": "",
+      "logging_error": "",
+      "elapsed_seconds": 27.740692249964923,
+      "usage": {
+        "roles": {
+          "repair": {
+            "input": 48656,
+            "output": 1528
+          },
+          "writer": {
+            "input": 0,
+            "output": 0
+          }
+        },
+        "input": 48656,
+        "output": 1528,
+        "known_calls": 13,
+        "unknown_calls": 0,
+        "estimated_usd": 0.0056296,
+        "usage_complete": true
+      },
+      "sensor_samples": 2,
+      "memory_supplied_tokens": 1824,
+      "memory_supplied_records_or_entries": 6,
+      "memory_writer_skipped": "Job total-token safety allowance reached.",
+      "memory_rejected_candidates": 0
+    },
+    {
+      "repetition": 2,
+      "condition": "rolling",
+      "job": 1,
+      "status": "success",
+      "certified": true,
+      "steps": 9,
+      "reason": "Independent test passed.",
+      "writer_error": "",
+      "infrastructure_error": "",
+      "logging_error": "",
+      "elapsed_seconds": 19.206455458013806,
+      "usage": {
+        "roles": {
+          "repair": {
+            "input": 12858,
+            "output": 990
+          },
+          "writer": {
+            "input": 0,
+            "output": 0
+          }
+        },
+        "input": 12858,
+        "output": 990,
+        "known_calls": 9,
+        "unknown_calls": 0,
+        "estimated_usd": 0.0017808,
+        "usage_complete": true
+      },
+      "sensor_samples": 2,
+      "memory_supplied_tokens": 1,
+      "memory_supplied_records_or_entries": 0,
+      "memory_writer_skipped": "",
+      "memory_rejected_candidates": 0
+    },
+    {
+      "repetition": 2,
+      "condition": "structured",
+      "job": 1,
+      "status": "success",
+      "certified": true,
+      "steps": 8,
+      "reason": "Independent test passed.",
+      "writer_error": "",
+      "infrastructure_error": "",
+      "logging_error": "",
+      "elapsed_seconds": 18.1783218330238,
+      "usage": {
+        "roles": {
+          "repair": {
+            "input": 10918,
+            "output": 656
+          },
+          "writer": {
+            "input": 1546,
+            "output": 438
+          }
+        },
+        "input": 12464,
+        "output": 1094,
+        "known_calls": 9,
+        "unknown_calls": 0,
+        "estimated_usd": 0.0017934000000000001,
+        "usage_complete": true
+      },
+      "sensor_samples": 2,
+      "memory_supplied_tokens": 4,
+      "memory_supplied_records_or_entries": 0,
+      "memory_writer_skipped": "",
+      "memory_rejected_candidates": 0
+    },
+    {
+      "repetition": 2,
+      "condition": "none",
+      "job": 1,
+      "status": "success",
+      "certified": true,
+      "steps": 9,
+      "reason": "Independent test passed.",
+      "writer_error": "",
+      "infrastructure_error": "",
+      "logging_error": "",
+      "elapsed_seconds": 19.842630041006487,
+      "usage": {
+        "roles": {
+          "repair": {
+            "input": 12811,
+            "output": 1092
+          },
+          "writer": {
+            "input": 0,
+            "output": 0
+          }
+        },
+        "input": 12811,
+        "output": 1092,
+        "known_calls": 9,
+        "unknown_calls": 0,
+        "estimated_usd": 0.0018271000000000001,
+        "usage_complete": true
+      },
+      "sensor_samples": 2,
+      "memory_supplied_tokens": 1,
+      "memory_supplied_records_or_entries": 0,
+      "memory_writer_skipped": "",
+      "memory_rejected_candidates": 0
+    },
+    {
+      "repetition": 2,
+      "condition": "rolling",
+      "job": 2,
+      "status": "success",
+      "certified": true,
+      "steps": 4,
+      "reason": "Independent test passed.",
+      "writer_error": "",
+      "infrastructure_error": "",
+      "logging_error": "",
+      "elapsed_seconds": 9.811574958031997,
+      "usage": {
+        "roles": {
+          "repair": {
+            "input": 7517,
+            "output": 533
+          },
+          "writer": {
+            "input": 0,
+            "output": 0
+          }
+        },
+        "input": 7517,
+        "output": 533,
+        "known_calls": 4,
+        "unknown_calls": 0,
+        "estimated_usd": 0.0010182,
+        "usage_complete": true
+      },
+      "sensor_samples": 0,
+      "memory_supplied_tokens": 807,
+      "memory_supplied_records_or_entries": 9,
+      "memory_writer_skipped": "",
+      "memory_rejected_candidates": 0
+    },
+    {
+      "repetition": 2,
+      "condition": "structured",
+      "job": 2,
+      "status": "success",
+      "certified": true,
+      "steps": 10,
+      "reason": "Independent test passed.",
+      "writer_error": "",
+      "infrastructure_error": "",
+      "logging_error": "",
+      "elapsed_seconds": 32.28804666601354,
+      "usage": {
+        "roles": {
+          "repair": {
+            "input": 17347,
+            "output": 1806
+          },
+          "writer": {
+            "input": 2479,
+            "output": 635
+          }
+        },
+        "input": 19826,
+        "output": 2441,
+        "known_calls": 11,
+        "unknown_calls": 0,
+        "estimated_usd": 0.0032031,
+        "usage_complete": true
+      },
+      "sensor_samples": 2,
+      "memory_supplied_tokens": 214,
+      "memory_supplied_records_or_entries": 1,
+      "memory_writer_skipped": "",
+      "memory_rejected_candidates": 0
+    },
+    {
+      "repetition": 2,
+      "condition": "none",
+      "job": 2,
+      "status": "success",
+      "certified": true,
+      "steps": 6,
+      "reason": "Independent test passed.",
+      "writer_error": "",
+      "infrastructure_error": "",
+      "logging_error": "",
+      "elapsed_seconds": 12.546919832995627,
+      "usage": {
+        "roles": {
+          "repair": {
+            "input": 7167,
+            "output": 433
+          },
+          "writer": {
+            "input": 0,
+            "output": 0
+          }
+        },
+        "input": 7167,
+        "output": 433,
+        "known_calls": 6,
+        "unknown_calls": 0,
+        "estimated_usd": 0.0009332,
+        "usage_complete": true
+      },
+      "sensor_samples": 2,
+      "memory_supplied_tokens": 1,
+      "memory_supplied_records_or_entries": 0,
+      "memory_writer_skipped": "",
+      "memory_rejected_candidates": 0
+    },
+    {
+      "repetition": 2,
+      "condition": "rolling",
+      "job": 3,
+      "status": "success",
+      "certified": true,
+      "steps": 9,
+      "reason": "Independent test passed.",
+      "writer_error": "",
+      "infrastructure_error": "",
+      "logging_error": "",
+      "elapsed_seconds": 26.240486791997682,
+      "usage": {
+        "roles": {
+          "repair": {
+            "input": 23704,
+            "output": 1317
+          },
+          "writer": {
+            "input": 0,
+            "output": 0
+          }
+        },
+        "input": 23704,
+        "output": 1317,
+        "known_calls": 9,
+        "unknown_calls": 0,
+        "estimated_usd": 0.0030289,
+        "usage_complete": true
+      },
+      "sensor_samples": 0,
+      "memory_supplied_tokens": 1167,
+      "memory_supplied_records_or_entries": 13,
+      "memory_writer_skipped": "",
+      "memory_rejected_candidates": 0
+    },
+    {
+      "repetition": 2,
+      "condition": "structured",
+      "job": 3,
+      "status": "success",
+      "certified": true,
+      "steps": 8,
+      "reason": "Independent test passed.",
+      "writer_error": "",
+      "infrastructure_error": "",
+      "logging_error": "",
+      "elapsed_seconds": 21.31072520802263,
+      "usage": {
+        "roles": {
+          "repair": {
+            "input": 14686,
+            "output": 821
+          },
+          "writer": {
+            "input": 2983,
+            "output": 920
+          }
+        },
+        "input": 17669,
+        "output": 1741,
+        "known_calls": 9,
+        "unknown_calls": 0,
+        "estimated_usd": 0.0026374,
+        "usage_complete": true
+      },
+      "sensor_samples": 2,
+      "memory_supplied_tokens": 424,
+      "memory_supplied_records_or_entries": 2,
+      "memory_writer_skipped": "",
+      "memory_rejected_candidates": 0
+    },
+    {
+      "repetition": 2,
+      "condition": "none",
+      "job": 3,
+      "status": "success",
+      "certified": true,
+      "steps": 13,
+      "reason": "Independent test passed.",
+      "writer_error": "",
+      "infrastructure_error": "",
+      "logging_error": "",
+      "elapsed_seconds": 28.272858417010866,
+      "usage": {
+        "roles": {
+          "repair": {
+            "input": 22396,
+            "output": 1727
+          },
+          "writer": {
+            "input": 0,
+            "output": 0
+          }
+        },
+        "input": 22396,
+        "output": 1727,
+        "known_calls": 13,
+        "unknown_calls": 0,
+        "estimated_usd": 0.0031031,
+        "usage_complete": true
+      },
+      "sensor_samples": 2,
+      "memory_supplied_tokens": 1,
+      "memory_supplied_records_or_entries": 0,
+      "memory_writer_skipped": "",
+      "memory_rejected_candidates": 0
+    },
+    {
+      "repetition": 2,
+      "condition": "rolling",
+      "job": 4,
+      "status": "success",
+      "certified": true,
+      "steps": 10,
+      "reason": "Independent test passed.",
+      "writer_error": "",
+      "infrastructure_error": "",
+      "logging_error": "",
+      "elapsed_seconds": 22.9063172909664,
+      "usage": {
+        "roles": {
+          "repair": {
+            "input": 35668,
+            "output": 1279
+          },
+          "writer": {
+            "input": 0,
+            "output": 0
+          }
+        },
+        "input": 35668,
+        "output": 1279,
+        "known_calls": 10,
+        "unknown_calls": 0,
+        "estimated_usd": 0.0042063000000000005,
+        "usage_complete": true
+      },
+      "sensor_samples": 0,
+      "memory_supplied_tokens": 1972,
+      "memory_supplied_records_or_entries": 22,
+      "memory_writer_skipped": "",
+      "memory_rejected_candidates": 0
+    },
+    {
+      "repetition": 2,
+      "condition": "structured",
+      "job": 4,
+      "status": "success",
+      "certified": true,
+      "steps": 12,
+      "reason": "Independent test passed.",
+      "writer_error": "",
+      "infrastructure_error": "",
+      "logging_error": "",
+      "elapsed_seconds": 33.28038645797642,
+      "usage": {
+        "roles": {
+          "repair": {
+            "input": 32141,
+            "output": 1677
+          },
+          "writer": {
+            "input": 4539,
+            "output": 760
+          }
+        },
+        "input": 36680,
+        "output": 2437,
+        "known_calls": 13,
+        "unknown_calls": 0,
+        "estimated_usd": 0.0048865,
+        "usage_complete": true
+      },
+      "sensor_samples": 2,
+      "memory_supplied_tokens": 922,
+      "memory_supplied_records_or_entries": 4,
+      "memory_writer_skipped": "",
+      "memory_rejected_candidates": 0
+    },
+    {
+      "repetition": 2,
+      "condition": "none",
+      "job": 4,
+      "status": "success",
+      "certified": true,
+      "steps": 11,
+      "reason": "Independent test passed.",
+      "writer_error": "",
+      "infrastructure_error": "",
+      "logging_error": "",
+      "elapsed_seconds": 25.28807016601786,
+      "usage": {
+        "roles": {
+          "repair": {
+            "input": 17366,
+            "output": 1208
+          },
+          "writer": {
+            "input": 0,
+            "output": 0
+          }
+        },
+        "input": 17366,
+        "output": 1208,
+        "known_calls": 11,
+        "unknown_calls": 0,
+        "estimated_usd": 0.0023406,
+        "usage_complete": true
+      },
+      "sensor_samples": 2,
+      "memory_supplied_tokens": 1,
+      "memory_supplied_records_or_entries": 0,
+      "memory_writer_skipped": "",
+      "memory_rejected_candidates": 0
+    },
+    {
+      "repetition": 2,
+      "condition": "rolling",
+      "job": 5,
+      "status": "success",
+      "certified": true,
+      "steps": 9,
+      "reason": "Independent test passed.",
+      "writer_error": "",
+      "infrastructure_error": "",
+      "logging_error": "",
+      "elapsed_seconds": 17.61620662495261,
+      "usage": {
+        "roles": {
+          "repair": {
+            "input": 31083,
+            "output": 842
+          },
+          "writer": {
+            "input": 0,
+            "output": 0
+          }
+        },
+        "input": 31083,
+        "output": 842,
+        "known_calls": 9,
+        "unknown_calls": 0,
+        "estimated_usd": 0.0035293,
+        "usage_complete": true
+      },
+      "sensor_samples": 2,
+      "memory_supplied_tokens": 1939,
+      "memory_supplied_records_or_entries": 22,
+      "memory_writer_skipped": "",
+      "memory_rejected_candidates": 0
+    },
+    {
+      "repetition": 2,
+      "condition": "structured",
+      "job": 5,
+      "status": "success",
+      "certified": true,
+      "steps": 8,
+      "reason": "Independent test passed.",
+      "writer_error": "",
+      "infrastructure_error": "",
+      "logging_error": "",
+      "elapsed_seconds": 24.33571033301996,
+      "usage": {
+        "roles": {
+          "repair": {
+            "input": 23062,
+            "output": 696
+          },
+          "writer": {
+            "input": 5113,
+            "output": 1083
+          }
+        },
+        "input": 28175,
+        "output": 1779,
+        "known_calls": 9,
+        "unknown_calls": 0,
+        "estimated_usd": 0.0037070000000000002,
+        "usage_complete": true
+      },
+      "sensor_samples": 2,
+      "memory_supplied_tokens": 1381,
+      "memory_supplied_records_or_entries": 6,
+      "memory_writer_skipped": "",
+      "memory_rejected_candidates": 0
+    },
+    {
+      "repetition": 2,
+      "condition": "none",
+      "job": 5,
+      "status": "success",
+      "certified": true,
+      "steps": 9,
+      "reason": "Independent test passed.",
+      "writer_error": "",
+      "infrastructure_error": "",
+      "logging_error": "",
+      "elapsed_seconds": 18.026659500028472,
+      "usage": {
+        "roles": {
+          "repair": {
+            "input": 12750,
+            "output": 878
+          },
+          "writer": {
+            "input": 0,
+            "output": 0
+          }
+        },
+        "input": 12750,
+        "output": 878,
+        "known_calls": 9,
+        "unknown_calls": 0,
+        "estimated_usd": 0.001714,
+        "usage_complete": true
+      },
+      "sensor_samples": 2,
+      "memory_supplied_tokens": 1,
+      "memory_supplied_records_or_entries": 0,
+      "memory_writer_skipped": "",
+      "memory_rejected_candidates": 0
+    },
+    {
+      "repetition": 2,
+      "condition": "rolling",
+      "job": 6,
+      "status": "success",
+      "certified": true,
+      "steps": 9,
+      "reason": "Independent test passed.",
+      "writer_error": "",
+      "infrastructure_error": "",
+      "logging_error": "",
+      "elapsed_seconds": 19.060990084020887,
+      "usage": {
+        "roles": {
+          "repair": {
+            "input": 31290,
+            "output": 1069
+          },
+          "writer": {
+            "input": 0,
+            "output": 0
+          }
+        },
+        "input": 31290,
+        "output": 1069,
+        "known_calls": 9,
+        "unknown_calls": 0,
+        "estimated_usd": 0.0036635,
+        "usage_complete": true
+      },
+      "sensor_samples": 2,
+      "memory_supplied_tokens": 1962,
+      "memory_supplied_records_or_entries": 22,
+      "memory_writer_skipped": "",
+      "memory_rejected_candidates": 0
+    },
+    {
+      "repetition": 2,
+      "condition": "structured",
+      "job": 6,
+      "status": "success",
+      "certified": true,
+      "steps": 9,
+      "reason": "Independent test passed.",
+      "writer_error": "",
+      "infrastructure_error": "",
+      "logging_error": "",
+      "elapsed_seconds": 23.36811579100322,
+      "usage": {
+        "roles": {
+          "repair": {
+            "input": 32359,
+            "output": 1061
+          },
+          "writer": {
+            "input": 6319,
+            "output": 632
+          }
+        },
+        "input": 38678,
+        "output": 1693,
+        "known_calls": 10,
+        "unknown_calls": 0,
+        "estimated_usd": 0.0047143,
+        "usage_complete": true
+      },
+      "sensor_samples": 2,
+      "memory_supplied_tokens": 1963,
+      "memory_supplied_records_or_entries": 8,
+      "memory_writer_skipped": "",
+      "memory_rejected_candidates": 0
+    },
+    {
+      "repetition": 2,
+      "condition": "none",
+      "job": 6,
+      "status": "success",
+      "certified": true,
+      "steps": 9,
+      "reason": "Independent test passed.",
+      "writer_error": "",
+      "infrastructure_error": "",
+      "logging_error": "",
+      "elapsed_seconds": 18.934026208007708,
+      "usage": {
+        "roles": {
+          "repair": {
+            "input": 12797,
+            "output": 1075
+          },
+          "writer": {
+            "input": 0,
+            "output": 0
+          }
+        },
+        "input": 12797,
+        "output": 1075,
+        "known_calls": 9,
+        "unknown_calls": 0,
+        "estimated_usd": 0.0018172000000000002,
+        "usage_complete": true
+      },
+      "sensor_samples": 2,
+      "memory_supplied_tokens": 1,
+      "memory_supplied_records_or_entries": 0,
+      "memory_writer_skipped": "",
+      "memory_rejected_candidates": 0
+    },
+    {
+      "repetition": 2,
+      "condition": "rolling",
+      "job": 7,
+      "status": "success",
+      "certified": true,
+      "steps": 11,
+      "reason": "Independent test passed.",
+      "writer_error": "",
+      "infrastructure_error": "",
+      "logging_error": "",
+      "elapsed_seconds": 24.353410458017606,
+      "usage": {
+        "roles": {
+          "repair": {
+            "input": 39752,
+            "output": 1410
+          },
+          "writer": {
+            "input": 0,
+            "output": 0
+          }
+        },
+        "input": 39752,
+        "output": 1410,
+        "known_calls": 11,
+        "unknown_calls": 0,
+        "estimated_usd": 0.0046802,
+        "usage_complete": true
+      },
+      "sensor_samples": 2,
+      "memory_supplied_tokens": 1950,
+      "memory_supplied_records_or_entries": 22,
+      "memory_writer_skipped": "",
+      "memory_rejected_candidates": 0
+    },
+    {
+      "repetition": 2,
+      "condition": "structured",
+      "job": 7,
+      "status": "success",
+      "certified": true,
+      "steps": 8,
+      "reason": "Independent test passed.",
+      "writer_error": "",
+      "infrastructure_error": "",
+      "logging_error": "",
+      "elapsed_seconds": 21.826418292010203,
+      "usage": {
+        "roles": {
+          "repair": {
+            "input": 28308,
+            "output": 592
+          },
+          "writer": {
+            "input": 7151,
+            "output": 1218
+          }
+        },
+        "input": 35459,
+        "output": 1810,
+        "known_calls": 9,
+        "unknown_calls": 0,
+        "estimated_usd": 0.0044509,
+        "usage_complete": true
+      },
+      "sensor_samples": 2,
+      "memory_supplied_tokens": 1978,
+      "memory_supplied_records_or_entries": 8,
+      "memory_writer_skipped": "",
+      "memory_rejected_candidates": 0
+    },
+    {
+      "repetition": 2,
+      "condition": "none",
+      "job": 7,
+      "status": "success",
+      "certified": true,
+      "steps": 8,
+      "reason": "Independent test passed.",
+      "writer_error": "",
+      "infrastructure_error": "",
+      "logging_error": "",
+      "elapsed_seconds": 16.44826599996304,
+      "usage": {
+        "roles": {
+          "repair": {
+            "input": 10824,
+            "output": 839
+          },
+          "writer": {
+            "input": 0,
+            "output": 0
+          }
+        },
+        "input": 10824,
+        "output": 839,
+        "known_calls": 8,
+        "unknown_calls": 0,
+        "estimated_usd": 0.0015019,
+        "usage_complete": true
+      },
+      "sensor_samples": 2,
+      "memory_supplied_tokens": 1,
+      "memory_supplied_records_or_entries": 0,
+      "memory_writer_skipped": "",
+      "memory_rejected_candidates": 0
+    },
+    {
+      "repetition": 2,
+      "condition": "rolling",
+      "job": 8,
+      "status": "unfinished",
+      "certified": false,
+      "steps": 13,
+      "reason": "Job total-token safety allowance reached.",
+      "writer_error": "",
+      "infrastructure_error": "",
+      "logging_error": "",
+      "elapsed_seconds": 33.10618137498386,
+      "usage": {
+        "roles": {
+          "repair": {
+            "input": 49101,
+            "output": 2034
+          },
+          "writer": {
+            "input": 0,
+            "output": 0
+          }
+        },
+        "input": 49101,
+        "output": 2034,
+        "known_calls": 13,
+        "unknown_calls": 0,
+        "estimated_usd": 0.0059271,
+        "usage_complete": true
+      },
+      "sensor_samples": 2,
+      "memory_supplied_tokens": 1950,
+      "memory_supplied_records_or_entries": 22,
+      "memory_writer_skipped": "",
+      "memory_rejected_candidates": 0
+    },
+    {
+      "repetition": 2,
+      "condition": "structured",
+      "job": 8,
+      "status": "unfinished",
+      "certified": false,
+      "steps": 13,
+      "reason": "Job total-token safety allowance reached.",
+      "writer_error": "",
+      "infrastructure_error": "",
+      "logging_error": "",
+      "elapsed_seconds": 28.92665954201948,
+      "usage": {
+        "roles": {
+          "repair": {
+            "input": 49495,
+            "output": 1536
+          },
+          "writer": {
+            "input": 0,
+            "output": 0
+          }
+        },
+        "input": 49495,
+        "output": 1536,
+        "known_calls": 13,
+        "unknown_calls": 0,
+        "estimated_usd": 0.0057175,
+        "usage_complete": true
+      },
+      "sensor_samples": 2,
+      "memory_supplied_tokens": 1868,
+      "memory_supplied_records_or_entries": 7,
+      "memory_writer_skipped": "Job total-token safety allowance reached.",
+      "memory_rejected_candidates": 0
+    },
+    {
+      "repetition": 2,
+      "condition": "none",
+      "job": 8,
+      "status": "success",
+      "certified": true,
+      "steps": 17,
+      "reason": "Independent test passed.",
+      "writer_error": "",
+      "infrastructure_error": "",
+      "logging_error": "",
+      "elapsed_seconds": 38.937163042020984,
+      "usage": {
+        "roles": {
+          "repair": {
+            "input": 34475,
+            "output": 1936
+          },
+          "writer": {
+            "input": 0,
+            "output": 0
+          }
+        },
+        "input": 34475,
+        "output": 1936,
+        "known_calls": 17,
+        "unknown_calls": 0,
+        "estimated_usd": 0.0044155,
+        "usage_complete": true
+      },
+      "sensor_samples": 2,
+      "memory_supplied_tokens": 1,
+      "memory_supplied_records_or_entries": 0,
+      "memory_writer_skipped": "",
+      "memory_rejected_candidates": 0
+    },
+    {
+      "repetition": 3,
+      "condition": "structured",
+      "job": 1,
+      "status": "success",
+      "certified": true,
+      "steps": 9,
+      "reason": "Independent test passed.",
+      "writer_error": "",
+      "infrastructure_error": "",
+      "logging_error": "",
+      "elapsed_seconds": 25.3523126670043,
+      "usage": {
+        "roles": {
+          "repair": {
+            "input": 12955,
+            "output": 957
+          },
+          "writer": {
+            "input": 1680,
+            "output": 509
+          }
+        },
+        "input": 14635,
+        "output": 1466,
+        "known_calls": 10,
+        "unknown_calls": 0,
+        "estimated_usd": 0.0021965,
+        "usage_complete": true
+      },
+      "sensor_samples": 2,
+      "memory_supplied_tokens": 4,
+      "memory_supplied_records_or_entries": 0,
+      "memory_writer_skipped": "",
+      "memory_rejected_candidates": 0
+    },
+    {
+      "repetition": 3,
+      "condition": "none",
+      "job": 1,
+      "status": "success",
+      "certified": true,
+      "steps": 9,
+      "reason": "Independent test passed.",
+      "writer_error": "",
+      "infrastructure_error": "",
+      "logging_error": "",
+      "elapsed_seconds": 15.713457916979678,
+      "usage": {
+        "roles": {
+          "repair": {
+            "input": 12811,
+            "output": 751
+          },
+          "writer": {
+            "input": 0,
+            "output": 0
+          }
+        },
+        "input": 12811,
+        "output": 751,
+        "known_calls": 9,
+        "unknown_calls": 0,
+        "estimated_usd": 0.0016566,
+        "usage_complete": true
+      },
+      "sensor_samples": 2,
+      "memory_supplied_tokens": 1,
+      "memory_supplied_records_or_entries": 0,
+      "memory_writer_skipped": "",
+      "memory_rejected_candidates": 0
+    },
+    {
+      "repetition": 3,
+      "condition": "rolling",
+      "job": 1,
+      "status": "success",
+      "certified": true,
+      "steps": 9,
+      "reason": "Independent test passed.",
+      "writer_error": "",
+      "infrastructure_error": "",
+      "logging_error": "",
+      "elapsed_seconds": 17.248854500008747,
+      "usage": {
+        "roles": {
+          "repair": {
+            "input": 12919,
+            "output": 849
+          },
+          "writer": {
+            "input": 0,
+            "output": 0
+          }
+        },
+        "input": 12919,
+        "output": 849,
+        "known_calls": 9,
+        "unknown_calls": 0,
+        "estimated_usd": 0.0017164,
+        "usage_complete": true
+      },
+      "sensor_samples": 2,
+      "memory_supplied_tokens": 1,
+      "memory_supplied_records_or_entries": 0,
+      "memory_writer_skipped": "",
+      "memory_rejected_candidates": 0
+    },
+    {
+      "repetition": 3,
+      "condition": "structured",
+      "job": 2,
+      "status": "success",
+      "certified": true,
+      "steps": 6,
+      "reason": "Independent test passed.",
+      "writer_error": "",
+      "infrastructure_error": "",
+      "logging_error": "",
+      "elapsed_seconds": 17.094795875018463,
+      "usage": {
+        "roles": {
+          "repair": {
+            "input": 8820,
+            "output": 642
+          },
+          "writer": {
+            "input": 1990,
+            "output": 508
+          }
+        },
+        "input": 10810,
+        "output": 1150,
+        "known_calls": 7,
+        "unknown_calls": 0,
+        "estimated_usd": 0.001656,
+        "usage_complete": true
+      },
+      "sensor_samples": 2,
+      "memory_supplied_tokens": 248,
+      "memory_supplied_records_or_entries": 1,
+      "memory_writer_skipped": "",
+      "memory_rejected_candidates": 0
+    },
+    {
+      "repetition": 3,
+      "condition": "none",
+      "job": 2,
+      "status": "success",
+      "certified": true,
+      "steps": 6,
+      "reason": "Independent test passed.",
+      "writer_error": "",
+      "infrastructure_error": "",
+      "logging_error": "",
+      "elapsed_seconds": 10.830730792018585,
+      "usage": {
+        "roles": {
+          "repair": {
+            "input": 7115,
+            "output": 531
+          },
+          "writer": {
+            "input": 0,
+            "output": 0
+          }
+        },
+        "input": 7115,
+        "output": 531,
+        "known_calls": 6,
+        "unknown_calls": 0,
+        "estimated_usd": 0.000977,
+        "usage_complete": true
+      },
+      "sensor_samples": 2,
+      "memory_supplied_tokens": 1,
+      "memory_supplied_records_or_entries": 0,
+      "memory_writer_skipped": "",
+      "memory_rejected_candidates": 0
+    },
+    {
+      "repetition": 3,
+      "condition": "rolling",
+      "job": 2,
+      "status": "success",
+      "certified": true,
+      "steps": 4,
+      "reason": "Independent test passed.",
+      "writer_error": "",
+      "infrastructure_error": "",
+      "logging_error": "",
+      "elapsed_seconds": 8.90813141601393,
+      "usage": {
+        "roles": {
+          "repair": {
+            "input": 7517,
+            "output": 382
+          },
+          "writer": {
+            "input": 0,
+            "output": 0
+          }
+        },
+        "input": 7517,
+        "output": 382,
+        "known_calls": 4,
+        "unknown_calls": 0,
+        "estimated_usd": 0.0009427000000000001,
+        "usage_complete": true
+      },
+      "sensor_samples": 0,
+      "memory_supplied_tokens": 807,
+      "memory_supplied_records_or_entries": 9,
+      "memory_writer_skipped": "",
+      "memory_rejected_candidates": 0
+    },
+    {
+      "repetition": 3,
+      "condition": "structured",
+      "job": 3,
+      "status": "success",
+      "certified": true,
+      "steps": 9,
+      "reason": "Independent test passed.",
+      "writer_error": "",
+      "infrastructure_error": "",
+      "logging_error": "",
+      "elapsed_seconds": 25.518537791038398,
+      "usage": {
+        "roles": {
+          "repair": {
+            "input": 17123,
+            "output": 902
+          },
+          "writer": {
+            "input": 2951,
+            "output": 825
+          }
+        },
+        "input": 20074,
+        "output": 1727,
+        "known_calls": 10,
+        "unknown_calls": 0,
+        "estimated_usd": 0.0028709,
+        "usage_complete": true
+      },
+      "sensor_samples": 2,
+      "memory_supplied_tokens": 421,
+      "memory_supplied_records_or_entries": 2,
+      "memory_writer_skipped": "",
+      "memory_rejected_candidates": 0
+    },
+    {
+      "repetition": 3,
+      "condition": "none",
+      "job": 3,
+      "status": "success",
+      "certified": true,
+      "steps": 11,
+      "reason": "Independent test passed.",
+      "writer_error": "",
+      "infrastructure_error": "",
+      "logging_error": "",
+      "elapsed_seconds": 34.18329470901517,
+      "usage": {
+        "roles": {
+          "repair": {
+            "input": 17226,
+            "output": 1976
+          },
+          "writer": {
+            "input": 0,
+            "output": 0
+          }
+        },
+        "input": 17226,
+        "output": 1976,
+        "known_calls": 11,
+        "unknown_calls": 0,
+        "estimated_usd": 0.0027106,
+        "usage_complete": true
+      },
+      "sensor_samples": 2,
+      "memory_supplied_tokens": 1,
+      "memory_supplied_records_or_entries": 0,
+      "memory_writer_skipped": "",
+      "memory_rejected_candidates": 0
+    },
+    {
+      "repetition": 3,
+      "condition": "rolling",
+      "job": 3,
+      "status": "success",
+      "certified": true,
+      "steps": 7,
+      "reason": "Independent test passed.",
+      "writer_error": "",
+      "infrastructure_error": "",
+      "logging_error": "",
+      "elapsed_seconds": 14.900561874965206,
+      "usage": {
+        "roles": {
+          "repair": {
+            "input": 17421,
+            "output": 891
+          },
+          "writer": {
+            "input": 0,
+            "output": 0
+          }
+        },
+        "input": 17421,
+        "output": 891,
+        "known_calls": 7,
+        "unknown_calls": 0,
+        "estimated_usd": 0.0021876,
+        "usage_complete": true
+      },
+      "sensor_samples": 0,
+      "memory_supplied_tokens": 1167,
+      "memory_supplied_records_or_entries": 13,
+      "memory_writer_skipped": "",
+      "memory_rejected_candidates": 0
+    },
+    {
+      "repetition": 3,
+      "condition": "structured",
+      "job": 4,
+      "status": "success",
+      "certified": true,
+      "steps": 14,
+      "reason": "Independent test passed.",
+      "writer_error": "",
+      "infrastructure_error": "",
+      "logging_error": "",
+      "elapsed_seconds": 40.40346983401105,
+      "usage": {
+        "roles": {
+          "repair": {
+            "input": 40222,
+            "output": 1608
+          },
+          "writer": {
+            "input": 4755,
+            "output": 1221
+          }
+        },
+        "input": 44977,
+        "output": 2829,
+        "known_calls": 15,
+        "unknown_calls": 0,
+        "estimated_usd": 0.0059122,
+        "usage_complete": true
+      },
+      "sensor_samples": 2,
+      "memory_supplied_tokens": 967,
+      "memory_supplied_records_or_entries": 4,
+      "memory_writer_skipped": "",
+      "memory_rejected_candidates": 0
+    },
+    {
+      "repetition": 3,
+      "condition": "none",
+      "job": 4,
+      "status": "success",
+      "certified": true,
+      "steps": 14,
+      "reason": "Independent test passed.",
+      "writer_error": "",
+      "infrastructure_error": "",
+      "logging_error": "",
+      "elapsed_seconds": 43.78000416699797,
+      "usage": {
+        "roles": {
+          "repair": {
+            "input": 25044,
+            "output": 2426
+          },
+          "writer": {
+            "input": 0,
+            "output": 0
+          }
+        },
+        "input": 25044,
+        "output": 2426,
+        "known_calls": 14,
+        "unknown_calls": 0,
+        "estimated_usd": 0.0037174000000000005,
+        "usage_complete": true
+      },
+      "sensor_samples": 2,
+      "memory_supplied_tokens": 1,
+      "memory_supplied_records_or_entries": 0,
+      "memory_writer_skipped": "",
+      "memory_rejected_candidates": 0
+    },
+    {
+      "repetition": 3,
+      "condition": "rolling",
+      "job": 4,
+      "status": "success",
+      "certified": true,
+      "steps": 9,
+      "reason": "Independent test passed.",
+      "writer_error": "",
+      "infrastructure_error": "",
+      "logging_error": "",
+      "elapsed_seconds": 20.167312458972447,
+      "usage": {
+        "roles": {
+          "repair": {
+            "input": 29781,
+            "output": 878
+          },
+          "writer": {
+            "input": 0,
+            "output": 0
+          }
+        },
+        "input": 29781,
+        "output": 878,
+        "known_calls": 9,
+        "unknown_calls": 0,
+        "estimated_usd": 0.0034171,
+        "usage_complete": true
+      },
+      "sensor_samples": 0,
+      "memory_supplied_tokens": 1798,
+      "memory_supplied_records_or_entries": 20,
+      "memory_writer_skipped": "",
+      "memory_rejected_candidates": 0
+    },
+    {
+      "repetition": 3,
+      "condition": "structured",
+      "job": 5,
+      "status": "success",
+      "certified": true,
+      "steps": 9,
+      "reason": "Independent test passed.",
+      "writer_error": "",
+      "infrastructure_error": "",
+      "logging_error": "",
+      "elapsed_seconds": 33.41882504103705,
+      "usage": {
+        "roles": {
+          "repair": {
+            "input": 28174,
+            "output": 822
+          },
+          "writer": {
+            "input": 5424,
+            "output": 957
+          }
+        },
+        "input": 33598,
+        "output": 1779,
+        "known_calls": 10,
+        "unknown_calls": 0,
+        "estimated_usd": 0.0042493,
+        "usage_complete": true
+      },
+      "sensor_samples": 2,
+      "memory_supplied_tokens": 1549,
+      "memory_supplied_records_or_entries": 6,
+      "memory_writer_skipped": "",
+      "memory_rejected_candidates": 0
+    },
+    {
+      "repetition": 3,
+      "condition": "none",
+      "job": 5,
+      "status": "success",
+      "certified": true,
+      "steps": 9,
+      "reason": "Independent test passed.",
+      "writer_error": "",
+      "infrastructure_error": "",
+      "logging_error": "",
+      "elapsed_seconds": 17.4334716660087,
+      "usage": {
+        "roles": {
+          "repair": {
+            "input": 12764,
+            "output": 943
+          },
+          "writer": {
+            "input": 0,
+            "output": 0
+          }
+        },
+        "input": 12764,
+        "output": 943,
+        "known_calls": 9,
+        "unknown_calls": 0,
+        "estimated_usd": 0.0017479000000000001,
+        "usage_complete": true
+      },
+      "sensor_samples": 2,
+      "memory_supplied_tokens": 1,
+      "memory_supplied_records_or_entries": 0,
+      "memory_writer_skipped": "",
+      "memory_rejected_candidates": 0
+    },
+    {
+      "repetition": 3,
+      "condition": "rolling",
+      "job": 5,
+      "status": "success",
+      "certified": true,
+      "steps": 9,
+      "reason": "Independent test passed.",
+      "writer_error": "",
+      "infrastructure_error": "",
+      "logging_error": "",
+      "elapsed_seconds": 18.88507529202616,
+      "usage": {
+        "roles": {
+          "repair": {
+            "input": 31299,
+            "output": 1050
+          },
+          "writer": {
+            "input": 0,
+            "output": 0
+          }
+        },
+        "input": 31299,
+        "output": 1050,
+        "known_calls": 9,
+        "unknown_calls": 0,
+        "estimated_usd": 0.0036549,
+        "usage_complete": true
+      },
+      "sensor_samples": 2,
+      "memory_supplied_tokens": 1963,
+      "memory_supplied_records_or_entries": 22,
+      "memory_writer_skipped": "",
+      "memory_rejected_candidates": 0
+    },
+    {
+      "repetition": 3,
+      "condition": "structured",
+      "job": 6,
+      "status": "success",
+      "certified": true,
+      "steps": 10,
+      "reason": "Independent test passed.",
+      "writer_error": "",
+      "infrastructure_error": "",
+      "logging_error": "",
+      "elapsed_seconds": 28.891631000034977,
+      "usage": {
+        "roles": {
+          "repair": {
+            "input": 36207,
+            "output": 1194
+          },
+          "writer": {
+            "input": 6748,
+            "output": 696
+          }
+        },
+        "input": 42955,
+        "output": 1890,
+        "known_calls": 11,
+        "unknown_calls": 0,
+        "estimated_usd": 0.0052405,
+        "usage_complete": true
+      },
+      "sensor_samples": 2,
+      "memory_supplied_tokens": 1926,
+      "memory_supplied_records_or_entries": 7,
+      "memory_writer_skipped": "",
+      "memory_rejected_candidates": 0
+    },
+    {
+      "repetition": 3,
+      "condition": "none",
+      "job": 6,
+      "status": "success",
+      "certified": true,
+      "steps": 9,
+      "reason": "Independent test passed.",
+      "writer_error": "",
+      "infrastructure_error": "",
+      "logging_error": "",
+      "elapsed_seconds": 20.872845707985107,
+      "usage": {
+        "roles": {
+          "repair": {
+            "input": 12811,
+            "output": 882
+          },
+          "writer": {
+            "input": 0,
+            "output": 0
+          }
+        },
+        "input": 12811,
+        "output": 882,
+        "known_calls": 9,
+        "unknown_calls": 0,
+        "estimated_usd": 0.0017221,
+        "usage_complete": true
+      },
+      "sensor_samples": 2,
+      "memory_supplied_tokens": 1,
+      "memory_supplied_records_or_entries": 0,
+      "memory_writer_skipped": "",
+      "memory_rejected_candidates": 0
+    },
+    {
+      "repetition": 3,
+      "condition": "rolling",
+      "job": 6,
+      "status": "success",
+      "certified": true,
+      "steps": 9,
+      "reason": "Independent test passed.",
+      "writer_error": "",
+      "infrastructure_error": "",
+      "logging_error": "",
+      "elapsed_seconds": 19.268708000017796,
+      "usage": {
+        "roles": {
+          "repair": {
+            "input": 31344,
+            "output": 869
+          },
+          "writer": {
+            "input": 0,
+            "output": 0
+          }
+        },
+        "input": 31344,
+        "output": 869,
+        "known_calls": 9,
+        "unknown_calls": 0,
+        "estimated_usd": 0.0035689000000000003,
+        "usage_complete": true
+      },
+      "sensor_samples": 2,
+      "memory_supplied_tokens": 1968,
+      "memory_supplied_records_or_entries": 22,
+      "memory_writer_skipped": "",
+      "memory_rejected_candidates": 0
+    },
+    {
+      "repetition": 3,
+      "condition": "structured",
+      "job": 7,
+      "status": "success",
+      "certified": true,
+      "steps": 9,
+      "reason": "Independent test passed.",
+      "writer_error": "",
+      "infrastructure_error": "",
+      "logging_error": "",
+      "elapsed_seconds": 24.16728754196083,
+      "usage": {
+        "roles": {
+          "repair": {
+            "input": 31763,
+            "output": 684
+          },
+          "writer": {
+            "input": 7665,
+            "output": 1111
+          }
+        },
+        "input": 39428,
+        "output": 1795,
+        "known_calls": 10,
+        "unknown_calls": 0,
+        "estimated_usd": 0.0048403000000000005,
+        "usage_complete": true
+      },
+      "sensor_samples": 2,
+      "memory_supplied_tokens": 1909,
+      "memory_supplied_records_or_entries": 7,
+      "memory_writer_skipped": "",
+      "memory_rejected_candidates": 0
+    },
+    {
+      "repetition": 3,
+      "condition": "none",
+      "job": 7,
+      "status": "success",
+      "certified": true,
+      "steps": 9,
+      "reason": "Independent test passed.",
+      "writer_error": "",
+      "infrastructure_error": "",
+      "logging_error": "",
+      "elapsed_seconds": 16.723576084012166,
+      "usage": {
+        "roles": {
+          "repair": {
+            "input": 12807,
+            "output": 846
+          },
+          "writer": {
+            "input": 0,
+            "output": 0
+          }
+        },
+        "input": 12807,
+        "output": 846,
+        "known_calls": 9,
+        "unknown_calls": 0,
+        "estimated_usd": 0.0017037,
+        "usage_complete": true
+      },
+      "sensor_samples": 2,
+      "memory_supplied_tokens": 1,
+      "memory_supplied_records_or_entries": 0,
+      "memory_writer_skipped": "",
+      "memory_rejected_candidates": 0
+    },
+    {
+      "repetition": 3,
+      "condition": "rolling",
+      "job": 7,
+      "status": "success",
+      "certified": true,
+      "steps": 11,
+      "reason": "Independent test passed.",
+      "writer_error": "",
+      "infrastructure_error": "",
+      "logging_error": "",
+      "elapsed_seconds": 30.100908750027884,
+      "usage": {
+        "roles": {
+          "repair": {
+            "input": 39838,
+            "output": 1794
+          },
+          "writer": {
+            "input": 0,
+            "output": 0
+          }
+        },
+        "input": 39838,
+        "output": 1794,
+        "known_calls": 11,
+        "unknown_calls": 0,
+        "estimated_usd": 0.0048808,
+        "usage_complete": true
+      },
+      "sensor_samples": 2,
+      "memory_supplied_tokens": 1960,
+      "memory_supplied_records_or_entries": 22,
+      "memory_writer_skipped": "",
+      "memory_rejected_candidates": 0
+    },
+    {
+      "repetition": 3,
+      "condition": "structured",
+      "job": 8,
+      "status": "unfinished",
+      "certified": false,
+      "steps": 13,
+      "reason": "Job total-token safety allowance reached.",
+      "writer_error": "",
+      "infrastructure_error": "",
+      "logging_error": "",
+      "elapsed_seconds": 31.712900208018254,
+      "usage": {
+        "roles": {
+          "repair": {
+            "input": 48612,
+            "output": 1592
+          },
+          "writer": {
+            "input": 0,
+            "output": 0
+          }
+        },
+        "input": 48612,
+        "output": 1592,
+        "known_calls": 13,
+        "unknown_calls": 0,
+        "estimated_usd": 0.0056572,
+        "usage_complete": true
+      },
+      "sensor_samples": 2,
+      "memory_supplied_tokens": 1809,
+      "memory_supplied_records_or_entries": 6,
+      "memory_writer_skipped": "Job total-token safety allowance reached.",
+      "memory_rejected_candidates": 0
+    },
+    {
+      "repetition": 3,
+      "condition": "none",
+      "job": 8,
+      "status": "success",
+      "certified": true,
+      "steps": 18,
+      "reason": "Independent test passed.",
+      "writer_error": "",
+      "infrastructure_error": "",
+      "logging_error": "",
+      "elapsed_seconds": 42.388010875030886,
+      "usage": {
+        "roles": {
+          "repair": {
+            "input": 37804,
+            "output": 2085
+          },
+          "writer": {
+            "input": 0,
+            "output": 0
+          }
+        },
+        "input": 37804,
+        "output": 2085,
+        "known_calls": 18,
+        "unknown_calls": 0,
+        "estimated_usd": 0.004822900000000001,
+        "usage_complete": true
+      },
+      "sensor_samples": 2,
+      "memory_supplied_tokens": 1,
+      "memory_supplied_records_or_entries": 0,
+      "memory_writer_skipped": "",
+      "memory_rejected_candidates": 0
+    },
+    {
+      "repetition": 3,
+      "condition": "rolling",
+      "job": 8,
+      "status": "unfinished",
+      "certified": false,
+      "steps": 13,
+      "reason": "Job total-token safety allowance reached.",
+      "writer_error": "",
+      "infrastructure_error": "",
+      "logging_error": "",
+      "elapsed_seconds": 31.183281458041165,
+      "usage": {
+        "roles": {
+          "repair": {
+            "input": 49282,
+            "output": 1675
+          },
+          "writer": {
+            "input": 0,
+            "output": 0
+          }
+        },
+        "input": 49282,
+        "output": 1675,
+        "known_calls": 13,
+        "unknown_calls": 0,
+        "estimated_usd": 0.0057657,
+        "usage_complete": true
+      },
+      "sensor_samples": 2,
+      "memory_supplied_tokens": 1950,
+      "memory_supplied_records_or_entries": 22,
+      "memory_writer_skipped": "",
+      "memory_rejected_candidates": 0
+    }
+  ],
+  "reservations_violated": 0,
+  "request_summary": {
+    "repair": {
+      "returned_calls": 701,
+      "estimated_usd": 0.2161767
+    },
+    "writer": {
+      "returned_calls": 21,
+      "estimated_usd": 0.017869700000000002
+    },
+    "incomplete_responses": 1,
+    "max_returned_input_tokens": 7665,
+    "max_returned_output_tokens": 2048,
+    "rejected_request_reservation": null
+  }
+}

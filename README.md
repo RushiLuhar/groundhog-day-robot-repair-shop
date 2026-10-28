@@ -26,6 +26,8 @@ The new condition-based harness runs separately with `.venv/bin/python -m repair
 
 The [October 28 live evaluation](docs/LIVE_EVALUATION_2026-10-28.md) records a bounded Luna run, matched outcomes, role usage, trace findings and proposed follow-ups. It stopped at the run-token admission guard after 46 started attempts; its partial results do not establish a general memory ranking.
 
+The [50k job-budget follow-up](docs/LIVE_EVALUATION_50K_2026-10-28.md) completed all 72 attempts: 65 certified, seven unfinished, 1,922,632 reported tokens and $0.2340464 estimated cost. [Versioned prompt/task tuning](docs/EVALUATION_TUNING_V2.md) follows that analysis and is available as the offline **tuned-v2** preset. Its model behavior has not been tested live; historical v1 tasks, prompts and examples remain unchanged.
+
 ## Put an experiment together
 
 1. Name the experiment and add notes or a hypothesis. Choose a task set, jobs per mechanic and repeated shifts. The selected prefix is shown as “N of M jobs”; **Select all jobs in this task set** explicitly selects the full suite. Changing task sets preserves the chosen count where possible.
