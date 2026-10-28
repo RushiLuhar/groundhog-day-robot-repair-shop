@@ -22,3 +22,12 @@ SUITES={s.id:s for s in (BASELINE,DIAGNOSTIC,LEARNING)}
 def get_suite(identifier):
     if identifier not in SUITES: raise ValueError(f'Unknown task set: {identifier}')
     return SUITES[identifier]
+
+
+# New condition-based runner: explicit trusted registry, separate from legacy bay adapters.
+from ..evaluation.service import suite as service_suite
+EVALUATION_SUITES={'service-v1':service_suite}
+
+def get_evaluation_suite(identifier,variant='standard-v1'):
+    if identifier not in EVALUATION_SUITES:raise ValueError('Unknown evaluation task set.')
+    return EVALUATION_SUITES[identifier](variant)

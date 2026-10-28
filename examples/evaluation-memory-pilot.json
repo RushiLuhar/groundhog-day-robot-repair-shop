@@ -1,0 +1,76 @@
+{
+  "schema_version": 2,
+  "name": "Eight-ticket memory comparison",
+  "task_set": "service-v1",
+  "variant": "standard-v1",
+  "jobs": 8,
+  "repetitions": 1,
+  "live": false,
+  "run_total_token_limit": 500000,
+  "run_estimated_usd_limit": 0.25,
+  "conditions": [
+    {
+      "id": "none",
+      "memory": "none",
+      "repair": {
+        "model": "gpt-6-luna",
+        "reasoning": "default",
+        "prompt_version": "repair-objective-v1",
+        "response_output_cap": 2048
+      },
+      "writer": {
+        "model": "gpt-6-luna",
+        "reasoning": "default",
+        "prompt_version": "job-end-writer-v1",
+        "response_output_cap": 2048
+      },
+      "rolling_entry_limit": 40,
+      "retention_tokens": 3000,
+      "supply_tokens": 2000,
+      "tool_step_limit": 20,
+      "job_total_token_allowance": 30000
+    },
+    {
+      "id": "rolling",
+      "memory": "rolling",
+      "repair": {
+        "model": "gpt-6-luna",
+        "reasoning": "default",
+        "prompt_version": "repair-objective-v1",
+        "response_output_cap": 2048
+      },
+      "writer": {
+        "model": "gpt-6-luna",
+        "reasoning": "default",
+        "prompt_version": "job-end-writer-v1",
+        "response_output_cap": 2048
+      },
+      "rolling_entry_limit": 40,
+      "retention_tokens": 3000,
+      "supply_tokens": 2000,
+      "tool_step_limit": 20,
+      "job_total_token_allowance": 30000
+    },
+    {
+      "id": "structured",
+      "memory": "structured",
+      "repair": {
+        "model": "gpt-6-luna",
+        "reasoning": "default",
+        "prompt_version": "repair-objective-v1",
+        "response_output_cap": 2048
+      },
+      "writer": {
+        "model": "gpt-6-luna",
+        "reasoning": "default",
+        "prompt_version": "job-end-writer-v1",
+        "response_output_cap": 2048
+      },
+      "rolling_entry_limit": 40,
+      "retention_tokens": 3000,
+      "supply_tokens": 2000,
+      "tool_step_limit": 20,
+      "job_total_token_allowance": 30000
+    }
+  ]
+}
