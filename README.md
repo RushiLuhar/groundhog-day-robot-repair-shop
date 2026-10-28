@@ -24,6 +24,8 @@ The server binds only to localhost; no public Gradio link is created. The first 
 
 The new condition-based harness runs separately with `.venv/bin/python -m repair_shop.evaluation.app` on localhost port **7862**. It accepts arbitrary condition lists, independent repair/writer settings and the eight-ticket `service-v1` suite. See [the implementation guide and execution plan](docs/EVALUATION_HARNESS_V2.md) and [offline 24-attempt example](examples/evaluation-memory-pilot.json). Legacy workshop instructions below retain their original semantics and storage. No live pilot is authorized by the example.
 
+The [October 28 live evaluation](docs/LIVE_EVALUATION_2026-10-28.md) records a bounded Luna run, matched outcomes, role usage, trace findings and proposed follow-ups. It stopped at the run-token admission guard after 46 started attempts; its partial results do not establish a general memory ranking.
+
 ## Put an experiment together
 
 1. Name the experiment and add notes or a hypothesis. Choose a task set, jobs per mechanic and repeated shifts. The selected prefix is shown as “N of M jobs”; **Select all jobs in this task set** explicitly selects the full suite. Changing task sets preserves the chosen count where possible.
