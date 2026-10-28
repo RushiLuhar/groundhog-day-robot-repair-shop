@@ -30,7 +30,7 @@ def export(run, directory=None):
                      selected_jobs=run.selected_jobs,state=run_state(run),calls=run.calls,experiment=run.experiment.to_dict())+'<details class="report-info"><summary>Experiment setup</summary>'+configuration_description(run.experiment)+'</details><details class="report-info"><summary>Exact experiment configuration</summary><pre>'+esc(json.dumps(run.experiment.to_dict(),indent=2))+'</pre></details></body></html>'
     html_path=base.with_suffix('.html'); html_path.write_text(document)
     json_path=base.with_suffix('.json'); json_path.write_text(json.dumps(data,indent=2))
-    output=io.StringIO(); fields=['mode','model','reasoning','memory_policy','repetition','step_limit','job','passed','steps','input','output','maintenance','calls','cost_usd','diagnostic_calls','invalid_actions','parts_used','reason','warning']
+    output=io.StringIO(); fields=['mode','model','reasoning','memory_policy','memory_update_policy','repetition','step_limit','job','passed','steps','input','output','maintenance','calls','cost_usd','phase','diagnostic_calls','failed_tests','calibration_writes','invalid_actions','parts_used','reason','warning']
     writer=csv.DictWriter(output,fieldnames=fields,extrasaction='ignore'); writer.writeheader(); writer.writerows({**r,**r.get('task_metrics',{})} for r in run.results)
     csv_path=base.with_suffix('.csv'); csv_path.write_text(output.getvalue())
     return [str(html_path),str(json_path),str(csv_path)]

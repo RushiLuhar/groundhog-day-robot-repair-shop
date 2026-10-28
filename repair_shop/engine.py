@@ -20,36 +20,7 @@ from dataclasses import replace
 
 MODES = ("groundhog", "notebook", "structured")
 LABELS = {"groundhog":"Groundhog Day", "notebook":"Raw notebook", "structured":"Four-level memory"}
-EMPTY_NOTES = {"episodic":[], "semantic":[], "procedural":[]}
-
-def note_tokens(notes):
-    # An explicit, fixed serialization/tokenizer budget independent of API billing.
-    import tiktoken
-    return len(tiktoken.get_encoding("o200k_base").encode(json.dumps(notes, separators=(",",":"))))
-
-def validate_notes(text, observed, budget=1000):
-    notes = json.loads(text)
-    if not isinstance(notes,dict) or set(notes) != set(EMPTY_NOTES):
-        raise ValueError("wrong note sections")
-    for kind, records in notes.items():
-        if not isinstance(records,list):
-            raise ValueError("notes must be lists")
-        for r in records:
-            if not isinstance(r,dict) or set(r) != {"model","revision","source_jobs","status","text"}:
-                raise ValueError("invalid record")
-            ids = r["source_jobs"]
-            if not isinstance(ids,list) or not ids or any(type(i) is not int or i not in observed for i in ids):
-                raise ValueError("invalid source jobs")
-            if r["status"] not in ("tentative","test-supported","disputed") or not isinstance(r["text"],str):
-                raise ValueError("invalid note status/text")
-            for i in ids:
-                if observed[i]["ticket"]["customer"] != f'{r["model"]} {r["revision"]}':
-                    raise ValueError("cross-revision citation")
-            if (kind == "procedural" or r["status"] == "test-supported") and not any(observed[i]["passed"] for i in ids):
-                raise ValueError("unsupported success")
-    if note_tokens(notes) > budget:
-        raise ValueError("notes exceed configured token budget")
-    return notes
+from .memory import EMPTY_NOTES, note_tokens, validate_notes, merge_notes, source_jobs, memory_audit
 
 class State(TypedDict, total=False):
     mode: str
@@ -61,6 +32,7 @@ class State(TypedDict, total=False):
     done: bool
     passed: bool
     reason: str
+    memory_audit: dict
 
 class Run:
     def __init__(self, model=None, stop=None, cap=12, on_event=None, experiment=None, model_factory=None):
@@ -116,7 +88,7 @@ class Run:
     def bill(self,reply,state,kind):
         self.calls.append({"mode":state["mode"],"job":state["ticket"]["job"],"kind":kind,
                            "input":reply.input_tokens,"output":reply.output_tokens,
-                           "response_id":reply.request_id,"status":reply.status,"model":self.models[state["mode"]].name,
+                           "response_id":reply.request_id,"status":reply.status,"end_reason":reply.end_reason,"model":self.models[state["mode"]].name,
                            "repetition":self.repetition,
                            "cost_usd":estimate(self.models[state["mode"]].name,reply.input_tokens,reply.output_tokens,self.models[state["mode"]].live)})
         if self.on_checkpoint: self.on_checkpoint(self)
@@ -134,8 +106,11 @@ class Run:
             records=self.records(s["mode"])
             cfg=self.settings[s['mode']]
             prior = (records['history'][-cfg.notebook_exchanges:] if cfg.notebook_exchanges else []) if cfg.memory=='notebook' else records['notes'] if cfg.memory=='structured' else []
-            self.emit("start",s,prior=prior)
-            return {"prior":prior}
+            previous_numbers={r['job'] for r in self.results if r['mode']==s['mode'] and r['repetition']==self.repetition}
+            earlier=[j.ticket() for j in self.suite.jobs if j.number in previous_numbers]
+            audit=memory_audit(prior,s['ticket'],earlier)
+            self.emit("start",s,prior=prior,memory_audit=audit)
+            return {"prior":prior,"memory_audit":audit}
         def decide(s):
             if self.stop.is_set():
                 return {"done":True,"reason":self.stop_reason or "stopped by user"}
@@ -154,7 +129,7 @@ class Run:
             if self.stop.is_set():
                 return {"done":True,"reason":self.stop_reason or "stopped by user after in-flight request; returned usage recorded"}
             if reply.action is None:
-                return {"done":True,"reason":"non-action or incomplete model response"}
+                return {"done":True,"reason":reply.end_reason or "non-action or incomplete model response"}
             return {"action":reply.action}
         def execute(s):
             action=s["action"]
@@ -175,6 +150,7 @@ class Run:
             records=self.records(s["mode"])
             job=s["ticket"]["job"]
             warning=""
+            update_audit={}
             cfg=self.settings[s['mode']]
             if cfg.memory=='notebook':
                 records['history']=(records['history']+deepcopy(s['exchanges']))[-cfg.notebook_exchanges:] if cfg.notebook_exchanges else []
@@ -186,14 +162,27 @@ class Run:
                         warning="Memory write skipped after stop."
                     else:
                         try:
-                            reply=self.models[s["mode"]].maintain({"ticket":s["ticket"],"passed":s["passed"],
-                                "exchanges":deepcopy(s["exchanges"]),"previous_notes":deepcopy(records["notes"])})
+                            payload={"ticket":s["ticket"],"passed":s["passed"],
+                                "exchanges":deepcopy(s["exchanges"]),"previous_notes":deepcopy(records["notes"])}
+                            if cfg.memory_update_policy=='merge_v2':
+                                payload['update_policy']='merge_v2: return additions/corrections; omission keeps prior notes'
+                                payload['source_catalog']=[{'job':i,**v} for i,v in sorted(records['observed'].items())]
+                            reply=self.models[s["mode"]].maintain(payload)
                             self.bill(reply,s,"memory")
                             if reply.status != "completed":
                                 raise ValueError("incomplete maintenance output")
-                            records["notes"]=validate_notes(reply.text,records["observed"],cfg.memory_tokens)
+                            if cfg.memory_update_policy=='merge_v2':
+                                records['notes'],update_audit=merge_notes(reply.text,records['notes'],records['observed'],cfg.memory_tokens)
+                                if update_audit['rejected_records']:
+                                    warning=f"{len(update_audit['rejected_records'])} memory record(s) rejected; valid records and prior notes kept within budget."
+                                if update_audit['evicted_record_ids']:
+                                    warning+=(" " if warning else "")+f"{len(update_audit['evicted_record_ids'])} record(s) excluded by the note budget."
+                            else:
+                                records["notes"]=validate_notes(reply.text,records["observed"],cfg.memory_tokens)
+                                update_audit={'policy':'replace_v1','retained_source_jobs':source_jobs(records['notes'])}
                         except (ValueError,TypeError,KeyError) as exc:
                             validation_reason=str(exc) if type(exc) is ValueError else type(exc).__name__
+                            update_audit={'policy':cfg.memory_update_policy,'rejected_response':validation_reason,'retained_source_jobs':source_jobs(records['notes'])}
                             self.emit("memory_rejected",s,validation_reason=validation_reason)
                             warning="Memory update rejected; previous validated notes retained. No retry."
                         except ModelError as e:
@@ -203,10 +192,10 @@ class Run:
             # No mode stores private scoring/replay data for another mode.
             if cfg.memory!="groundhog":
                 self.store.put(self.namespace(s["mode"]),"records",records)
-            self.emit("memory",s,notes=records["notes"] if cfg.memory=="structured" else records["history"] if cfg.memory=="notebook" else [],warning=warning)
+            self.emit("memory",s,notes=records["notes"] if cfg.memory=="structured" else records["history"] if cfg.memory=="notebook" else [],warning=warning,update_audit=update_audit)
             self.results.append({"mode":s["mode"],"model":self.models[s["mode"]].name,"repetition":self.repetition,
-                                 "memory_policy":cfg.memory,"reasoning":cfg.reasoning,"step_limit":cfg.step_limit,"job":job,"passed":s["passed"],"steps":s["steps"],
-                                 "reason":s["reason"],"warning":warning,**self.totals(s["mode"],job,self.repetition),
+                                 "memory_policy":cfg.memory,"memory_update_policy":cfg.memory_update_policy,"reasoning":cfg.reasoning,"step_limit":cfg.step_limit,"job":job,"passed":s["passed"],"steps":s["steps"],
+                                 "reason":s["reason"],"warning":warning,"memory_audit":s.get("memory_audit",{}),"memory_update":update_audit,**self.totals(s["mode"],job,self.repetition),
                                  "task_metrics":self.world.metrics() if hasattr(self.world,"metrics") else {}})
             self.emit("invoice",s,usage=self.totals(s["mode"],job,self.repetition),passed=s["passed"],live=self.models[s["mode"]].live)
             return {}
@@ -252,5 +241,5 @@ class Run:
                 "started_at":self.started_at,"selected_jobs":self.selected_jobs,
                 "completed":self.completed,"stop_reason":self.stop_reason,
                 "pricing":{"date":PRICE_DATE,"source":PRICE_URL,"note":COST_NOTE},
-                "cap":self.cap,"results":deepcopy(self.results),"usage":self.totals(),"error":self.error,
+                "memory_implementation":"versioned-replace-v1-or-merge-v2","cap":self.cap,"results":deepcopy(self.results),"usage":self.totals(),"error":self.error,
                 "usage_complete":self.error is None,"events":deepcopy(self.events),"calls":deepcopy(self.calls)}

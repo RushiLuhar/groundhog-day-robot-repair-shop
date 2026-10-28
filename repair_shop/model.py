@@ -31,6 +31,7 @@ class Reply:
     text: str = ""
     request_id: str = ""
     status: str = "completed"
+    end_reason: str = ""
 
 NOTE_RECORD = {
     "type": "object", "additionalProperties": False,
@@ -89,6 +90,8 @@ class OpenAIModel:
 
     def decide(self, context):
         instructions=SYSTEM.replace('12-step cap',f"{getattr(self,'step_limit',12)}-step cap")
+        if not any(t['name']=='operate' for t in getattr(self,'tools',TOOLS)):
+            instructions=instructions.replace('Diagnose using inspect,\nrepair using operate, and prove completion using test.','Inspect the customer, use the available measurement and repair tools,\nand prove completion using test.')
         if getattr(self,'task_instructions',''): instructions+='\n'+self.task_instructions
         response = self._call(instructions=instructions, input=json.dumps(context), tools=getattr(self,'tools',TOOLS),
                               parallel_tool_calls=False, max_output_tokens=getattr(self,'repair_output_tokens',1024))
@@ -103,8 +106,16 @@ class OpenAIModel:
                 pass
         if response.usage is None:
             raise ModelError("OpenAI returned no token count. The shift stopped without retrying the request.")
+        reason=''
+        if action is None:
+            if response.status!='completed':
+                detail=getattr(getattr(response,'incomplete_details',None),'reason',None)
+                reason='response output limit reached' if detail=='max_output_tokens' else 'incomplete model response'
+            elif len(calls)==0:reason='model returned no tool action'
+            elif len(calls)>1:reason='model returned multiple tool actions'
+            else:reason='model returned invalid tool arguments'
         return Reply(action,response.usage.input_tokens,response.usage.output_tokens,
-                     response.output_text or "",response.id,response.status)
+                     response.output_text or "",response.id,response.status,reason)
 
     def maintain(self, payload):
         instructions = """Update compact episodic, semantic, procedural repair notes using ONLY the supplied observed exchanges and previous notes.
@@ -114,6 +125,8 @@ Copy model and revision from ticket.customer (for example, Amber R2 means model=
 source_jobs must contain integer ticket.job numbers observed in this shift. Preserve different revisions separately.
 Failures are episodes, never successful procedures. Supported procedures require a passing test in their sources.
 Contradictions should be marked disputed. Keep useful old notes within about 800 tokens total. No hidden answer key exists here."""
+        if payload.get('update_policy'):
+            instructions+='\nFor merge_v2, return only useful new or corrected records. Omitted previous notes are retained by the host subject to its budget. Use exact integer job IDs and robot identities in source_catalog; never invent source IDs. Record replacement-module exceptions explicitly, not as a general factory procedure.'
         budget=getattr(self,'memory_tokens',1000)
         instructions=instructions.replace('about 800 tokens total',f'about {max(64,int(budget*.8))} tokens total')
         response = self._call(instructions=instructions,input=json.dumps(payload),

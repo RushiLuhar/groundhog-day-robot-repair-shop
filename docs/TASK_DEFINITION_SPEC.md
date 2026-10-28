@@ -58,3 +58,9 @@ Keep effectiveness and efficiency separate. A low token count can reflect failur
 A future suite may supply original or authorized documents through explicit `search_manual` / `read_manual` tools. Treat document IDs and versions as fixtures included in the fingerprint. Retrieval consumes a step; retrieved text enters subsequent model input and is therefore counted by the API. All mechanics receive identical document access. Specify truncation, retrieval budgets, citation checks and contradictory revision handling before implementation. Do not preload hidden solutions into persistent memory. Private course PDFs, slides and notes must not be published.
 
 Manual tools, arbitrary user-uploaded task code, variable bay counts, cross-run memory and automatic task generation are not implemented in version 1.
+
+## Learning-suite and memory-audit extension (2026-10-28)
+
+`learning-v1` adds 32 tickets through the same interface. Optional world metrics now include `phase`, `failed_tests` and `calibration_writes`, alongside diagnostic calls and invalid actions. Phase is scorer metadata and must never appear in agent ticket/tool input. Include every calibration fixture and phase assignment in `fixture_data` so the fingerprint changes when the experiment changes. Previously published suites remain unchanged.
+
+Per-attempt reports also include `memory_audit` (prior evidence supplied) and `memory_update` (maintenance acceptance/retention). These are runner metadata, not model-visible evaluation hints. Existing saved settings with no update-policy field map to `replace_v1`; new settings choose `merge_v2`. See [Learning evaluation](LEARNING_EVALUATION.md) for the algorithm, limitations and experiment plan.
