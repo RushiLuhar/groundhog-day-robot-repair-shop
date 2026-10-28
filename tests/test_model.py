@@ -49,3 +49,19 @@ def test_safe_machine_error_details_without_raw_body():
     assert 'code=unsupported_parameter' in str(exc.value)
     assert 'param=text.format' in str(exc.value)
     assert 'raw sensitive' not in str(exc.value)
+
+
+def test_per_mechanic_settings_reach_official_request():
+    from repair_shop.tasks import get_suite
+    m=fake_model(response([N(type='function_call',name='inspect',arguments='{}')]))
+    m.reasoning='high';m.step_limit=20;m.repair_output_tokens=700;m.memory_output_tokens=900
+    m.memory_tokens=600;m.tools=list(get_suite('diagnostic-v1').tools);m.task_instructions='Public task instructions'
+    m.decide({})
+    kwargs=m.client.responses.create.call_args.kwargs
+    assert kwargs['reasoning']=={'effort':'high'} and kwargs['max_output_tokens']==700
+    assert '20-step cap' in kwargs['instructions'] and 'Public task instructions' in kwargs['instructions']
+    assert [x['name'] for x in kwargs['tools']]==['inspect','diagnose','operate','test']
+    m.maintain({})
+    kwargs=m.client.responses.create.call_args.kwargs
+    assert kwargs['reasoning']=={'effort':'high'} and kwargs['max_output_tokens']==900
+    assert '480 tokens' in kwargs['instructions'] and 'ROBOT family' in kwargs['instructions']

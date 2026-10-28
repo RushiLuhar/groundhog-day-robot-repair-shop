@@ -1,12 +1,12 @@
 # Groundhog Day Robot Repair Shop
 
-An experiment design comparing one robot mechanic under three memory policies: no cross-job memory, a raw notebook of the last 12 turns, and structured working/episodic/semantic/procedural memory. All three will use the same OpenAI model and face the same ten repair jobs. Completion, repair steps, and actual token usage will be measured without assuming which policy wins.
+A local experiment harness for comparing robot mechanics on identical repair jobs. Configure each mechanic’s model, reasoning and memory, save a versioned experiment, and compare passes, tool steps, reported tokens and estimated dollars.
 
-**Status: runnable local prototype on the implementation branch.** The deterministic simulator, three memory policies, LangGraph orchestration, usage ledger, and animated Gradio bays are implemented. Offline demonstrations are clearly labelled; they are not evidence of model performance.
+The animated Gradio workshop follows actual simulator events. The free demo is scripted and makes no model calls; it is useful for checking the interface, not measuring AI performance.
 
-## Run locally
+## Start locally
 
-Use Python 3.11 or newer (verified here on Python 3.15). From the repository root:
+Use Python 3.11 or later (tested on Python 3.15):
 
 ```sh
 python3 -m venv .venv
@@ -16,51 +16,76 @@ python3 -m venv .venv
 .venv/bin/python -m repair_shop.serve
 ```
 
-The launcher starts a detached local process, records its PID in ignored `logs/workshop.pid`, and writes server output to ignored `logs/workshop.log`. It survives the launching terminal closing, but does not install a login/reboot service. After a restart, run the launcher again. For a foreground development server, use `.venv/bin/python -m repair_shop.app`.
+Open **http://127.0.0.1:7860** on the same computer. The launcher creates a detached local process with ignored `logs/workshop.log` and `logs/workshop.pid`; it does not install a login service. After a computer restart, launch it again. For foreground development, use `.venv/bin/python -m repair_shop.app`. Reload an old disconnected browser tab after a server restart.
 
-Open **http://127.0.0.1:7860** on the same computer. If an old tab reports a disconnected backend after restart, reload it to create a fresh session. The server binds only to loopback, does not create a Gradio share link, and is not remotely accessible. The one-time tokenizer preparation downloads its official vocabulary; subsequent offline runs use the cache. `requirements-lock.txt` records this prototype's tested dependency environment; `pyproject.toml` gives the supported top-level ranges.
+The server binds only to localhost; no public Gradio link is created. The first tokenizer preparation downloads its vocabulary. Dependency versions are in `requirements-lock.txt`.
 
-The default **Free demo** uses an observation-driven deterministic mock and makes no model calls. Choose the number of jobs, then **Start shift**. Three bays run the same fixed jobs with separate state. **Stop** prevents new calls after an in-flight request settles; its returned usage is retained. **Reset workshop** clears session memory once stopped. Every new shift starts empty. **Replay last shift** uses recorded events with no API calls. Desktop shows neighboring bays; narrow screens stack them. Reduced-motion preferences disable CSS animation.
+## Put an experiment together
 
-**OpenAI (paid)** is an explicit opt-in. Both live and free-demo shifts support the first 1–10 jobs per bay (at most 30 repair attempts total). The step and output-token limits per attempt remain unchanged. Longer shifts make more paid calls in OpenAI mode. The full repeated evaluation proposed by the spec has not been run. The backend runs bays sequentially for auditable call limits, while each displayed bay animates its actual event state. Reloading the browser loses the UI session's replay; completed UI shifts automatically save portable reports under ignored `runs/`. The completion banner distinguishes a settled schedule from passing every job. Waiting for a response and writing memory have separate animated states, with an elapsed-event heartbeat during slow calls. The final bay clocks out and its repaired customer departs.
+1. Name the experiment and add notes or a hypothesis. Choose a task set, jobs per mechanic and repeated shifts.
+2. Click a robot to edit that mechanic. Choose its model, reasoning, memory policy, notebook window, structured-note budget, step limit and output-token caps. Select **Apply mechanic settings**.
+3. Use **Save as new experiment** for a new configuration identity. **Save new version** appends a version to the loaded configuration; previous versions stay available. Loading an older version is allowed; saving over a newer version is refused so concurrent edits cannot silently overwrite it.
+4. Leave **Use OpenAI (paid calls)** unchecked for a free demo. Start the experiment explicitly when ready. Paid runs use the model selected for each mechanic, including that mechanic’s memory writes.
+5. Review passes and unfinished attempts alongside steps and cost. Open **Saved runs and shareable reports** to revisit results or create HTML, JSON and CSV reports.
 
-## Share results and extend the evaluation
+A **job** is one ticket. Each mechanic makes one **attempt** at each selected job. A **step** is one tool call. A shift covers all selected jobs and all three mechanics, in ticket order. Repeated shifts start with fresh memories. For example, 4 jobs × 3 mechanics × 2 repeated shifts produces 24 attempts, each with its own step cap. To study accumulating memory, increase jobs within a shift; repetitions measure fresh starts.
 
-After a shift settles, open **Download and share results** and choose **Create report**. The self-contained HTML report opens without a running server or API key; JSON records run configuration, pricing assumptions and results, while CSV contains the per-job ledger. HTML includes the visible simulation memory; review it before sharing. Reports are local files, not public links, and are ignored by Git. They never serialize the model client or environment.
+The original ten-job baseline remains selectable. The new **diagnostic-v1** set requires targeted measurements, compound repairs, power interlocks, a spare-fuse budget and revision-specific cooler behavior. Similar symptoms can have different causes. There are no manuals in this release. Read the [task author guide](repair_shop/tasks/README.md) for all ten scenarios and [task definition contract](docs/TASK_DEFINITION_SPEC.md) for new suites and future manual retrieval.
 
-[EVALUATION_ROADMAP.md](EVALUATION_ROADMAP.md) proposes a harder, versioned task set and future per-bay model/reasoning/memory configuration. The current ten-job baseline and shared-model controls remain unchanged.
+## Saved versions and results
 
-## Configuration and safety
+The ignored local database is `runs/experiments.sqlite3`. Each run captures its exact configuration, task version, fingerprint and seed. Changing settings or saving a new version cannot change past results. Model settings remain separate from credentials.
 
-Copy `.env.example` to `.env` only if `.env` does not already exist. Set `OPENAI_API_KEY` yourself and set `OPENAI_MODEL` to your selected API identifier. The user-selected model for this prototype is `gpt-6-luna`, verified in current official documentation and in real repair calls. It is used unchanged for all conditions and memory writes. No model substitution occurs. Never commit a real key or paste it into chat. The UI never receives it. Credentials are read only by the server-side official OpenAI client, which uses the official endpoint, disables automatic retries, and requests `store=False`. Remote tracing and Gradio analytics are disabled.
+Returned API usage is checkpointed before another request; completed attempts and final status are also saved. The app never resumes a paid run automatically. A stored “running” status after a restart may mean the process stopped during a request: known usage is retained, but in-flight usage may be unknown. Earlier prototype reports remain in `runs/`; they are not automatically imported into the new database.
 
-Each job has at most 12 tool calls; a non-action or incomplete response ends it unfinished. Repair responses have a 1,024 output-token limit; memory writes have a 1,600 output-token limit. Reasoning/decoding defaults are identical across repair conditions. Output usage includes the API-reported total, including reasoning tokens. The ledger displays the actual configured model and an estimated USD cost. For `gpt-6-luna`, the estimate uses official standard uncached text rates checked 2026-10-28: $0.10 per million input tokens and $0.50 per million output tokens, with the documented long-context multiplier above 272K input tokens. It is not an invoice: caching, cache-write premiums, region/service-tier adjustments, and taxes are excluded. Unknown model rates display N/A; offline runs display $0. Input/output totals include memory writes; maintenance is also shown as a subtotal. Failed or uncertain requests stop the shift, with incomplete usage explicitly marked. There are no automatic paid retries.
+**Stop** waits for an in-flight response to settle before starting no further requests. **Reset workshop** clears the displayed session after it stops. **Replay displayed run** uses saved events and makes no model calls. Loading saved results constructs no API client. Mechanic names and result rows stay tied to the recorded run even if you edit the next experiment.
 
-## Design and memory
+Reports are local files, not public links. The HTML works without a server and includes memory notes and exact settings. JSON includes the configuration, fingerprint, results and known usage; it omits raw response identifiers and detailed event logs. CSV includes repetition, model, memory, reasoning, step limits and attempt outcomes. Review your annotations and notes before sharing. No report serializes the environment or model client.
 
-[SPEC.md](SPEC.md) preserves the approved version 1 unchanged; its original design-only status text is historical. Its PFAI references are attribution by title/page only. Repair checklists are original adaptations. No private course files or links are distributed, and no open-source license has been selected.
+Saved configurations can also run from the command line:
 
-`world.py` holds the hidden deterministic rules. Agent inputs contain only the job ticket, permitted prior memory, current exchanges, and remaining steps. A `StateGraph` runs load → decide → execute → decide → finish → save. Fresh run/mode/job checkpoint threads and isolated store namespaces prevent cross-condition memory leakage. Scoring/event logs are not injected into model context.
+```sh
+.venv/bin/python -m repair_shop.experiment list
+.venv/bin/python -m repair_shop.experiment run --config CONFIG_ID --version 1
+# A saved paid configuration requires explicit opt-in:
+.venv/bin/python -m repair_shop.experiment run --config CONFIG_ID --version 2 --live
+```
 
-- **Groundhog Day:** current-job transcript only; no cross-job store.
-- **Raw notebook:** latest 12 complete action/result exchanges, including full tool results and original tickets/boundaries; the window is fixed during a job and is never summarized.
-- **Four-level memory:** current-job working context plus episodic, semantic, and procedural records. One model call updates notes after each job. Validation checks schema, model/revision/source-job references, supported success, and a 1,000-token serialized note budget using fixed `o200k_base` tokenization. Invalid/oversized updates retain previous notes and still count their usage. This is a local storage budget, not a claim that the tokenizer exactly matches API billing. No embeddings, hidden-answer validation, or fine-tuning is used.
+## Models, bounds and accounting
 
-## Verification
+Place the key yourself in the ignored `.env` file at the repository root, using `.env.example` only if `.env` does not already exist. Never commit the key or paste it into chat. The official OpenAI client alone loads it server-side. It uses the official endpoint, disables retries and requests `store=False`. Remote tracing and Gradio analytics are disabled.
+
+The model dropdown lists `gpt-6-luna`, `gpt-6-sol` and `gpt-6-astra` from current official documentation; listing a model does not confirm account access. The UI defaults to Luna. `OPENAI_MODEL` remains a fallback for legacy command-line smoke calls; saved UI experiments use their explicit per-mechanic choices. Unsupported model/reasoning pairs are rejected; no model substitution occurs. “default” omits the reasoning setting and uses the provider default.
+
+Limits are configurable within bounded ranges: 1–40 tool steps, 0–100 retained notebook exchanges, 128–8,000 structured-note tokens, 128–4,096 output tokens per repair/memory request, and 1–10 repeated shifts. Jobs range from 1 to the chosen suite’s size. The whole-run token limit is checked after every returned response; one in-flight request can exceed it. The default remains 12 steps, 12 notebook exchanges, 1,000 note tokens, 1,024 repair output tokens and 1,600 memory output tokens.
+
+Only a passing simulator test counts as success. A failed test uses a step and can be followed by further repairs. A non-action/incomplete response or the step cap ends an attempt unfinished. “Run complete” means all scheduled attempts ended, not that every repair passed. Errors stop the run; uncertain usage is marked rather than treated as zero. Output usage includes reported reasoning tokens. Memory writes consume tokens and cost but no repair steps.
+
+Luna dollar estimates use official standard uncached text rates checked 2026-10-28: $0.10/M input and $0.50/M output, with the documented long-context multiplier. Caching, cache-write premiums, region/service-tier adjustments and taxes are excluded. Other models currently display N/A for cost. Demo runs display $0. This is an estimate, not a billing invoice.
+
+## Memory and task isolation
+
+The LangGraph loop is load → decide → execute → decide → finish → save. Checkpoint threads include run, repetition, bay and job. Store namespaces include run, repetition and bay. Bay identity is separate from memory policy, so all three bays can use the same policy with different models if desired.
+
+- **Groundhog Day:** current-job context only; no cross-job records.
+- **Raw notebook:** the configured number of complete action/result exchanges, without summarization. A window of zero retains nothing between jobs.
+- **Four-level memory:** current-job working context plus episodic, semantic and procedural records. A separate call updates notes. Validation checks schema, family/revision/source references, supported successes and the configured serialized token budget. Invalid notes are rejected; previous notes survive and returned usage still counts.
+
+The note budget uses `o200k_base` as a fixed local measurement, not an API billing claim. Tool observations are the only world evidence given to models. Private scoring state and other bays’ notes do not enter their prompts.
+
+[SPEC.md](SPEC.md) preserves the original approved design; its design-only language is historical. [EVALUATION_ROADMAP.md](EVALUATION_ROADMAP.md) preserves earlier proposals. This release implements configuration and a diagnostic suite while deferring manuals. No private course material or local personal paths are published, and no license has been selected.
+
+## Verification and limitations
 
 ```sh
 .venv/bin/python -m pytest -q
-.venv/bin/python -m repair_shop.smoke                 # free, one job per mode
-.venv/bin/python -m repair_shop.smoke --live --jobs-per-mode 1  # paid, explicit
 ```
 
-Tests cover all ten simulator jobs, wrong-order no-ops, revision differences, mode isolation, exact notebook windows, fresh runs, step/non-action stops, error handling, usage subtotals, invalid memory, escaped HTML, and stop/reset/replay. UI verification covers desktop and 390px mobile layouts, memory drawers, completion tables, replay, stop, reset, and repeat runs.
+Offline tests cover both complete task sets, diagnostic constraints, memory isolation, repetition resets, configurable limits, token stops, safe exports and SQLite version/snapshot persistence. Browser checks cover the mechanic editor, saved versions, repeated demo runs, stop/reset, replay, report export and mobile layout.
 
-**Live smoke evidence (2026-10-28):** the first run exercised one job per mode; all three passed in 8 tool steps each. Its 24 successful repair calls reported **14,770 input + 1,472 output = 16,242 tokens**. The following legacy JSON-object memory request returned HTTP 400 and was not automatically retried. Its usage was unavailable; its exact cause cannot be reconstructed because the original handler retained only the HTTP status.
+The UI has three bays and uses ordered ticket prefixes. There is no arbitrary uploaded task code, automatic task generation, cross-run memory or confidence-interval analysis. The diagnostic suite is harder by construction, but whether it separates model/memory approaches needs a controlled evaluation. Free demos and bounded integration smoke tests do not establish rankings.
 
-After switching maintenance to the documented strict JSON schema, a bounded follow-up ran two structured-memory jobs. Both passed in 8 steps, both memory writes validated, and the second job's actual model input contained the first job's exact saved notes with a fresh current-job transcript. The first stored notes occupied 183 local budget tokens. The follow-up's 18 successful calls reported **13,711 input + 2,050 output = 15,761 tokens**, including **3,170 maintenance tokens**; totals were checked against the per-call ledger.
-
-**Cumulative live testing: five repair jobs, 42 successful calls, 28,481 input + 3,522 output = 32,003 known tokens.** The earlier failed request remains explicitly unknown and is not silently counted as zero. No full repeated evaluation was run, and these integration checks do not establish comparative memory performance. Future errors retain safe machine-readable code/parameter diagnostics without raw bodies, headers, or credentials.
+Prior implementation smoke tests exercised five repair jobs and 42 successful calls, reporting 32,003 known tokens. An earlier rejected memory request had unavailable usage; it is not silently counted as zero. Upgrade smoke (2026-10-28): three diagnostic-v1 attempts on Luna all passed in six tool steps. Nineteen successful calls reported 14,909 input + 1,482 output = 16,391 tokens, including 1,246 maintenance tokens (estimated $0.0022319). The structured-memory update was rejected by validation and previous notes were retained; the precise validation reason was not recorded by that version. The current code records a safe rejection reason and clarifies that note “model” means robot family, not AI model. Those changes passed mocked tests but were not retested live because the three-attempt authorization was exhausted. This smoke verifies repair integration, not successful note retention or comparative performance. User-run experiments are separate from development smoke tests.
 
 ## Official documentation checked
 
@@ -83,3 +108,5 @@ The isolation rules and experimental controls above are project design decisions
 Additional implementation references checked 2026-10-28: [GPT-6 Luna](https://developers.openai.com/api/docs/models/gpt-6-luna), [function calling](https://developers.openai.com/api/docs/guides/function-calling), and [structured outputs](https://developers.openai.com/api/docs/guides/structured-outputs). The maintenance request uses the documented strict JSON-schema format.
 
 UI/report update references checked 2026-10-28: [OpenAI API pricing](https://developers.openai.com/api/docs/pricing), [GPT-6 Luna pricing](https://developers.openai.com/api/docs/models/gpt-6-luna), and [Gradio download controls](https://gradio.app/docs/gradio/downloadbutton).
+
+Experiment configuration references checked 2026-10-28: [GPT-6 Sol](https://developers.openai.com/api/docs/models/gpt-6-sol), [GPT-6 Astra](https://developers.openai.com/api/docs/models/gpt-6-astra), and [Gradio HTML events](https://gradio.app/docs/gradio/html). The model choices and reasoning options follow these official pages; live verification is limited to the explicitly selected smoke-test model.

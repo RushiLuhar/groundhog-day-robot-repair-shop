@@ -6,7 +6,7 @@ from .costs import money, total_cost, COST_NOTE, PRICE_URL
 
 EVENT_LABELS = {'start':'Starting job', 'thinking':'Waiting for model response',
                 'action':'Tool result', 'finish':'Repair attempt ended',
-                'maintenance_start':'Saving memory', 'memory':'Memory updated', 'invoice':'Usage recorded'}
+                'maintenance_start':'Saving memory', 'memory_rejected':'New notes failed validation', 'memory':'Memory updated', 'invoice':'Usage recorded'}
 
 def event_label(kind, live=True):
     if kind=='thinking' and not live:
@@ -97,9 +97,13 @@ CSS += """
 """
 
 def render(events=None, results=None, live=False, model="offline scripted demo", running=False,
-           error=None, selected_jobs=10, state=None, elapsed=0, calls=None):
+           error=None, selected_jobs=10, state=None, elapsed=0, calls=None, experiment=None):
     events,results=events or [],results or []
-    expected=selected_jobs*len(MODES)
+    settings={m['bay_id']:m for m in experiment['mechanics']} if experiment else {}
+    names={m:settings.get(m,{}).get('name',LABELS[m]) for m in MODES}
+    repeats=experiment['repetitions'] if experiment else 1
+    per_bay=selected_jobs*repeats
+    expected=per_bay*len(MODES)
     state=state or ('error' if error else 'running' if running else 'completed' if results and len(results)==expected else 'stopped' if results else 'ready')
     settled=len(results); passes=sum(r['passed'] for r in results)
     title={'ready':'READY TO START','running':'SHIFT IN PROGRESS','completed':'SHIFT COMPLETE',
@@ -108,7 +112,7 @@ def render(events=None, results=None, live=False, model="offline scripted demo",
     phase={'start':'Loading memory','thinking':event_label('thinking',live),'action':'Using a repair tool',
            'finish':'Repair test passed' if latest.get('passed') else 'Repair attempt ended',
            'maintenance_start':'Saving notes for the next job','memory':'Memory updated','invoice':'Usage recorded'}.get(latest.get('kind'),'Waiting for the first job')
-    activity=f"{LABELS.get(latest.get('mode'),'Workshop')} · job {latest.get('job','—')} · {phase}"
+    activity=f"{names.get(latest.get('mode'),'Workshop')} · repeat {latest.get('repetition',1)} · job {latest.get('job','—')} · {phase}"
     if state in ('running','replay'):
         detail=('Recorded: ' if state=='replay' else '') + activity + (f' · {elapsed}s since last event' if elapsed else '')
     elif state=='completed':
@@ -116,7 +120,7 @@ def render(events=None, results=None, live=False, model="offline scripted demo",
     elif state in ('stopped','error'):
         detail=f'{settled} of {expected} attempts ended; {max(0,expected-settled)} not attempted. The shift has stopped.'
     else:
-        detail='Choose a run mode and jobs per bay, then select Start shift.'
+        detail='Choose your experiment settings, then select Start experiment.'
     bill_rows=calls if calls is not None else results
     input_tokens=sum(r.get('input',0) for r in bill_rows); output_tokens=sum(r.get('output',0) for r in bill_rows)
     cost=total_cost(bill_rows) if live else 0.0
@@ -125,8 +129,8 @@ def render(events=None, results=None, live=False, model="offline scripted demo",
         es=[e for e in events if e['mode']==mode]; last=es[-1] if es else {}
         start=next((e for e in reversed(es) if e['kind']=='start'),{})
         job=last.get('job',0)
-        a=next((e for e in reversed(es) if e['kind']=='action' and e['job']==job),{})
-        done=next((e for e in reversed(es) if e['kind']=='finish' and e['job']==job),None)
+        a=next((e for e in reversed(es) if e['kind']=='action' and e['job']==job and e.get('repetition',1)==last.get('repetition',1)),{})
+        done=next((e for e in reversed(es) if e['kind']=='finish' and e['job']==job and e.get('repetition',1)==last.get('repetition',1)),None)
         kind=last.get('kind','idle'); rs=[r for r in results if r['mode']==mode]
         cls='idle'; quip='Clock in. Try not to become a spare part.'
         bay_phase='Waiting to start'; tag='WAITING'
@@ -148,17 +152,17 @@ def render(events=None, results=None, live=False, model="offline scripted demo",
             cls='saving'; tag='SAVING MEMORY'; bay_phase='Saving notes · paid model call' if live else 'Saving demo notes'; quip='Writing this down so I don’t have to learn it twice.'
         elif kind=='invoice':
             bay_phase='Usage recorded · waiting for the next job'
-            if len(rs)==selected_jobs:
+            if len(rs)==per_bay:
                 cls='clocked-out' if done and done['passed'] else 'break'; tag='CLOCKED OUT'
-                bay_phase=f'BAY DONE · {sum(r["passed"] for r in rs)}/{selected_jobs} passed'
+                bay_phase=f'BAY DONE · {sum(r["passed"] for r in rs)}/{per_bay} passed'
                 quip='Shift’s over. I’ve earned the bad coffee.' if done and done['passed'] else 'Shift’s over. The unfinished ones are still your problem.'
         if state=='replay' and es: bay_phase='Recorded: '+bay_phase
         tokens=sum(r['input']+r['output'] for r in rs)
         memory=next((e for e in reversed(es) if e['kind']=='memory'),{})
         working={'job':job or 'waiting','steps_used':last.get('steps',0),'latest_observation':a.get('result',{})}
         color=['#efb974','#94d7c9','#bdacf1'][index]
-        cards.append(f'''<article class="bay" style="--accent:{color}"><div class="bay-head"><div><small>BAY 0{index+1}</small><h2>{LABELS[mode]}</h2></div><span class="tag">{tag}</span></div><div class="scene-stage"><div class="quip" role="note" aria-label="Mechanic says">{esc(quip)}</div>{scene(color,cls)}</div>
-<div class="phase">{esc(bay_phase)}</div><div class="hud"><span>CUSTOMER<strong>{esc(last.get('ticket',{}).get('customer','—'))}</strong></span><span>JOB TICKET<strong>{job or '—'}/{selected_jobs}</strong></span><span>ATTEMPT STEPS<strong>{last.get('steps',0)}/12</strong></span></div>
+        cards.append(f'''<article class="bay" style="--accent:{color}"><div class="bay-head"><div><small>BAY 0{index+1}</small><h2>{esc(names[mode])}</h2></div><span class="tag">{tag}</span></div><div class="scene-stage"><div class="quip" role="note" aria-label="Mechanic says">{esc(quip)}</div><button type="button" data-bay="{mode}" aria-label="Configure {esc(names[mode])}" class="mechanic-button">{scene(color,cls)}<span>Configure this mechanic</span></button></div>
+<div class="phase">{esc(bay_phase)} · repeat {last.get("repetition",1)}/{repeats}</div><div class="hud"><span>CUSTOMER<strong>{esc(last.get('ticket',{}).get('customer','—'))}</strong></span><span>JOB TICKET<strong>{job or '—'}/{selected_jobs}</strong></span><span>ATTEMPT STEPS<strong>{last.get('steps',0)}/{settings.get(mode,{}).get('step_limit',12)}</strong></span></div>
 <div class="hud receipt"><span>{'TOKENS · ENDED ATTEMPTS' if live else 'FREE DEMO · NO MODEL CALLS'}</span><b>{tokens:,} tokens</b></div>
 <details><summary>Current job details</summary><pre>{esc(json.dumps(working,indent=2))}</pre></details>
 <details><summary>Memory used for this job</summary><pre>{esc(json.dumps(start.get('prior',[]),indent=2))}</pre></details>
@@ -169,13 +173,32 @@ def render(events=None, results=None, live=False, model="offline scripted demo",
         bs=[r for r in bill_rows if r['mode']==mode]
         avg=f'{sum(r["steps"] for r in passed)/len(passed):.1f}' if passed else '—'
         maint=sum(r['input']+r['output'] for r in bs if r.get('kind')=='memory') if calls is not None else sum(r['maintenance'] for r in rs)
-        rows.append(f'<tr><td>{LABELS[mode]}</td><td>{esc(model) if live else "Scripted demo"}</td><td>{len(passed)}/{len(rs)}</td><td>{len(rs)}/{selected_jobs}</td><td>{avg}</td><td>{sum(r["input"] for r in bs):,}</td><td>{sum(r["output"] for r in bs):,}</td><td>{maint:,}</td><td>{money(total_cost(bs) if live else 0)}</td></tr>')
-    jobs=''.join(f'<tr><td>{r["job"]}</td><td>{LABELS[r["mode"]]}</td><td class="{"good" if r["passed"] else "bad"}">{"PASS" if r["passed"] else "UNFINISHED"}</td><td>{r["steps"]}/12</td><td>{r["input"]+r["output"]:,}</td><td>{money(r.get("cost_usd") if live else 0)}</td><td>{esc(readable_reason(r["reason"]))} {esc(readable_reason(r.get("warning","")))}</td></tr>' for r in results)
-    timeline=''.join(f'<p>#{e["sequence"]:03} · {esc(e.get("at","")[11:19])} · {LABELS[e["mode"]]} · job {e["job"]} · {esc(event_label(e["kind"],live))} {esc(json.dumps(e.get("result",e.get("usage",e.get("warning","")))))}</p>' for e in events[-60:][::-1])
-    notice=('OPENAI SELECTED · NO MODEL CALLS YET' if state=='ready' else 'LIVE OPENAI · '+esc(model)) if live else 'FREE DEMO · NO AI MODEL'
-    return f'''<section class="shop"><header class="mast"><div><div class="eyebrow">COMPARE THREE MEMORY APPROACHES</div><h1>Groundhog Day<br>Robot Repair Shop<span style="color:#c8ef89">.</span></h1><p>See how different kinds of memory affect the same repair jobs.</p><div class="subtle">{notice}</div></div><div class="open-sign">{'SHIFT<br>OVER.' if state=='completed' else 'OPEN<br>AGAIN.'}</div></header>
+        rows.append(f'<tr><td>{esc(names[mode])}<br>{esc(LABELS[settings.get(mode,{}).get("memory",mode)])}</td><td>{esc(settings.get(mode,{}).get("model",model)) if live else "Scripted demo"}<br>{esc(settings.get(mode,{}).get("reasoning","default"))}</td><td>{len(passed)}/{len(rs)}</td><td>{len(rs)}/{per_bay}</td><td>{avg}</td><td>{sum(r["input"] for r in bs):,}</td><td>{sum(r["output"] for r in bs):,}</td><td>{maint:,}</td><td>{money(total_cost(bs) if live else 0)}</td></tr>')
+    jobs=''.join(f'<tr><td>{r.get("repetition",1)} / {r["job"]}</td><td>{esc(names[r["mode"]])}</td><td class="{"good" if r["passed"] else "bad"}">{"PASS" if r["passed"] else "UNFINISHED"}</td><td>{r["steps"]}/{r.get("step_limit",12)}</td><td>{r["input"]+r["output"]:,}</td><td>{money(r.get("cost_usd") if live else 0)}</td><td>{esc(readable_reason(r["reason"]))} {esc(readable_reason(r.get("warning","")))}</td></tr>' for r in results)
+    timeline=''.join(f'<p>#{e["sequence"]:03} · {esc(e.get("at","")[11:19])} · {esc(names[e["mode"]])} · repeat {e.get("repetition",1)} · job {e["job"]} · {esc(event_label(e["kind"],live))} {esc(json.dumps(e.get("result",e.get("usage",e.get("validation_reason",e.get("warning",""))))))}</p>' for e in events[-60:][::-1])
+    notice=('OPENAI SELECTED · NO MODEL CALLS YET' if state=='ready' else 'LIVE OPENAI · models listed below') if live else 'FREE DEMO · NO AI MODEL'
+    return f'''<section class="shop"><header class="mast"><div><div class="eyebrow">COMPARE REPAIR AGENTS</div><h1>Groundhog Day<br>Robot Repair Shop<span style="color:#c8ef89">.</span></h1><p>Compare models, reasoning and memory on the same repair jobs.</p><div class="subtle">{notice}</div></div><div class="open-sign">{'SHIFT<br>OVER.' if state=='completed' else 'OPEN<br>AGAIN.'}</div></header>
 <section class="shift-banner {state}" role="status" aria-live="polite"><h2>{title}</h2><p>{esc(detail)}</p><progress value="{settled}" max="{expected}" aria-label="Repair attempts ended"></progress><div class="metrics"><span><b>{settled}/{expected}</b>attempts ended</span><span><b>{passes}</b>passed</span><span><b>{settled-passes}</b>unfinished</span><span><b>{input_tokens+output_tokens:,}</b>reported tokens</span><span><b>{money(cost)}</b>estimated cost (USD){' · partial' if error else ''}</span></div></section>
 {f'<p class="bad">{esc(error)}</p>' if error else ''}<div class="bays">{''.join(cards)}</div>
-<section class="ledger"><h2>Results by bay</h2><p class="subtle">Each row summarizes one bay’s attempts. The step average includes passing attempts only. Check the pass count alongside it. Token and cost totals include memory updates. Input tokens are text sent to the model; output tokens are text it generates, including reasoning tokens.</p><div class="scroll"><table><thead><tr><th>Memory approach</th><th>Model</th><th>Passed / ended attempts</th><th>Attempts ended / planned</th><th>Average steps per passing attempt</th><th>Input tokens</th><th>Output tokens</th><th>Tokens used for memory</th><th>Estimated cost (USD)</th></tr></thead><tbody>{''.join(rows)}</tbody></table></div><p class="subtle">Costs are estimates in US dollars. The free demo costs $0. N/A means we do not have a price for this model.</p><details><summary>How cost is estimated</summary><p class="subtle">{esc(COST_NOTE)} <a href="{PRICE_URL}">OpenAI pricing</a></p></details><details><summary>Results for each attempt</summary><div class="scroll"><table><tr><th>Job</th><th>Memory approach</th><th>Outcome</th><th>Steps</th><th>Total tokens</th><th>Estimated cost (USD)</th><th>What happened</th></tr>{jobs}</table></div></details></section>
+<section class="ledger"><h2>Results by bay</h2><p class="subtle">Each row summarizes one bay’s attempts. The step average includes passing attempts only. Check the pass count alongside it. Token and cost totals include memory updates. Input tokens are text sent to the model; output tokens are text it generates, including reasoning tokens.</p><div class="scroll"><table><thead><tr><th>Mechanic / memory</th><th>Model</th><th>Passed / ended attempts</th><th>Attempts ended / planned</th><th>Average steps per passing attempt</th><th>Input tokens</th><th>Output tokens</th><th>Tokens used for memory</th><th>Estimated cost (USD)</th></tr></thead><tbody>{''.join(rows)}</tbody></table></div><p class="subtle">Costs are estimates in US dollars. The free demo costs $0. N/A means we do not have a price for this model.</p><details><summary>How cost is estimated</summary><p class="subtle">{esc(COST_NOTE)} <a href="{PRICE_URL}">OpenAI pricing</a></p></details><details><summary>Results for each attempt</summary><div class="scroll"><table><tr><th>Repeat / job</th><th>Mechanic / memory</th><th>Outcome</th><th>Steps</th><th>Total tokens</th><th>Estimated cost (USD)</th><th>What happened</th></tr>{jobs}</table></div></details></section>
 <section class="ledger"><h2>Activity log</h2><p class="subtle">The animation follows these recorded events. {'In OpenAI mode, each bay waits for the model to choose its next action.' if live else 'The free demo chooses actions using a fixed script.'} The jokes are scripted and use no model tokens.</p><div class="timeline">{timeline or 'No activity yet. Start a shift to see the repairs.'}</div></section>
 <p class="footnote">Simulated repairs. Animations follow your device’s reduced-motion setting.</p></section>'''
+
+CSS += """
+.mechanic-button{display:block;width:100%;padding:0;border:0;background:#232634;color:#c8ef89;cursor:pointer}.mechanic-button span{display:block;padding:8px;font-size:12px}.mechanic-button:focus-visible{outline:3px solid #c8ef89}.report-info pre{white-space:pre-wrap;overflow-wrap:anywhere}
+"""
+
+def configuration_description(config):
+    from .tasks import get_suite
+    suite=get_suite(config.task_set)
+    rows=''.join(f"<tr><td>{esc(m.name)}</td><td>{esc(m.model)} / {esc(m.reasoning)}</td><td>{esc(LABELS[m.memory])}; notebook {m.notebook_exchanges} exchanges; notes {m.memory_tokens} tokens</td><td>{m.step_limit}</td></tr>" for m in config.mechanics)
+    tickets=''.join(f"<li>Job {j.number}: {esc(j.ticket())}</li>" for j in suite.jobs[:config.jobs_per_bay])
+    return f"""<section class="experiment-explainer"><h3>{esc(config.name)}</h3>
+<p>{esc(config.annotation)}</p><p><b>{'OpenAI (paid)' if config.live else 'Free scripted demo'}</b> · {config.jobs_per_bay} jobs × 3 mechanics × {config.repetitions} repeated shifts = <b>{config.attempts} repair attempts</b>.</p>
+<p>A <b>job</b> is one repair ticket. Each mechanic gets one <b>attempt</b> at each job. A <b>step</b> is one tool call (inspect, diagnose, repair or test). Each attempt stops at its mechanic’s step limit or a passing test. Unfinished attempts remain in the results.</p>
+<p>Mechanics receive identical jobs and tools in the same order. Their model, reasoning and memory settings may differ. Memory carries between jobs within a shift; it starts empty for every repeated shift. Repetitions measure fresh starts, not longer memory histories. No attempt is automatically retried.</p>
+<div class="scroll"><table><tr><th>Mechanic</th><th>Model / reasoning</th><th>Memory settings</th><th>Step limit</th></tr>{rows}</table></div>
+<p>“default” uses the model provider’s reasoning default. Free demos ignore model and reasoning choices and use a script; they do not measure AI performance. Model access depends on your account. Unknown prices appear as N/A.</p>
+<p>Run token limit: {config.max_total_tokens:,}. The app checks returned usage after every request and stops before the next request once this limit is reached. One in-flight request can exceed it. Repair and memory calls both count.</p>
+<h3>{esc(suite.title)}</h3><p>{esc(suite.description)}</p><details><summary>Selected job tickets</summary><ol>{tickets}</ol></details>
+<p class="subtle">Task version {esc(suite.id)} · fingerprint {suite.fingerprint[:12]}. Saved run snapshots preserve these settings. Form edits apply only to the next run.</p></section>"""

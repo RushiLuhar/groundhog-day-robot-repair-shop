@@ -39,7 +39,8 @@ def test_memory_costs_and_safe_portable_exports(tmp_path):
         assert 'DO-NOT-EXPORT-THIS-CANARY' not in text
         assert str(tmp_path) not in text
     data=json.loads(__import__('pathlib').Path(files[1]).read_text())
-    assert data['state']=='completed' and data['configuration']['model']=='gpt-6-luna'
+    assert data['state']=='completed' and data['configuration']['mechanics'][0]['model']=='gpt-6-luna'
+    assert data['configuration']['jobs_per_bay']==1
     assert 'events' not in data and 'calls' not in data  # no raw response identifiers
     html=__import__('pathlib').Path(files[0]).read_text()
     assert 'SHIFT COMPLETE' in html and '3/3' in html and 'clocked-out' in html

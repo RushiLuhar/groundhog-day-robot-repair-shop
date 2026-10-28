@@ -170,32 +170,8 @@ def replay_described(speed, request: gr.Request):
 
 
 def build_app():
-    with gr.Blocks(title='Groundhog Day • Robot Repair Shop',analytics_enabled=False) as app:
-        with gr.Accordion('About the experiment',open=False):
-            explanation=gr.HTML(experiment_description())
-        gr.Markdown('### Run a shift\nTry the free demo or use your configured OpenAI model. Each bay gets the same jobs. Your API key is kept out of the browser and reports.')
-        with gr.Row():
-            kind=gr.Radio([('Free demo','Offline scripted demo'),('OpenAI (paid)','Live OpenAI (paid)')],value='Offline scripted demo',label='Run mode')
-            count=gr.Slider(1,len(JOBS),value=3,step=1,label=f'Jobs per bay (up to {len(JOBS)} in either mode)')
-            speed=gr.Slider(0.05,0.8,value=0.15,step=0.05,label='Demo and replay delay (seconds)')
-        with gr.Row():
-            go=gr.Button('Start shift',variant='primary'); halt=gr.Button('Stop'); again=gr.Button('Replay last shift'); clear=gr.Button('Reset workshop')
-        status=gr.Textbox(value='Ready · free demo selected',label='Shift status',interactive=False)
-        with gr.Accordion('Download and share results',open=False):
-            gr.Markdown('Choose Create report after the shift ends. Open the HTML report in a browser, use the CSV in a spreadsheet, or use the JSON for further analysis. The HTML includes the saved memory notes; review them before sharing. Reports contain no API key.')
-            download=gr.Button('Create report')
-            files=gr.File(label='Report files',file_count='multiple',interactive=False)
-        workshop=gr.HTML(render(selected_jobs=3))
-        download.click(download_results,[],files,api_visibility='private')
-        go.click(lambda: None,[],files,queue=False,api_visibility='private')
-        clear.click(lambda: None,[],files,queue=False,api_visibility='private')
-        kind.change(settings_changed,[kind,count],[workshop,status,explanation],queue=False,api_visibility='private')
-        count.change(settings_changed,[kind,count],[workshop,status,explanation],queue=False,api_visibility='private')
-        go.click(start_described,[kind,count,speed],[workshop,status,explanation],concurrency_limit=1,api_visibility='private')
-        halt.click(stop,[],status,queue=False,api_visibility='private')
-        clear.click(reset_described,[kind,count],[workshop,status,explanation],queue=False,api_visibility='private')
-        again.click(replay_described,[speed],[workshop,status,explanation],concurrency_limit=1,api_visibility='private')
-    return app
+    from .experiments_ui import build_app as build_experiments_app
+    return build_experiments_app()
 
 if __name__=='__main__':
     build_app().queue(max_size=8).launch(server_name='127.0.0.1',server_port=7860,share=False,

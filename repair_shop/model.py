@@ -50,11 +50,20 @@ class ModelError(RuntimeError):
 
 class OpenAIModel:
     live = True
-    def __init__(self):
+    def __init__(self, name=None, reasoning='default', repair_output_tokens=1024,
+                 memory_output_tokens=1600, memory_tokens=1000, step_limit=12,
+                 tools=None, task_instructions=''):
         from openai import OpenAI
         config = dotenv_values(Path(__file__).resolve().parents[1] / ".env")
         key = config.get("OPENAI_API_KEY") or os.environ.get("OPENAI_API_KEY")
-        self.name = config.get("OPENAI_MODEL") or os.environ.get("OPENAI_MODEL")
+        self.name = name or config.get("OPENAI_MODEL") or os.environ.get("OPENAI_MODEL")
+        self.reasoning=reasoning
+        self.repair_output_tokens=repair_output_tokens
+        self.memory_output_tokens=memory_output_tokens
+        self.memory_tokens=memory_tokens
+        self.step_limit=step_limit
+        self.tools=tools if tools is not None else TOOLS
+        self.task_instructions=task_instructions
         if not key or not self.name:
             raise ModelError("OpenAI is not configured. Set OPENAI_API_KEY and OPENAI_MODEL in the local .env file.")
         # Explicit official endpoint: no environment-supplied proxy endpoint or SDK retries.
@@ -62,6 +71,8 @@ class OpenAIModel:
 
     def _call(self, **kwargs):
         try:
+            effort=getattr(self,'reasoning','default')
+            if effort!='default': kwargs['reasoning']={'effort':effort}
             return self.client.responses.create(model=self.name, store=False, **kwargs)
         except Exception as exc:
             code = getattr(exc, "status_code", None)
@@ -77,8 +88,10 @@ class OpenAIModel:
             raise ModelError(f"The OpenAI request failed ({label}). The app did not retry it. Token usage for this request may be missing.") from None
 
     def decide(self, context):
-        response = self._call(instructions=SYSTEM, input=json.dumps(context), tools=TOOLS,
-                              parallel_tool_calls=False, max_output_tokens=1024)
+        instructions=SYSTEM.replace('12-step cap',f"{getattr(self,'step_limit',12)}-step cap")
+        if getattr(self,'task_instructions',''): instructions+='\n'+self.task_instructions
+        response = self._call(instructions=instructions, input=json.dumps(context), tools=getattr(self,'tools',TOOLS),
+                              parallel_tool_calls=False, max_output_tokens=getattr(self,'repair_output_tokens',1024))
         calls = [x for x in response.output if x.type == "function_call"]
         action = None
         if response.status == "completed" and len(calls) == 1:
@@ -96,11 +109,15 @@ class OpenAIModel:
     def maintain(self, payload):
         instructions = """Update compact episodic, semantic, procedural repair notes using ONLY the supplied observed exchanges and previous notes.
 Return JSON with exactly these keys, each a list of records. Each record has model, revision, source_jobs (integer list),
-status (tentative, test-supported, or disputed), and text. Preserve different revisions separately.
+status (tentative, test-supported, or disputed), and text. Here model means the ROBOT family, not the AI model.
+Copy model and revision from ticket.customer (for example, Amber R2 means model=Amber and revision=R2).
+source_jobs must contain integer ticket.job numbers observed in this shift. Preserve different revisions separately.
 Failures are episodes, never successful procedures. Supported procedures require a passing test in their sources.
 Contradictions should be marked disputed. Keep useful old notes within about 800 tokens total. No hidden answer key exists here."""
+        budget=getattr(self,'memory_tokens',1000)
+        instructions=instructions.replace('about 800 tokens total',f'about {max(64,int(budget*.8))} tokens total')
         response = self._call(instructions=instructions,input=json.dumps(payload),
-                              text={"format":NOTE_FORMAT},max_output_tokens=1600)
+                              text={"format":NOTE_FORMAT},max_output_tokens=getattr(self,"memory_output_tokens",1600))
         if response.usage is None:
             raise ModelError("OpenAI returned no token count for the memory update. The shift stopped without retrying the request.")
         return Reply(None,response.usage.input_tokens,response.usage.output_tokens,
