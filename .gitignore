@@ -1,0 +1,39 @@
+# Local secrets and environment files
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+
+# Python environments, bytecode, packaging, and test/tool caches
+.venv/
+venv/
+env/
+__pycache__/
+*.py[cod]
+*.egg-info/
+build/
+dist/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+.coverage.*
+htmlcov/
+.tox/
+.nox/
+
+# Local outputs and persistence
+logs/
+runs/
+artifacts/
+*.log
+*.sqlite
+*.sqlite3
+*.db
+.ipynb_checkpoints/
+
+# Editors and operating system
+.idea/
+.vscode/
+.DS_Store
