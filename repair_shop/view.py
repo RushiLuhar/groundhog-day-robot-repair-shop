@@ -121,6 +121,8 @@ def render(events=None, results=None, live=False, model="offline scripted demo",
         detail=f'{settled} of {expected} attempts ended; {max(0,expected-settled)} not attempted. The shift has stopped.'
     else:
         detail='Choose your experiment settings, then select Start experiment.'
+    warning_count=sum(bool(r.get('warning')) for r in results)
+    if warning_count: detail+=f' {warning_count} attempt(s) have a memory warning; see the bay cards and attempt results.'
     bill_rows=calls if calls is not None else results
     input_tokens=sum(r.get('input',0) for r in bill_rows); output_tokens=sum(r.get('output',0) for r in bill_rows)
     cost=total_cost(bill_rows) if live else 0.0
@@ -159,6 +161,7 @@ def render(events=None, results=None, live=False, model="offline scripted demo",
         if state=='replay' and es: bay_phase='Recorded: '+bay_phase
         tokens=sum(r['input']+r['output'] for r in rs)
         memory=next((e for e in reversed(es) if e['kind']=='memory'),{})
+        memory_warning=('<p class="subtle" role="note">Memory warning: '+esc(readable_reason(memory["warning"]))+'</p>') if memory.get("warning") else ""
         working={'job':job or 'waiting','steps_used':last.get('steps',0),'latest_observation':a.get('result',{})}
         color=['#efb974','#94d7c9','#bdacf1'][index]
         cards.append(f'''<article class="bay" style="--accent:{color}"><div class="bay-head"><div><small>BAY 0{index+1}</small><h2>{esc(names[mode])}</h2></div><span class="tag">{tag}</span></div><div class="scene-stage"><div class="quip" role="note" aria-label="Mechanic says">{esc(quip)}</div><button type="button" data-bay="{mode}" aria-label="Configure {esc(names[mode])}" class="mechanic-button">{scene(color,cls)}<span>Configure this mechanic</span></button></div>
@@ -166,6 +169,7 @@ def render(events=None, results=None, live=False, model="offline scripted demo",
 <div class="hud receipt"><span>{'TOKENS · ENDED ATTEMPTS' if live else 'FREE DEMO · NO MODEL CALLS'}</span><b>{tokens:,} tokens</b></div>
 <details><summary>Current job details</summary><pre>{esc(json.dumps(working,indent=2))}</pre></details>
 <details><summary>Memory used for this job</summary><pre>{esc(json.dumps(start.get('prior',[]),indent=2))}</pre></details>
+{memory_warning}
 <details><summary>Memory kept for the next job</summary><pre>{esc(json.dumps(memory.get('notes',[]),indent=2))}</pre></details></article>''')
     rows=[]
     for mode in MODES:
