@@ -1,0 +1,77 @@
+{
+  "schema_version": 2,
+  "name": "Authorized tuned memory-first / 50k job allowance",
+  "task_set": "service-v2",
+  "variant": "standard-v1",
+  "jobs": 8,
+  "repetitions": 3,
+  "live": true,
+  "run_total_token_limit": 2000000,
+  "run_estimated_usd_limit": 0.5,
+  "request_admission_policy": "conservative-bytes-v1",
+  "conditions": [
+    {
+      "id": "none",
+      "memory": "none",
+      "repair": {
+        "model": "gpt-6-luna",
+        "reasoning": "medium",
+        "prompt_version": "repair-objective-v3",
+        "response_output_cap": 2048
+      },
+      "writer": {
+        "model": "gpt-6-luna",
+        "reasoning": "medium",
+        "prompt_version": "job-end-writer-v2",
+        "response_output_cap": 2048
+      },
+      "rolling_entry_limit": 40,
+      "retention_tokens": 3000,
+      "supply_tokens": 2000,
+      "tool_step_limit": 20,
+      "job_total_token_allowance": 50000
+    },
+    {
+      "id": "rolling",
+      "memory": "rolling",
+      "repair": {
+        "model": "gpt-6-luna",
+        "reasoning": "medium",
+        "prompt_version": "repair-objective-v3",
+        "response_output_cap": 2048
+      },
+      "writer": {
+        "model": "gpt-6-luna",
+        "reasoning": "medium",
+        "prompt_version": "job-end-writer-v2",
+        "response_output_cap": 2048
+      },
+      "rolling_entry_limit": 40,
+      "retention_tokens": 3000,
+      "supply_tokens": 2000,
+      "tool_step_limit": 20,
+      "job_total_token_allowance": 50000
+    },
+    {
+      "id": "structured",
+      "memory": "structured",
+      "repair": {
+        "model": "gpt-6-luna",
+        "reasoning": "medium",
+        "prompt_version": "repair-objective-v3",
+        "response_output_cap": 2048
+      },
+      "writer": {
+        "model": "gpt-6-luna",
+        "reasoning": "medium",
+        "prompt_version": "job-end-writer-v2",
+        "response_output_cap": 2048
+      },
+      "rolling_entry_limit": 40,
+      "retention_tokens": 3000,
+      "supply_tokens": 2000,
+      "tool_step_limit": 20,
+      "job_total_token_allowance": 50000
+    }
+  ]
+}

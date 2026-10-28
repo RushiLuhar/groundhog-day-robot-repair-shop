@@ -136,7 +136,7 @@ def build_app(controller=None):
         gr.Markdown('# Paired agent evaluations\nCompare memory, reasoning, models and limits on the same eight tickets. The original robot workshop and historical experiments remain separate. No live pilot has been authorized by this configuration.')
         reference=gr.State(None)
         with gr.Row():
-            presets=gr.Dropdown(['memory','reasoning','model','budget','tuned-v2'],value='memory',label='Comparison preset')
+            presets=gr.Dropdown(['memory','reasoning','model','budget','tuned-v2','tuned-memory-first'],value='memory',label='Comparison preset')
             use=gr.Button('Load preset')
         gr.Markdown('Edit the explicit condition list below: add or remove conditions freely. Repair and writer settings, retention/supply limits, per-job allowance and run safety limits have separate names. Start uses the validated text as an immutable snapshot. Loading a preset does not run it.')
         config=gr.Code(value=json.dumps(initial.to_dict(),indent=2),language='json',label='Versioned configuration · editable JSON',lines=18)

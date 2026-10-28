@@ -9,6 +9,7 @@ REPAIR_PROMPT='repair-objective-v1'
 WRITER_PROMPT='job-end-writer-v1'
 REPAIR_PROMPT_V2='repair-objective-v2'
 WRITER_PROMPT_V2='job-end-writer-v2'
+REPAIR_PROMPT_V3='repair-objective-v3'
 LOG_VERSION='literal-observation-en-v1'
 MEMORY_VERSION='typed-record-merge-v1'
 
@@ -22,7 +23,7 @@ class AgentConfig:
     def validate(self,role):
         if self.model not in MODEL_EFFORTS or self.reasoning not in MODEL_EFFORTS[self.model]:
             raise ValueError(f'Unsupported {role} model/reasoning combination.')
-        supported=(REPAIR_PROMPT,REPAIR_PROMPT_V2) if role=='repair' else (WRITER_PROMPT,WRITER_PROMPT_V2)
+        supported=(REPAIR_PROMPT,REPAIR_PROMPT_V2,REPAIR_PROMPT_V3) if role=='repair' else (WRITER_PROMPT,WRITER_PROMPT_V2)
         if self.prompt_version not in supported: raise ValueError(f'Unsupported {role} prompt version.')
         integer(self.response_output_cap,128,4096,f'{role} response output cap')
         return self
@@ -104,6 +105,10 @@ class EvaluationConfig:
 
 def preset(name='memory'):
     c=EvaluationConfig()
+    if name=='tuned-memory-first':
+        base=preset('tuned-v2')
+        return replace(base,name='Memory-first scoped facts / service-v2',conditions=tuple(
+            replace(x,repair=replace(x.repair,prompt_version=REPAIR_PROMPT_V3)) for x in base.conditions))
     if name=='tuned-v2':return replace(c,name='Unvalidated live: scoped facts / service-v2',task_set='service-v2',
         run_total_token_limit=2000000,run_estimated_usd_limit=.5,request_admission_policy='conservative-bytes-v1',
         conditions=tuple(replace(x,job_total_token_allowance=50000,

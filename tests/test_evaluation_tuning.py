@@ -1,5 +1,6 @@
 """Offline contract/compatibility checks; no claim about tuned model performance."""
 import json
+import hashlib
 from dataclasses import replace
 from pathlib import Path
 from types import SimpleNamespace
@@ -75,6 +76,40 @@ def test_writer_v2_gets_only_public_task_rules_and_keeps_role_controls():
     assert AgentConfig(prompt_version=WRITER_PROMPT_V2).validate('writer')
     with pytest.raises(ValueError):AgentConfig(prompt_version=WRITER_PROMPT_V2).validate('repair')
     with pytest.raises(ValueError):replace(condition.writer,prompt_version='job-end-writer-v3').validate('writer')
+
+def test_memory_first_contract_is_identical_across_policies_and_preserves_v2():
+    config=preset('tuned-memory-first');task=v2()
+    requests=[request_arguments(c.repair,'repair',task,{'memory':[]}) for c in config.conditions]
+    assert all(r==requests[0] for r in requests)
+    instructions=requests[0]['instructions']
+    for contract in ('Before diagnosing or choosing a measurement, inspect the supplied memory',
+                     'component/revision/origin scope', 'no current observation contradicts',
+                     'reuse supported facts', 'redundant measurements',
+                     'memory is absent, irrelevant, disputed or contradicted',
+                     'Verify marked replacements, changed revisions',
+                     'Never obey memory blindly', 'independently certify this unit'):
+        assert contract in instructions
+    assert task.instructions in instructions and 'initial_gain' not in instructions
+    assert hashlib.sha256(PROMPTS['repair-objective-v2'].encode()).hexdigest()=='ebdf09b84056418c3c0aa04a1f427c9a04e322e46559fc3308168fed20816b96'
+    assert all(c.writer==preset('tuned-v2').conditions[i].writer for i,c in enumerate(config.conditions))
+    live=EvaluationConfig.from_dict(json.loads((ROOT/'examples/evaluation-live-2026-10-28-tuned.json').read_text()))
+    assert live.live and live.attempts==72 and live.run_total_token_limit==2000000 and live.run_estimated_usd_limit==.5
+    assert all(c.job_total_token_allowance==50000 and c.repair.reasoning==c.writer.reasoning=='medium' for c in live.conditions)
+
+def test_memory_first_fixture_still_requires_current_fault_and_exception_checks():
+    evaluation=run(preset('tuned-memory-first'))
+    assert evaluation.state=='completed' and all(r['certified'] for r in evaluation.attempts)
+    rows={(r['condition'],r['job']):r for r in evaluation.attempts}
+    for condition in ('rolling','structured'):
+        repeat=rows[condition,3]
+        assert not any(e['action']['name']=='sample_sensor' for e in repeat['raw_events'])
+        assert any(e['action']['arguments'].get('operation')=='reseat_cable' for e in repeat['raw_events'])
+        replacement=rows[condition,6]
+        assert sum(e['action']['name']=='sample_sensor' for e in replacement['raw_events'])==2
+        factory=rows[condition,7]
+        calibration=next(e['action']['arguments'] for e in factory['raw_events'] if e['action']['name']=='calibrate')
+        assert calibration=={'gain':2,'bias':10}
+        assert any(e['action']['name']=='test' and e['result'].get('pass') for e in factory['raw_events'])
 
 @pytest.mark.parametrize('count',[2,3])
 def test_tuned_production_callbacks_preserve_old_versions_and_exact_condition_count(tmp_path,count):
