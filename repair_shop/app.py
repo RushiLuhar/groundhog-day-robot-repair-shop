@@ -127,6 +127,25 @@ def describe_experiment(kind, count, request: gr.Request):
     return experiment_description(live=kind=='Live OpenAI (paid)',count=count)
 
 
+def ready_setup(kind, count):
+    live=kind=='Live OpenAI (paid)'
+    count=int(count)
+    status=('OpenAI selected · choose up to 4 jobs per bay before starting.' if count>4 else
+            'Ready · OpenAI selected (paid) · no model calls yet') if live else 'Ready · free demo selected'
+    return (render(live=live,model='Model name shown when the shift starts' if live else 'Scripted demo',
+                   selected_jobs=count,state='ready'), status,
+            experiment_description(live=live,count=count))
+
+
+def settings_changed(kind, count, request: gr.Request):
+    session=get_session(request)
+    if session['busy']:
+        return gr.skip(),gr.skip(),gr.skip()
+    if session['run'] is not None:
+        return gr.skip(),gr.skip(),describe_experiment(kind,count,request)
+    return ready_setup(kind,count)
+
+
 def start_described(kind, count, speed, request: gr.Request):
     previous=get_session(request)['run']
     for workshop,status in start(kind,count,speed,request):
@@ -137,8 +156,9 @@ def start_described(kind, count, speed, request: gr.Request):
 
 
 def reset_described(kind, count, request: gr.Request):
-    _,status=reset(request)
-    return render(selected_jobs=int(count)),status,describe_experiment(kind,count,request)
+    reset(request)
+    workshop,status,description=ready_setup(kind,count)
+    return workshop,status+'. All bay memories are cleared.',description
 
 
 def replay_described(speed, request: gr.Request):
@@ -168,8 +188,8 @@ def build_app():
         download.click(download_results,[],files,api_visibility='private')
         go.click(lambda: None,[],files,queue=False,api_visibility='private')
         clear.click(lambda: None,[],files,queue=False,api_visibility='private')
-        kind.change(describe_experiment,[kind,count],explanation,queue=False,api_visibility='private')
-        count.change(describe_experiment,[kind,count],explanation,queue=False,api_visibility='private')
+        kind.change(settings_changed,[kind,count],[workshop,status,explanation],queue=False,api_visibility='private')
+        count.change(settings_changed,[kind,count],[workshop,status,explanation],queue=False,api_visibility='private')
         go.click(start_described,[kind,count,speed],[workshop,status,explanation],concurrency_limit=1,api_visibility='private')
         halt.click(stop,[],status,queue=False,api_visibility='private')
         clear.click(reset_described,[kind,count],[workshop,status,explanation],queue=False,api_visibility='private')

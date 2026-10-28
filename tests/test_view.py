@@ -31,3 +31,25 @@ def test_stop_reset_repeated_run_and_replay(monkeypatch):
     list(start('Offline scripted demo',1,0.05,req))
     assert SESSIONS['test-ui']['run'].id!=old.id
     assert len(SESSIONS['test-ui']['run'].results)==3
+
+
+def test_ready_mode_changes_and_reset_preserve_recorded_results(monkeypatch):
+    import gradio as gr
+    from repair_shop.app import settings_changed, reset_described, get_session
+    req=SimpleNamespace(session_hash='selected-mode-regression')
+    monkeypatch.setattr('repair_shop.app.OpenAIModel',lambda: (_ for _ in ()).throw(AssertionError('selection must not create a client')))
+    html,status,description=settings_changed('Live OpenAI (paid)',2,req)
+    assert 'OpenAI selected (paid)' in status and 'OPENAI SELECTED' in html
+    assert '2 jobs × 3 bays = 6' in description
+    assert 'choose up to 4' in settings_changed('Live OpenAI (paid)',5,req)[1]
+    assert 'free demo selected' in settings_changed('Offline scripted demo',2,req)[1]
+    session=get_session(req); session['busy']=True
+    assert settings_changed('Live OpenAI (paid)',2,req)==(gr.skip(),gr.skip(),gr.skip())
+    session['busy']=False
+    run=Run(DemoModel()); list(run.run(JOBS[:1])); session['run']=run
+    html,status,description=settings_changed('Live OpenAI (paid)',2,req)
+    assert html==gr.skip() and status==gr.skip() and 'Completed shift' in description
+    assert 'Free demo' in description
+    html,status,_=reset_described('Live OpenAI (paid)',2,req)
+    assert 'OpenAI selected (paid)' in status and 'OPENAI SELECTED' in html
+    assert session['run'] is None
