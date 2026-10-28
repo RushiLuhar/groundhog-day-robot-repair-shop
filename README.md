@@ -13,10 +13,12 @@ python3 -m venv .venv
 .venv/bin/python -m pip install -r requirements-lock.txt
 .venv/bin/python -m pip install --no-deps -e .
 .venv/bin/python -c "import tiktoken; tiktoken.get_encoding('o200k_base')"
-.venv/bin/python -m repair_shop.app
+.venv/bin/python -m repair_shop.serve
 ```
 
-Open **http://127.0.0.1:7860** on the same computer. The server binds only to loopback, does not create a Gradio share link, and is not remotely accessible. The one-time tokenizer preparation downloads its official vocabulary; subsequent offline runs use the cache. `requirements-lock.txt` records this prototype's tested dependency environment; `pyproject.toml` gives the supported top-level ranges.
+The launcher starts a detached local process, records its PID in ignored `logs/workshop.pid`, and writes server output to ignored `logs/workshop.log`. It survives the launching terminal closing, but does not install a login/reboot service. After a restart, run the launcher again. For a foreground development server, use `.venv/bin/python -m repair_shop.app`.
+
+Open **http://127.0.0.1:7860** on the same computer. If an old tab reports a disconnected backend after restart, reload it to create a fresh session. The server binds only to loopback, does not create a Gradio share link, and is not remotely accessible. The one-time tokenizer preparation downloads its official vocabulary; subsequent offline runs use the cache. `requirements-lock.txt` records this prototype's tested dependency environment; `pyproject.toml` gives the supported top-level ranges.
 
 The default **Offline scripted demo** uses an observation-driven deterministic mock and makes no model calls. Choose the number of jobs, then **Start shift**. Three bays run the same fixed jobs with separate state. **Stop** prevents new calls after an in-flight request settles; its returned usage is retained. **Reset workshop** clears session memory once stopped. Every new shift starts empty. **Replay last shift** uses recorded events with no API calls. Desktop shows neighboring bays; narrow screens stack them. Reduced-motion preferences disable CSS animation.
 
