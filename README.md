@@ -26,7 +26,9 @@ The new condition-based harness runs separately with `.venv/bin/python -m repair
 
 The [October 28 live evaluation](docs/LIVE_EVALUATION_2026-10-28.md) records a bounded Luna run, matched outcomes, role usage, trace findings and proposed follow-ups. It stopped at the run-token admission guard after 46 started attempts; its partial results do not establish a general memory ranking.
 
-The [50k job-budget follow-up](docs/LIVE_EVALUATION_50K_2026-10-28.md) completed all 72 attempts: 65 certified, seven unfinished, 1,922,632 reported tokens and $0.2340464 estimated cost. [Versioned prompt/task tuning](docs/EVALUATION_TUNING_V2.md) follows that analysis and is available as the offline **tuned-v2** preset. Its model behavior has not been tested live; historical v1 tasks, prompts and examples remain unchanged.
+The [50k job-budget follow-up](docs/LIVE_EVALUATION_50K_2026-10-28.md) completed all 72 attempts: 65 certified, seven unfinished, 1,922,632 reported tokens and $0.2340464 estimated cost. [Versioned prompt/task tuning](docs/EVALUATION_TUNING_V2.md) follows that analysis and is available as the offline **tuned-v2** preset. That initial repair-v2 preset was not run live; historical v1 tasks, prompts and examples remain unchanged.
+
+The subsequent [memory-first combined intervention](docs/LIVE_EVALUATION_TUNED_2026-10-28.md) used repair-v3, writer-v2 and service-v2 after **107 offline tests passed**. It completed 72 attempts: **67 certified**, five compound budget failures, 1,945,605 tokens and $0.2333469 estimated. Structured memory showed repeat/transfer reuse, but no memory certified more repairs at lower overall cost. The **tuned-memory-first** preset remains offline by default. Prompt and task changes were combined, so the result does not isolate one cause.
 
 ## Put an experiment together
 

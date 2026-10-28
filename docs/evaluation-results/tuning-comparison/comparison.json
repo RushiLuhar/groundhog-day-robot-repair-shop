@@ -1,0 +1,2176 @@
+{
+  "comparison": "Combined repair prompt, writer prompt/public context and task-version intervention across separate stochastic runs; not a causal estimate of any one factor or general ranking.",
+  "same_sequence_positions": [
+    {
+      "repetition": 1,
+      "job": 1
+    },
+    {
+      "repetition": 1,
+      "job": 2
+    },
+    {
+      "repetition": 1,
+      "job": 3
+    },
+    {
+      "repetition": 1,
+      "job": 4
+    },
+    {
+      "repetition": 1,
+      "job": 5
+    },
+    {
+      "repetition": 1,
+      "job": 6
+    },
+    {
+      "repetition": 1,
+      "job": 7
+    },
+    {
+      "repetition": 1,
+      "job": 8
+    },
+    {
+      "repetition": 2,
+      "job": 1
+    },
+    {
+      "repetition": 2,
+      "job": 2
+    },
+    {
+      "repetition": 2,
+      "job": 3
+    },
+    {
+      "repetition": 2,
+      "job": 4
+    },
+    {
+      "repetition": 2,
+      "job": 5
+    },
+    {
+      "repetition": 2,
+      "job": 6
+    },
+    {
+      "repetition": 2,
+      "job": 7
+    },
+    {
+      "repetition": 2,
+      "job": 8
+    },
+    {
+      "repetition": 3,
+      "job": 1
+    },
+    {
+      "repetition": 3,
+      "job": 2
+    },
+    {
+      "repetition": 3,
+      "job": 3
+    },
+    {
+      "repetition": 3,
+      "job": 4
+    },
+    {
+      "repetition": 3,
+      "job": 5
+    },
+    {
+      "repetition": 3,
+      "job": 6
+    },
+    {
+      "repetition": 3,
+      "job": 7
+    },
+    {
+      "repetition": 3,
+      "job": 8
+    }
+  ],
+  "runs": {
+    "v1-50k": {
+      "state": "completed",
+      "stop_reason": "",
+      "settings": {
+        "schema_version": 2,
+        "name": "Luna medium memory pilot - 50k job allowance",
+        "task_set": "service-v1",
+        "variant": "standard-v1",
+        "jobs": 8,
+        "repetitions": 3,
+        "live": true,
+        "run_total_token_limit": 2000000,
+        "run_estimated_usd_limit": 0.5,
+        "request_admission_policy": "conservative-bytes-v1",
+        "conditions": [
+          {
+            "id": "none",
+            "memory": "none",
+            "repair": {
+              "model": "gpt-6-luna",
+              "reasoning": "medium",
+              "prompt_version": "repair-objective-v1",
+              "response_output_cap": 2048
+            },
+            "writer": {
+              "model": "gpt-6-luna",
+              "reasoning": "medium",
+              "prompt_version": "job-end-writer-v1",
+              "response_output_cap": 2048
+            },
+            "rolling_entry_limit": 40,
+            "retention_tokens": 3000,
+            "supply_tokens": 2000,
+            "tool_step_limit": 20,
+            "job_total_token_allowance": 50000
+          },
+          {
+            "id": "rolling",
+            "memory": "rolling",
+            "repair": {
+              "model": "gpt-6-luna",
+              "reasoning": "medium",
+              "prompt_version": "repair-objective-v1",
+              "response_output_cap": 2048
+            },
+            "writer": {
+              "model": "gpt-6-luna",
+              "reasoning": "medium",
+              "prompt_version": "job-end-writer-v1",
+              "response_output_cap": 2048
+            },
+            "rolling_entry_limit": 40,
+            "retention_tokens": 3000,
+            "supply_tokens": 2000,
+            "tool_step_limit": 20,
+            "job_total_token_allowance": 50000
+          },
+          {
+            "id": "structured",
+            "memory": "structured",
+            "repair": {
+              "model": "gpt-6-luna",
+              "reasoning": "medium",
+              "prompt_version": "repair-objective-v1",
+              "response_output_cap": 2048
+            },
+            "writer": {
+              "model": "gpt-6-luna",
+              "reasoning": "medium",
+              "prompt_version": "job-end-writer-v1",
+              "response_output_cap": 2048
+            },
+            "rolling_entry_limit": 40,
+            "retention_tokens": 3000,
+            "supply_tokens": 2000,
+            "tool_step_limit": 20,
+            "job_total_token_allowance": 50000
+          }
+        ]
+      },
+      "source": {
+        "commit": "fc35987a61683f7c9c701fee324f707c8d7f58fc",
+        "dirty": false
+      },
+      "usage": {
+        "roles": {
+          "repair": {
+            "input": 1726222,
+            "output": 87109
+          },
+          "writer": {
+            "input": 91952,
+            "output": 17349
+          }
+        },
+        "input": 1818174,
+        "output": 104458,
+        "known_calls": 722,
+        "unknown_calls": 0,
+        "estimated_usd": 0.23404640000000002,
+        "usage_complete": true
+      },
+      "elapsed_seconds": 1745.0011478330125,
+      "all_scheduled_by_condition": {
+        "none": {
+          "scheduled": 24,
+          "started": 24,
+          "certified": 23,
+          "unfinished": 1,
+          "interrupted": 0,
+          "unattempted": 0,
+          "infrastructure_errors": 0,
+          "writer_errors": 0,
+          "logging_errors": 0,
+          "steps": 253,
+          "roles": {
+            "repair": {
+              "input": 413116,
+              "output": 35151
+            },
+            "writer": {
+              "input": 0,
+              "output": 0
+            }
+          },
+          "known_tokens": 448267,
+          "known_estimated_usd": 0.058887100000000005,
+          "unknown_calls": 0,
+          "elapsed_seconds": 630.1203124190797
+        },
+        "rolling": {
+          "scheduled": 24,
+          "started": 24,
+          "certified": 21,
+          "unfinished": 3,
+          "interrupted": 0,
+          "unattempted": 0,
+          "infrastructure_errors": 0,
+          "writer_errors": 0,
+          "logging_errors": 0,
+          "steps": 215,
+          "roles": {
+            "repair": {
+              "input": 665854,
+              "output": 26314
+            },
+            "writer": {
+              "input": 0,
+              "output": 0
+            }
+          },
+          "known_tokens": 692168,
+          "known_estimated_usd": 0.0797424,
+          "unknown_calls": 0,
+          "elapsed_seconds": 484.90802654105937
+        },
+        "structured": {
+          "scheduled": 24,
+          "started": 24,
+          "certified": 21,
+          "unfinished": 3,
+          "interrupted": 0,
+          "unattempted": 0,
+          "infrastructure_errors": 0,
+          "writer_errors": 0,
+          "logging_errors": 0,
+          "steps": 232,
+          "roles": {
+            "repair": {
+              "input": 647252,
+              "output": 25644
+            },
+            "writer": {
+              "input": 91952,
+              "output": 17349
+            }
+          },
+          "known_tokens": 782197,
+          "known_estimated_usd": 0.0954169,
+          "unknown_calls": 0,
+          "elapsed_seconds": 628.8603436221601
+        }
+      },
+      "within_run_matched": {
+        "selection": "Same repetition/ticket with every condition terminal as success or unfinished; excludes global-interruption/unattempted groups. Unfinished job-budget outcomes remain included.",
+        "ticket_groups": [
+          {
+            "repetition": 1,
+            "job": 1
+          },
+          {
+            "repetition": 1,
+            "job": 2
+          },
+          {
+            "repetition": 1,
+            "job": 3
+          },
+          {
+            "repetition": 1,
+            "job": 4
+          },
+          {
+            "repetition": 1,
+            "job": 5
+          },
+          {
+            "repetition": 1,
+            "job": 6
+          },
+          {
+            "repetition": 1,
+            "job": 7
+          },
+          {
+            "repetition": 1,
+            "job": 8
+          },
+          {
+            "repetition": 2,
+            "job": 1
+          },
+          {
+            "repetition": 2,
+            "job": 2
+          },
+          {
+            "repetition": 2,
+            "job": 3
+          },
+          {
+            "repetition": 2,
+            "job": 4
+          },
+          {
+            "repetition": 2,
+            "job": 5
+          },
+          {
+            "repetition": 2,
+            "job": 6
+          },
+          {
+            "repetition": 2,
+            "job": 7
+          },
+          {
+            "repetition": 2,
+            "job": 8
+          },
+          {
+            "repetition": 3,
+            "job": 1
+          },
+          {
+            "repetition": 3,
+            "job": 2
+          },
+          {
+            "repetition": 3,
+            "job": 3
+          },
+          {
+            "repetition": 3,
+            "job": 4
+          },
+          {
+            "repetition": 3,
+            "job": 5
+          },
+          {
+            "repetition": 3,
+            "job": 6
+          },
+          {
+            "repetition": 3,
+            "job": 7
+          },
+          {
+            "repetition": 3,
+            "job": 8
+          }
+        ],
+        "by_condition": {
+          "none": {
+            "scheduled": 24,
+            "started": 24,
+            "certified": 23,
+            "unfinished": 1,
+            "interrupted": 0,
+            "unattempted": 0,
+            "infrastructure_errors": 0,
+            "writer_errors": 0,
+            "logging_errors": 0,
+            "steps": 253,
+            "roles": {
+              "repair": {
+                "input": 413116,
+                "output": 35151
+              },
+              "writer": {
+                "input": 0,
+                "output": 0
+              }
+            },
+            "known_tokens": 448267,
+            "known_estimated_usd": 0.058887100000000005,
+            "unknown_calls": 0,
+            "elapsed_seconds": 630.1203124190797
+          },
+          "rolling": {
+            "scheduled": 24,
+            "started": 24,
+            "certified": 21,
+            "unfinished": 3,
+            "interrupted": 0,
+            "unattempted": 0,
+            "infrastructure_errors": 0,
+            "writer_errors": 0,
+            "logging_errors": 0,
+            "steps": 215,
+            "roles": {
+              "repair": {
+                "input": 665854,
+                "output": 26314
+              },
+              "writer": {
+                "input": 0,
+                "output": 0
+              }
+            },
+            "known_tokens": 692168,
+            "known_estimated_usd": 0.0797424,
+            "unknown_calls": 0,
+            "elapsed_seconds": 484.90802654105937
+          },
+          "structured": {
+            "scheduled": 24,
+            "started": 24,
+            "certified": 21,
+            "unfinished": 3,
+            "interrupted": 0,
+            "unattempted": 0,
+            "infrastructure_errors": 0,
+            "writer_errors": 0,
+            "logging_errors": 0,
+            "steps": 232,
+            "roles": {
+              "repair": {
+                "input": 647252,
+                "output": 25644
+              },
+              "writer": {
+                "input": 91952,
+                "output": 17349
+              }
+            },
+            "known_tokens": 782197,
+            "known_estimated_usd": 0.0954169,
+            "unknown_calls": 0,
+            "elapsed_seconds": 628.8603436221601
+          }
+        }
+      },
+      "cross_version_same_position_by_condition": {
+        "none": {
+          "scheduled": 24,
+          "started": 24,
+          "certified": 23,
+          "unfinished": 1,
+          "interrupted": 0,
+          "unattempted": 0,
+          "infrastructure_error": 0,
+          "steps": 253,
+          "roles": {
+            "repair": {
+              "input": 413116,
+              "output": 35151
+            },
+            "writer": {
+              "input": 0,
+              "output": 0
+            }
+          },
+          "known_tokens": 448267,
+          "known_estimated_usd": 0.058887100000000005,
+          "unknown_calls": 0,
+          "elapsed_seconds": 630.1203124190797
+        },
+        "rolling": {
+          "scheduled": 24,
+          "started": 24,
+          "certified": 21,
+          "unfinished": 3,
+          "interrupted": 0,
+          "unattempted": 0,
+          "infrastructure_error": 0,
+          "steps": 215,
+          "roles": {
+            "repair": {
+              "input": 665854,
+              "output": 26314
+            },
+            "writer": {
+              "input": 0,
+              "output": 0
+            }
+          },
+          "known_tokens": 692168,
+          "known_estimated_usd": 0.0797424,
+          "unknown_calls": 0,
+          "elapsed_seconds": 484.90802654105937
+        },
+        "structured": {
+          "scheduled": 24,
+          "started": 24,
+          "certified": 21,
+          "unfinished": 3,
+          "interrupted": 0,
+          "unattempted": 0,
+          "infrastructure_error": 0,
+          "steps": 232,
+          "roles": {
+            "repair": {
+              "input": 647252,
+              "output": 25644
+            },
+            "writer": {
+              "input": 91952,
+              "output": 17349
+            }
+          },
+          "known_tokens": 782197,
+          "known_estimated_usd": 0.0954169,
+          "unknown_calls": 0,
+          "elapsed_seconds": 628.8603436221601
+        }
+      },
+      "by_ticket": {
+        "1": {
+          "none": {
+            "scheduled": 3,
+            "started": 3,
+            "certified": 3,
+            "unfinished": 0,
+            "interrupted": 0,
+            "unattempted": 0,
+            "infrastructure_error": 0,
+            "steps": 27,
+            "roles": {
+              "repair": {
+                "input": 38433,
+                "output": 2574
+              },
+              "writer": {
+                "input": 0,
+                "output": 0
+              }
+            },
+            "known_tokens": 41007,
+            "known_estimated_usd": 0.0051303,
+            "unknown_calls": 0,
+            "elapsed_seconds": 51.94608950003749
+          },
+          "rolling": {
+            "scheduled": 3,
+            "started": 3,
+            "certified": 3,
+            "unfinished": 0,
+            "interrupted": 0,
+            "unattempted": 0,
+            "infrastructure_error": 0,
+            "steps": 27,
+            "roles": {
+              "repair": {
+                "input": 38681,
+                "output": 2729
+              },
+              "writer": {
+                "input": 0,
+                "output": 0
+              }
+            },
+            "known_tokens": 41410,
+            "known_estimated_usd": 0.0052326000000000004,
+            "unknown_calls": 0,
+            "elapsed_seconds": 53.453134624054655
+          },
+          "structured": {
+            "scheduled": 3,
+            "started": 3,
+            "certified": 3,
+            "unfinished": 0,
+            "interrupted": 0,
+            "unattempted": 0,
+            "infrastructure_error": 0,
+            "steps": 26,
+            "roles": {
+              "repair": {
+                "input": 36781,
+                "output": 2511
+              },
+              "writer": {
+                "input": 4906,
+                "output": 1442
+              }
+            },
+            "known_tokens": 45640,
+            "known_estimated_usd": 0.0061452,
+            "unknown_calls": 0,
+            "elapsed_seconds": 64.25497837498551
+          }
+        },
+        "2": {
+          "none": {
+            "scheduled": 3,
+            "started": 3,
+            "certified": 3,
+            "unfinished": 0,
+            "interrupted": 0,
+            "unattempted": 0,
+            "infrastructure_error": 0,
+            "steps": 19,
+            "roles": {
+              "repair": {
+                "input": 23163,
+                "output": 1742
+              },
+              "writer": {
+                "input": 0,
+                "output": 0
+              }
+            },
+            "known_tokens": 24905,
+            "known_estimated_usd": 0.0031873,
+            "unknown_calls": 0,
+            "elapsed_seconds": 37.242015041993
+          },
+          "rolling": {
+            "scheduled": 3,
+            "started": 3,
+            "certified": 3,
+            "unfinished": 0,
+            "interrupted": 0,
+            "unattempted": 0,
+            "infrastructure_error": 0,
+            "steps": 12,
+            "roles": {
+              "repair": {
+                "input": 22551,
+                "output": 1321
+              },
+              "writer": {
+                "input": 0,
+                "output": 0
+              }
+            },
+            "known_tokens": 23872,
+            "known_estimated_usd": 0.0029156,
+            "unknown_calls": 0,
+            "elapsed_seconds": 26.5541259990423
+          },
+          "structured": {
+            "scheduled": 3,
+            "started": 3,
+            "certified": 3,
+            "unfinished": 0,
+            "interrupted": 0,
+            "unattempted": 0,
+            "infrastructure_error": 0,
+            "steps": 22,
+            "roles": {
+              "repair": {
+                "input": 35003,
+                "output": 3130
+              },
+              "writer": {
+                "input": 6466,
+                "output": 1573
+              }
+            },
+            "known_tokens": 46172,
+            "known_estimated_usd": 0.0064984,
+            "unknown_calls": 0,
+            "elapsed_seconds": 65.0795610830537
+          }
+        },
+        "3": {
+          "none": {
+            "scheduled": 3,
+            "started": 3,
+            "certified": 3,
+            "unfinished": 0,
+            "interrupted": 0,
+            "unattempted": 0,
+            "infrastructure_error": 0,
+            "steps": 33,
+            "roles": {
+              "repair": {
+                "input": 52450,
+                "output": 4703
+              },
+              "writer": {
+                "input": 0,
+                "output": 0
+              }
+            },
+            "known_tokens": 57153,
+            "known_estimated_usd": 0.007596500000000001,
+            "unknown_calls": 0,
+            "elapsed_seconds": 81.10482370998943
+          },
+          "rolling": {
+            "scheduled": 3,
+            "started": 3,
+            "certified": 3,
+            "unfinished": 0,
+            "interrupted": 0,
+            "unattempted": 0,
+            "infrastructure_error": 0,
+            "steps": 23,
+            "roles": {
+              "repair": {
+                "input": 58554,
+                "output": 3456
+              },
+              "writer": {
+                "input": 0,
+                "output": 0
+              }
+            },
+            "known_tokens": 62010,
+            "known_estimated_usd": 0.0075834000000000006,
+            "unknown_calls": 0,
+            "elapsed_seconds": 60.824211708968505
+          },
+          "structured": {
+            "scheduled": 3,
+            "started": 3,
+            "certified": 3,
+            "unfinished": 0,
+            "interrupted": 0,
+            "unattempted": 0,
+            "infrastructure_error": 0,
+            "steps": 26,
+            "roles": {
+              "repair": {
+                "input": 49026,
+                "output": 2611
+              },
+              "writer": {
+                "input": 8908,
+                "output": 2716
+              }
+            },
+            "known_tokens": 63261,
+            "known_estimated_usd": 0.0084569,
+            "unknown_calls": 0,
+            "elapsed_seconds": 70.04187929007458
+          }
+        },
+        "4": {
+          "none": {
+            "scheduled": 3,
+            "started": 3,
+            "certified": 3,
+            "unfinished": 0,
+            "interrupted": 0,
+            "unattempted": 0,
+            "infrastructure_error": 0,
+            "steps": 37,
+            "roles": {
+              "repair": {
+                "input": 62209,
+                "output": 6105
+              },
+              "writer": {
+                "input": 0,
+                "output": 0
+              }
+            },
+            "known_tokens": 68314,
+            "known_estimated_usd": 0.009273400000000001,
+            "unknown_calls": 0,
+            "elapsed_seconds": 105.99562325002626
+          },
+          "rolling": {
+            "scheduled": 3,
+            "started": 3,
+            "certified": 3,
+            "unfinished": 0,
+            "interrupted": 0,
+            "unattempted": 0,
+            "infrastructure_error": 0,
+            "steps": 29,
+            "roles": {
+              "repair": {
+                "input": 99276,
+                "output": 3435
+              },
+              "writer": {
+                "input": 0,
+                "output": 0
+              }
+            },
+            "known_tokens": 102711,
+            "known_estimated_usd": 0.011645100000000002,
+            "unknown_calls": 0,
+            "elapsed_seconds": 66.08340012497501
+          },
+          "structured": {
+            "scheduled": 3,
+            "started": 3,
+            "certified": 3,
+            "unfinished": 0,
+            "interrupted": 0,
+            "unattempted": 0,
+            "infrastructure_error": 0,
+            "steps": 39,
+            "roles": {
+              "repair": {
+                "input": 108627,
+                "output": 5187
+              },
+              "writer": {
+                "input": 13915,
+                "output": 2813
+              }
+            },
+            "known_tokens": 130542,
+            "known_estimated_usd": 0.0162542,
+            "unknown_calls": 0,
+            "elapsed_seconds": 112.4496354169678
+          }
+        },
+        "5": {
+          "none": {
+            "scheduled": 3,
+            "started": 3,
+            "certified": 3,
+            "unfinished": 0,
+            "interrupted": 0,
+            "unattempted": 0,
+            "infrastructure_error": 0,
+            "steps": 26,
+            "roles": {
+              "repair": {
+                "input": 36316,
+                "output": 2799
+              },
+              "writer": {
+                "input": 0,
+                "output": 0
+              }
+            },
+            "known_tokens": 39115,
+            "known_estimated_usd": 0.0050311,
+            "unknown_calls": 0,
+            "elapsed_seconds": 53.60564745799638
+          },
+          "rolling": {
+            "scheduled": 3,
+            "started": 3,
+            "certified": 3,
+            "unfinished": 0,
+            "interrupted": 0,
+            "unattempted": 0,
+            "infrastructure_error": 0,
+            "steps": 27,
+            "roles": {
+              "repair": {
+                "input": 93681,
+                "output": 2946
+              },
+              "writer": {
+                "input": 0,
+                "output": 0
+              }
+            },
+            "known_tokens": 96627,
+            "known_estimated_usd": 0.0108411,
+            "unknown_calls": 0,
+            "elapsed_seconds": 55.67658729193499
+          },
+          "structured": {
+            "scheduled": 3,
+            "started": 3,
+            "certified": 3,
+            "unfinished": 0,
+            "interrupted": 0,
+            "unattempted": 0,
+            "infrastructure_error": 0,
+            "steps": 26,
+            "roles": {
+              "repair": {
+                "input": 78883,
+                "output": 2473
+              },
+              "writer": {
+                "input": 15861,
+                "output": 3059
+              }
+            },
+            "known_tokens": 100276,
+            "known_estimated_usd": 0.012240400000000002,
+            "unknown_calls": 0,
+            "elapsed_seconds": 83.40071791608352
+          }
+        },
+        "6": {
+          "none": {
+            "scheduled": 3,
+            "started": 3,
+            "certified": 2,
+            "unfinished": 1,
+            "interrupted": 0,
+            "unattempted": 0,
+            "infrastructure_error": 0,
+            "steps": 35,
+            "roles": {
+              "repair": {
+                "input": 63724,
+                "output": 8673
+              },
+              "writer": {
+                "input": 0,
+                "output": 0
+              }
+            },
+            "known_tokens": 72397,
+            "known_estimated_usd": 0.0107089,
+            "unknown_calls": 0,
+            "elapsed_seconds": 135.12700766598573
+          },
+          "rolling": {
+            "scheduled": 3,
+            "started": 3,
+            "certified": 3,
+            "unfinished": 0,
+            "interrupted": 0,
+            "unattempted": 0,
+            "infrastructure_error": 0,
+            "steps": 27,
+            "roles": {
+              "repair": {
+                "input": 93901,
+                "output": 3131
+              },
+              "writer": {
+                "input": 0,
+                "output": 0
+              }
+            },
+            "known_tokens": 97032,
+            "known_estimated_usd": 0.010955600000000001,
+            "unknown_calls": 0,
+            "elapsed_seconds": 59.4225336680538
+          },
+          "structured": {
+            "scheduled": 3,
+            "started": 3,
+            "certified": 3,
+            "unfinished": 0,
+            "interrupted": 0,
+            "unattempted": 0,
+            "infrastructure_error": 0,
+            "steps": 28,
+            "roles": {
+              "repair": {
+                "input": 100144,
+                "output": 3112
+              },
+              "writer": {
+                "input": 19580,
+                "output": 2054
+              }
+            },
+            "known_tokens": 124890,
+            "known_estimated_usd": 0.014555400000000001,
+            "unknown_calls": 0,
+            "elapsed_seconds": 74.8321667490527
+          }
+        },
+        "7": {
+          "none": {
+            "scheduled": 3,
+            "started": 3,
+            "certified": 3,
+            "unfinished": 0,
+            "interrupted": 0,
+            "unattempted": 0,
+            "infrastructure_error": 0,
+            "steps": 26,
+            "roles": {
+              "repair": {
+                "input": 36406,
+                "output": 2638
+              },
+              "writer": {
+                "input": 0,
+                "output": 0
+              }
+            },
+            "known_tokens": 39044,
+            "known_estimated_usd": 0.0049596,
+            "unknown_calls": 0,
+            "elapsed_seconds": 51.58559112600051
+          },
+          "rolling": {
+            "scheduled": 3,
+            "started": 3,
+            "certified": 3,
+            "unfinished": 0,
+            "interrupted": 0,
+            "unattempted": 0,
+            "infrastructure_error": 0,
+            "steps": 31,
+            "roles": {
+              "repair": {
+                "input": 110752,
+                "output": 4227
+              },
+              "writer": {
+                "input": 0,
+                "output": 0
+              }
+            },
+            "known_tokens": 114979,
+            "known_estimated_usd": 0.013188700000000001,
+            "unknown_calls": 0,
+            "elapsed_seconds": 73.64820749900537
+          },
+          "structured": {
+            "scheduled": 3,
+            "started": 3,
+            "certified": 3,
+            "unfinished": 0,
+            "interrupted": 0,
+            "unattempted": 0,
+            "infrastructure_error": 0,
+            "steps": 26,
+            "roles": {
+              "repair": {
+                "input": 92025,
+                "output": 1964
+              },
+              "writer": {
+                "input": 22316,
+                "output": 3692
+              }
+            },
+            "known_tokens": 119997,
+            "known_estimated_usd": 0.0142621,
+            "unknown_calls": 0,
+            "elapsed_seconds": 70.42115279193968
+          }
+        },
+        "8": {
+          "none": {
+            "scheduled": 3,
+            "started": 3,
+            "certified": 3,
+            "unfinished": 0,
+            "interrupted": 0,
+            "unattempted": 0,
+            "infrastructure_error": 0,
+            "steps": 50,
+            "roles": {
+              "repair": {
+                "input": 100415,
+                "output": 5917
+              },
+              "writer": {
+                "input": 0,
+                "output": 0
+              }
+            },
+            "known_tokens": 106332,
+            "known_estimated_usd": 0.013000000000000001,
+            "unknown_calls": 0,
+            "elapsed_seconds": 113.51351466705091
+          },
+          "rolling": {
+            "scheduled": 3,
+            "started": 3,
+            "certified": 0,
+            "unfinished": 3,
+            "interrupted": 0,
+            "unattempted": 0,
+            "infrastructure_error": 0,
+            "steps": 39,
+            "roles": {
+              "repair": {
+                "input": 148458,
+                "output": 5069
+              },
+              "writer": {
+                "input": 0,
+                "output": 0
+              }
+            },
+            "known_tokens": 153527,
+            "known_estimated_usd": 0.0173803,
+            "unknown_calls": 0,
+            "elapsed_seconds": 89.24582562502474
+          },
+          "structured": {
+            "scheduled": 3,
+            "started": 3,
+            "certified": 0,
+            "unfinished": 3,
+            "interrupted": 0,
+            "unattempted": 0,
+            "infrastructure_error": 0,
+            "steps": 39,
+            "roles": {
+              "repair": {
+                "input": 146763,
+                "output": 4656
+              },
+              "writer": {
+                "input": 0,
+                "output": 0
+              }
+            },
+            "known_tokens": 151419,
+            "known_estimated_usd": 0.0170043,
+            "unknown_calls": 0,
+            "elapsed_seconds": 88.38025200000266
+          }
+        }
+      }
+    },
+    "tuned-50k": {
+      "state": "completed",
+      "stop_reason": "",
+      "settings": {
+        "schema_version": 2,
+        "name": "Authorized tuned memory-first / 50k job allowance",
+        "task_set": "service-v2",
+        "variant": "standard-v1",
+        "jobs": 8,
+        "repetitions": 3,
+        "live": true,
+        "run_total_token_limit": 2000000,
+        "run_estimated_usd_limit": 0.5,
+        "request_admission_policy": "conservative-bytes-v1",
+        "conditions": [
+          {
+            "id": "none",
+            "memory": "none",
+            "repair": {
+              "model": "gpt-6-luna",
+              "reasoning": "medium",
+              "prompt_version": "repair-objective-v3",
+              "response_output_cap": 2048
+            },
+            "writer": {
+              "model": "gpt-6-luna",
+              "reasoning": "medium",
+              "prompt_version": "job-end-writer-v2",
+              "response_output_cap": 2048
+            },
+            "rolling_entry_limit": 40,
+            "retention_tokens": 3000,
+            "supply_tokens": 2000,
+            "tool_step_limit": 20,
+            "job_total_token_allowance": 50000
+          },
+          {
+            "id": "rolling",
+            "memory": "rolling",
+            "repair": {
+              "model": "gpt-6-luna",
+              "reasoning": "medium",
+              "prompt_version": "repair-objective-v3",
+              "response_output_cap": 2048
+            },
+            "writer": {
+              "model": "gpt-6-luna",
+              "reasoning": "medium",
+              "prompt_version": "job-end-writer-v2",
+              "response_output_cap": 2048
+            },
+            "rolling_entry_limit": 40,
+            "retention_tokens": 3000,
+            "supply_tokens": 2000,
+            "tool_step_limit": 20,
+            "job_total_token_allowance": 50000
+          },
+          {
+            "id": "structured",
+            "memory": "structured",
+            "repair": {
+              "model": "gpt-6-luna",
+              "reasoning": "medium",
+              "prompt_version": "repair-objective-v3",
+              "response_output_cap": 2048
+            },
+            "writer": {
+              "model": "gpt-6-luna",
+              "reasoning": "medium",
+              "prompt_version": "job-end-writer-v2",
+              "response_output_cap": 2048
+            },
+            "rolling_entry_limit": 40,
+            "retention_tokens": 3000,
+            "supply_tokens": 2000,
+            "tool_step_limit": 20,
+            "job_total_token_allowance": 50000
+          }
+        ]
+      },
+      "source": {
+        "commit": "f20daf098f365bfc99f7db2973e7a0a46a32108b",
+        "dirty": false
+      },
+      "usage": {
+        "roles": {
+          "repair": {
+            "input": 1770662,
+            "output": 81297
+          },
+          "writer": {
+            "input": 77977,
+            "output": 15669
+          }
+        },
+        "input": 1848639,
+        "output": 96966,
+        "known_calls": 685,
+        "unknown_calls": 0,
+        "estimated_usd": 0.23334690000000002,
+        "usage_complete": true
+      },
+      "elapsed_seconds": 1563.1715514580137,
+      "all_scheduled_by_condition": {
+        "none": {
+          "scheduled": 24,
+          "started": 24,
+          "certified": 24,
+          "unfinished": 0,
+          "interrupted": 0,
+          "unattempted": 0,
+          "infrastructure_errors": 0,
+          "writer_errors": 0,
+          "logging_errors": 0,
+          "steps": 248,
+          "roles": {
+            "repair": {
+              "input": 500239,
+              "output": 24278
+            },
+            "writer": {
+              "input": 0,
+              "output": 0
+            }
+          },
+          "known_tokens": 524517,
+          "known_estimated_usd": 0.0621629,
+          "unknown_calls": 0,
+          "elapsed_seconds": 454.97222424898064
+        },
+        "rolling": {
+          "scheduled": 24,
+          "started": 24,
+          "certified": 21,
+          "unfinished": 3,
+          "interrupted": 0,
+          "unattempted": 0,
+          "infrastructure_errors": 0,
+          "writer_errors": 0,
+          "logging_errors": 0,
+          "steps": 211,
+          "roles": {
+            "repair": {
+              "input": 733792,
+              "output": 34284
+            },
+            "writer": {
+              "input": 0,
+              "output": 0
+            }
+          },
+          "known_tokens": 768076,
+          "known_estimated_usd": 0.09052120000000001,
+          "unknown_calls": 0,
+          "elapsed_seconds": 518.0110024181195
+        },
+        "structured": {
+          "scheduled": 24,
+          "started": 24,
+          "certified": 22,
+          "unfinished": 2,
+          "interrupted": 0,
+          "unattempted": 0,
+          "infrastructure_errors": 0,
+          "writer_errors": 0,
+          "logging_errors": 0,
+          "steps": 205,
+          "roles": {
+            "repair": {
+              "input": 536631,
+              "output": 22735
+            },
+            "writer": {
+              "input": 77977,
+              "output": 15669
+            }
+          },
+          "known_tokens": 653012,
+          "known_estimated_usd": 0.0806628,
+          "unknown_calls": 0,
+          "elapsed_seconds": 589.1260112510645
+        }
+      },
+      "within_run_matched": {
+        "selection": "Same repetition/ticket with every condition terminal as success or unfinished; excludes global-interruption/unattempted groups. Unfinished job-budget outcomes remain included.",
+        "ticket_groups": [
+          {
+            "repetition": 1,
+            "job": 1
+          },
+          {
+            "repetition": 1,
+            "job": 2
+          },
+          {
+            "repetition": 1,
+            "job": 3
+          },
+          {
+            "repetition": 1,
+            "job": 4
+          },
+          {
+            "repetition": 1,
+            "job": 5
+          },
+          {
+            "repetition": 1,
+            "job": 6
+          },
+          {
+            "repetition": 1,
+            "job": 7
+          },
+          {
+            "repetition": 1,
+            "job": 8
+          },
+          {
+            "repetition": 2,
+            "job": 1
+          },
+          {
+            "repetition": 2,
+            "job": 2
+          },
+          {
+            "repetition": 2,
+            "job": 3
+          },
+          {
+            "repetition": 2,
+            "job": 4
+          },
+          {
+            "repetition": 2,
+            "job": 5
+          },
+          {
+            "repetition": 2,
+            "job": 6
+          },
+          {
+            "repetition": 2,
+            "job": 7
+          },
+          {
+            "repetition": 2,
+            "job": 8
+          },
+          {
+            "repetition": 3,
+            "job": 1
+          },
+          {
+            "repetition": 3,
+            "job": 2
+          },
+          {
+            "repetition": 3,
+            "job": 3
+          },
+          {
+            "repetition": 3,
+            "job": 4
+          },
+          {
+            "repetition": 3,
+            "job": 5
+          },
+          {
+            "repetition": 3,
+            "job": 6
+          },
+          {
+            "repetition": 3,
+            "job": 7
+          },
+          {
+            "repetition": 3,
+            "job": 8
+          }
+        ],
+        "by_condition": {
+          "none": {
+            "scheduled": 24,
+            "started": 24,
+            "certified": 24,
+            "unfinished": 0,
+            "interrupted": 0,
+            "unattempted": 0,
+            "infrastructure_errors": 0,
+            "writer_errors": 0,
+            "logging_errors": 0,
+            "steps": 248,
+            "roles": {
+              "repair": {
+                "input": 500239,
+                "output": 24278
+              },
+              "writer": {
+                "input": 0,
+                "output": 0
+              }
+            },
+            "known_tokens": 524517,
+            "known_estimated_usd": 0.0621629,
+            "unknown_calls": 0,
+            "elapsed_seconds": 454.97222424898064
+          },
+          "rolling": {
+            "scheduled": 24,
+            "started": 24,
+            "certified": 21,
+            "unfinished": 3,
+            "interrupted": 0,
+            "unattempted": 0,
+            "infrastructure_errors": 0,
+            "writer_errors": 0,
+            "logging_errors": 0,
+            "steps": 211,
+            "roles": {
+              "repair": {
+                "input": 733792,
+                "output": 34284
+              },
+              "writer": {
+                "input": 0,
+                "output": 0
+              }
+            },
+            "known_tokens": 768076,
+            "known_estimated_usd": 0.09052120000000001,
+            "unknown_calls": 0,
+            "elapsed_seconds": 518.0110024181195
+          },
+          "structured": {
+            "scheduled": 24,
+            "started": 24,
+            "certified": 22,
+            "unfinished": 2,
+            "interrupted": 0,
+            "unattempted": 0,
+            "infrastructure_errors": 0,
+            "writer_errors": 0,
+            "logging_errors": 0,
+            "steps": 205,
+            "roles": {
+              "repair": {
+                "input": 536631,
+                "output": 22735
+              },
+              "writer": {
+                "input": 77977,
+                "output": 15669
+              }
+            },
+            "known_tokens": 653012,
+            "known_estimated_usd": 0.0806628,
+            "unknown_calls": 0,
+            "elapsed_seconds": 589.1260112510645
+          }
+        }
+      },
+      "cross_version_same_position_by_condition": {
+        "none": {
+          "scheduled": 24,
+          "started": 24,
+          "certified": 24,
+          "unfinished": 0,
+          "interrupted": 0,
+          "unattempted": 0,
+          "infrastructure_error": 0,
+          "steps": 248,
+          "roles": {
+            "repair": {
+              "input": 500239,
+              "output": 24278
+            },
+            "writer": {
+              "input": 0,
+              "output": 0
+            }
+          },
+          "known_tokens": 524517,
+          "known_estimated_usd": 0.0621629,
+          "unknown_calls": 0,
+          "elapsed_seconds": 454.97222424898064
+        },
+        "rolling": {
+          "scheduled": 24,
+          "started": 24,
+          "certified": 21,
+          "unfinished": 3,
+          "interrupted": 0,
+          "unattempted": 0,
+          "infrastructure_error": 0,
+          "steps": 211,
+          "roles": {
+            "repair": {
+              "input": 733792,
+              "output": 34284
+            },
+            "writer": {
+              "input": 0,
+              "output": 0
+            }
+          },
+          "known_tokens": 768076,
+          "known_estimated_usd": 0.09052120000000001,
+          "unknown_calls": 0,
+          "elapsed_seconds": 518.0110024181195
+        },
+        "structured": {
+          "scheduled": 24,
+          "started": 24,
+          "certified": 22,
+          "unfinished": 2,
+          "interrupted": 0,
+          "unattempted": 0,
+          "infrastructure_error": 0,
+          "steps": 205,
+          "roles": {
+            "repair": {
+              "input": 536631,
+              "output": 22735
+            },
+            "writer": {
+              "input": 77977,
+              "output": 15669
+            }
+          },
+          "known_tokens": 653012,
+          "known_estimated_usd": 0.0806628,
+          "unknown_calls": 0,
+          "elapsed_seconds": 589.1260112510645
+        }
+      },
+      "by_ticket": {
+        "1": {
+          "none": {
+            "scheduled": 3,
+            "started": 3,
+            "certified": 3,
+            "unfinished": 0,
+            "interrupted": 0,
+            "unattempted": 0,
+            "infrastructure_error": 0,
+            "steps": 27,
+            "roles": {
+              "repair": {
+                "input": 49455,
+                "output": 2747
+              },
+              "writer": {
+                "input": 0,
+                "output": 0
+              }
+            },
+            "known_tokens": 52202,
+            "known_estimated_usd": 0.006319,
+            "unknown_calls": 0,
+            "elapsed_seconds": 49.34246704203542
+          },
+          "rolling": {
+            "scheduled": 3,
+            "started": 3,
+            "certified": 3,
+            "unfinished": 0,
+            "interrupted": 0,
+            "unattempted": 0,
+            "infrastructure_error": 0,
+            "steps": 27,
+            "roles": {
+              "repair": {
+                "input": 49779,
+                "output": 2741
+              },
+              "writer": {
+                "input": 0,
+                "output": 0
+              }
+            },
+            "known_tokens": 52520,
+            "known_estimated_usd": 0.006348400000000001,
+            "unknown_calls": 0,
+            "elapsed_seconds": 47.327725540963
+          },
+          "structured": {
+            "scheduled": 3,
+            "started": 3,
+            "certified": 3,
+            "unfinished": 0,
+            "interrupted": 0,
+            "unattempted": 0,
+            "infrastructure_error": 0,
+            "steps": 27,
+            "roles": {
+              "repair": {
+                "input": 49998,
+                "output": 2635
+              },
+              "writer": {
+                "input": 6300,
+                "output": 1817
+              }
+            },
+            "known_tokens": 60750,
+            "known_estimated_usd": 0.0078558,
+            "unknown_calls": 0,
+            "elapsed_seconds": 70.61282745999051
+          }
+        },
+        "2": {
+          "none": {
+            "scheduled": 3,
+            "started": 3,
+            "certified": 3,
+            "unfinished": 0,
+            "interrupted": 0,
+            "unattempted": 0,
+            "infrastructure_error": 0,
+            "steps": 18,
+            "roles": {
+              "repair": {
+                "input": 29003,
+                "output": 1671
+              },
+              "writer": {
+                "input": 0,
+                "output": 0
+              }
+            },
+            "known_tokens": 30674,
+            "known_estimated_usd": 0.0037358,
+            "unknown_calls": 0,
+            "elapsed_seconds": 31.60181529202964
+          },
+          "rolling": {
+            "scheduled": 3,
+            "started": 3,
+            "certified": 3,
+            "unfinished": 0,
+            "interrupted": 0,
+            "unattempted": 0,
+            "infrastructure_error": 0,
+            "steps": 12,
+            "roles": {
+              "repair": {
+                "input": 27531,
+                "output": 1549
+              },
+              "writer": {
+                "input": 0,
+                "output": 0
+              }
+            },
+            "known_tokens": 29080,
+            "known_estimated_usd": 0.0035275999999999997,
+            "unknown_calls": 0,
+            "elapsed_seconds": 25.12692871002946
+          },
+          "structured": {
+            "scheduled": 3,
+            "started": 3,
+            "certified": 3,
+            "unfinished": 0,
+            "interrupted": 0,
+            "unattempted": 0,
+            "infrastructure_error": 0,
+            "steps": 12,
+            "roles": {
+              "repair": {
+                "input": 19819,
+                "output": 977
+              },
+              "writer": {
+                "input": 6136,
+                "output": 1448
+              }
+            },
+            "known_tokens": 28380,
+            "known_estimated_usd": 0.003808,
+            "unknown_calls": 0,
+            "elapsed_seconds": 35.56190254201647
+          }
+        },
+        "3": {
+          "none": {
+            "scheduled": 3,
+            "started": 3,
+            "certified": 3,
+            "unfinished": 0,
+            "interrupted": 0,
+            "unattempted": 0,
+            "infrastructure_error": 0,
+            "steps": 31,
+            "roles": {
+              "repair": {
+                "input": 60164,
+                "output": 2699
+              },
+              "writer": {
+                "input": 0,
+                "output": 0
+              }
+            },
+            "known_tokens": 62863,
+            "known_estimated_usd": 0.0073659,
+            "unknown_calls": 0,
+            "elapsed_seconds": 48.75656762596918
+          },
+          "rolling": {
+            "scheduled": 3,
+            "started": 3,
+            "certified": 3,
+            "unfinished": 0,
+            "interrupted": 0,
+            "unattempted": 0,
+            "infrastructure_error": 0,
+            "steps": 28,
+            "roles": {
+              "repair": {
+                "input": 86670,
+                "output": 3601
+              },
+              "writer": {
+                "input": 0,
+                "output": 0
+              }
+            },
+            "known_tokens": 90271,
+            "known_estimated_usd": 0.010467500000000001,
+            "unknown_calls": 0,
+            "elapsed_seconds": 57.79331237403676
+          },
+          "structured": {
+            "scheduled": 3,
+            "started": 3,
+            "certified": 3,
+            "unfinished": 0,
+            "interrupted": 0,
+            "unattempted": 0,
+            "infrastructure_error": 0,
+            "steps": 24,
+            "roles": {
+              "repair": {
+                "input": 50611,
+                "output": 2734
+              },
+              "writer": {
+                "input": 8995,
+                "output": 2866
+              }
+            },
+            "known_tokens": 65206,
+            "known_estimated_usd": 0.0087606,
+            "unknown_calls": 0,
+            "elapsed_seconds": 77.41958933195565
+          }
+        },
+        "4": {
+          "none": {
+            "scheduled": 3,
+            "started": 3,
+            "certified": 3,
+            "unfinished": 0,
+            "interrupted": 0,
+            "unattempted": 0,
+            "infrastructure_error": 0,
+            "steps": 38,
+            "roles": {
+              "repair": {
+                "input": 80575,
+                "output": 4213
+              },
+              "writer": {
+                "input": 0,
+                "output": 0
+              }
+            },
+            "known_tokens": 84788,
+            "known_estimated_usd": 0.010164,
+            "unknown_calls": 0,
+            "elapsed_seconds": 79.99262312497012
+          },
+          "rolling": {
+            "scheduled": 3,
+            "started": 3,
+            "certified": 3,
+            "unfinished": 0,
+            "interrupted": 0,
+            "unattempted": 0,
+            "infrastructure_error": 0,
+            "steps": 33,
+            "roles": {
+              "repair": {
+                "input": 132860,
+                "output": 4399
+              },
+              "writer": {
+                "input": 0,
+                "output": 0
+              }
+            },
+            "known_tokens": 137259,
+            "known_estimated_usd": 0.015485500000000001,
+            "unknown_calls": 0,
+            "elapsed_seconds": 77.07409704203019
+          },
+          "structured": {
+            "scheduled": 3,
+            "started": 3,
+            "certified": 3,
+            "unfinished": 0,
+            "interrupted": 0,
+            "unattempted": 0,
+            "infrastructure_error": 0,
+            "steps": 30,
+            "roles": {
+              "repair": {
+                "input": 73563,
+                "output": 3441
+              },
+              "writer": {
+                "input": 11745,
+                "output": 3082
+              }
+            },
+            "known_tokens": 91831,
+            "known_estimated_usd": 0.0117923,
+            "unknown_calls": 0,
+            "elapsed_seconds": 94.69814912398579
+          }
+        },
+        "5": {
+          "none": {
+            "scheduled": 3,
+            "started": 3,
+            "certified": 3,
+            "unfinished": 0,
+            "interrupted": 0,
+            "unattempted": 0,
+            "infrastructure_error": 0,
+            "steps": 27,
+            "roles": {
+              "repair": {
+                "input": 49581,
+                "output": 2633
+              },
+              "writer": {
+                "input": 0,
+                "output": 0
+              }
+            },
+            "known_tokens": 52214,
+            "known_estimated_usd": 0.0062746,
+            "unknown_calls": 0,
+            "elapsed_seconds": 46.7452915830072
+          },
+          "rolling": {
+            "scheduled": 3,
+            "started": 3,
+            "certified": 3,
+            "unfinished": 0,
+            "interrupted": 0,
+            "unattempted": 0,
+            "infrastructure_error": 0,
+            "steps": 26,
+            "roles": {
+              "repair": {
+                "input": 100420,
+                "output": 6270
+              },
+              "writer": {
+                "input": 0,
+                "output": 0
+              }
+            },
+            "known_tokens": 106690,
+            "known_estimated_usd": 0.013177000000000001,
+            "unknown_calls": 0,
+            "elapsed_seconds": 90.50368146004621
+          },
+          "structured": {
+            "scheduled": 3,
+            "started": 3,
+            "certified": 3,
+            "unfinished": 0,
+            "interrupted": 0,
+            "unattempted": 0,
+            "infrastructure_error": 0,
+            "steps": 21,
+            "roles": {
+              "repair": {
+                "input": 51783,
+                "output": 2420
+              },
+              "writer": {
+                "input": 12786,
+                "output": 2397
+              }
+            },
+            "known_tokens": 69386,
+            "known_estimated_usd": 0.0088654,
+            "unknown_calls": 0,
+            "elapsed_seconds": 68.40477958403062
+          }
+        },
+        "6": {
+          "none": {
+            "scheduled": 3,
+            "started": 3,
+            "certified": 3,
+            "unfinished": 0,
+            "interrupted": 0,
+            "unattempted": 0,
+            "infrastructure_error": 0,
+            "steps": 27,
+            "roles": {
+              "repair": {
+                "input": 49549,
+                "output": 2789
+              },
+              "writer": {
+                "input": 0,
+                "output": 0
+              }
+            },
+            "known_tokens": 52338,
+            "known_estimated_usd": 0.0063494,
+            "unknown_calls": 0,
+            "elapsed_seconds": 49.375798248976935
+          },
+          "rolling": {
+            "scheduled": 3,
+            "started": 3,
+            "certified": 3,
+            "unfinished": 0,
+            "interrupted": 0,
+            "unattempted": 0,
+            "infrastructure_error": 0,
+            "steps": 27,
+            "roles": {
+              "repair": {
+                "input": 105030,
+                "output": 3894
+              },
+              "writer": {
+                "input": 0,
+                "output": 0
+              }
+            },
+            "known_tokens": 108924,
+            "known_estimated_usd": 0.01245,
+            "unknown_calls": 0,
+            "elapsed_seconds": 61.32349762500962
+          },
+          "structured": {
+            "scheduled": 3,
+            "started": 3,
+            "certified": 3,
+            "unfinished": 0,
+            "interrupted": 0,
+            "unattempted": 0,
+            "infrastructure_error": 0,
+            "steps": 27,
+            "roles": {
+              "repair": {
+                "input": 76519,
+                "output": 2665
+              },
+              "writer": {
+                "input": 15411,
+                "output": 1632
+              }
+            },
+            "known_tokens": 96227,
+            "known_estimated_usd": 0.011341500000000001,
+            "unknown_calls": 0,
+            "elapsed_seconds": 87.80326745903585
+          }
+        },
+        "7": {
+          "none": {
+            "scheduled": 3,
+            "started": 3,
+            "certified": 3,
+            "unfinished": 0,
+            "interrupted": 0,
+            "unattempted": 0,
+            "infrastructure_error": 0,
+            "steps": 27,
+            "roles": {
+              "repair": {
+                "input": 49722,
+                "output": 2336
+              },
+              "writer": {
+                "input": 0,
+                "output": 0
+              }
+            },
+            "known_tokens": 52058,
+            "known_estimated_usd": 0.0061402,
+            "unknown_calls": 0,
+            "elapsed_seconds": 55.50101312500192
+          },
+          "rolling": {
+            "scheduled": 3,
+            "started": 3,
+            "certified": 3,
+            "unfinished": 0,
+            "interrupted": 0,
+            "unattempted": 0,
+            "infrastructure_error": 0,
+            "steps": 22,
+            "roles": {
+              "repair": {
+                "input": 82576,
+                "output": 4447
+              },
+              "writer": {
+                "input": 0,
+                "output": 0
+              }
+            },
+            "known_tokens": 87023,
+            "known_estimated_usd": 0.0104811,
+            "unknown_calls": 0,
+            "elapsed_seconds": 61.7803904999746
+          },
+          "structured": {
+            "scheduled": 3,
+            "started": 3,
+            "certified": 3,
+            "unfinished": 0,
+            "interrupted": 0,
+            "unattempted": 0,
+            "infrastructure_error": 0,
+            "steps": 21,
+            "roles": {
+              "repair": {
+                "input": 60440,
+                "output": 2246
+              },
+              "writer": {
+                "input": 16604,
+                "output": 2427
+              }
+            },
+            "known_tokens": 81717,
+            "known_estimated_usd": 0.0100409,
+            "unknown_calls": 0,
+            "elapsed_seconds": 66.66721320897341
+          }
+        },
+        "8": {
+          "none": {
+            "scheduled": 3,
+            "started": 3,
+            "certified": 3,
+            "unfinished": 0,
+            "interrupted": 0,
+            "unattempted": 0,
+            "infrastructure_error": 0,
+            "steps": 53,
+            "roles": {
+              "repair": {
+                "input": 132190,
+                "output": 5190
+              },
+              "writer": {
+                "input": 0,
+                "output": 0
+              }
+            },
+            "known_tokens": 137380,
+            "known_estimated_usd": 0.015814,
+            "unknown_calls": 0,
+            "elapsed_seconds": 93.65664820699021
+          },
+          "rolling": {
+            "scheduled": 3,
+            "started": 3,
+            "certified": 0,
+            "unfinished": 3,
+            "interrupted": 0,
+            "unattempted": 0,
+            "infrastructure_error": 0,
+            "steps": 36,
+            "roles": {
+              "repair": {
+                "input": 148926,
+                "output": 7383
+              },
+              "writer": {
+                "input": 0,
+                "output": 0
+              }
+            },
+            "known_tokens": 156309,
+            "known_estimated_usd": 0.0185841,
+            "unknown_calls": 0,
+            "elapsed_seconds": 97.08136916602962
+          },
+          "structured": {
+            "scheduled": 3,
+            "started": 3,
+            "certified": 1,
+            "unfinished": 2,
+            "interrupted": 0,
+            "unattempted": 0,
+            "infrastructure_error": 0,
+            "steps": 43,
+            "roles": {
+              "repair": {
+                "input": 153898,
+                "output": 5617
+              },
+              "writer": {
+                "input": 0,
+                "output": 0
+              }
+            },
+            "known_tokens": 159515,
+            "known_estimated_usd": 0.0181983,
+            "unknown_calls": 0,
+            "elapsed_seconds": 87.95828254107619
+          }
+        }
+      }
+    }
+  },
+  "limitations": [
+    "One deterministic eight-ticket variant; no statistical generalization.",
+    "Global guards can produce unequal exposure; compare complete corresponding sequence positions and show all scheduled outcomes separately. Corresponding positions do not imply identical task definitions.",
+    "Per-job limits count returned usage including writers and can overshoot by one returned request.",
+    "Elapsed time includes local overhead; estimated cost is not an invoice.",
+    "Ticket positions are aligned, but service-v2 fixtures differ on tickets 3, 7 and 8 and public rules/test-precondition feedback differ across the suite. Repair and writer prompts both changed; outcomes do not isolate one cause."
+  ]
+}
