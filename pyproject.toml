@@ -1,0 +1,20 @@
+[build-system]
+requires = ["setuptools>=75"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "groundhog-day-robot-repair-shop"
+version = "0.1.0"
+description = "An auditable LangGraph memory experiment with an animated Gradio workshop"
+requires-python = ">=3.11"
+dependencies = ["openai>=3.40,<4", "langgraph>=1.2.18,<2", "gradio>=6,<7", "python-dotenv>=1,<2", "tiktoken>=0.12,<1"]
+
+[project.optional-dependencies]
+test = ["pytest>=8"]
+
+[tool.setuptools.packages.find]
+include = ["repair_shop*"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["."]

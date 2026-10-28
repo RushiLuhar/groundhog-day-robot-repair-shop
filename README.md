@@ -2,33 +2,57 @@
 
 An experiment design comparing one robot mechanic under three memory policies: no cross-job memory, a raw notebook of the last 12 turns, and structured working/episodic/semantic/procedural memory. All three will use the same OpenAI model and face the same ten repair jobs. Completion, repair steps, and actual token usage will be measured without assuming which policy wins.
 
-**Status: specification and initial repository setup only.** There is no simulator, runnable application, animation, installed dependency set, or evaluation result yet. Implementation and paid model runs require a later go-ahead.
+**Status: runnable local prototype on the implementation branch.** The deterministic simulator, three memory policies, LangGraph orchestration, usage ledger, and animated Gradio bays are implemented. Offline demonstrations are clearly labelled; they are not evidence of model performance.
 
-## Specification
+## Run locally
 
-[SPEC.md](SPEC.md) preserves the approved specification, version 1, unchanged. Its sentence saying nothing is published yet records the design-stage status when it was written; publication of this repository has since been authorized. The planned implementation remains unstarted.
+Use Python 3.11 or newer (verified here on Python 3.15). From the repository root:
 
-The spec's PFAI lecture references are attribution by title and PDF page only. The repair world and procedural repair checklists are original adaptations; private course slides, PDFs, notes, and links are not distributed here. No open-source license has been selected or granted by this setup.
+```sh
+python3 -m venv .venv
+.venv/bin/python -m pip install -r requirements-lock.txt
+.venv/bin/python -m pip install --no-deps -e .
+.venv/bin/python -c "import tiktoken; tiktoken.get_encoding('o200k_base')"
+.venv/bin/python -m repair_shop.app
+```
 
-## Local configuration for future implementation
+Open **http://127.0.0.1:7860** on the same computer. The server binds only to loopback, does not create a Gradio share link, and is not remotely accessible. The one-time tokenizer preparation downloads its official vocabulary; subsequent offline runs use the cache. `requirements-lock.txt` records this prototype's tested dependency environment; `pyproject.toml` gives the supported top-level ranges.
 
-No API key is needed to read or review this repository. An ignored local `.env` can hold future configuration; `.env.example` is the tracked blank template. On a fresh clone, copy the template to `.env` only if `.env` does not already exist.
+The default **Offline scripted demo** uses an observation-driven deterministic mock and makes no model calls. Choose the number of jobs, then **Start shift**. Three bays run the same fixed jobs with separate state. **Stop** prevents new calls after an in-flight request settles; its returned usage is retained. **Reset workshop** clears session memory once stopped. Every new shift starts empty. **Replay last shift** uses recorded events with no API calls. Desktop shows neighboring bays; narrow screens stack them. Reduced-motion preferences disable CSS animation.
 
-Put your own key in the repository-root `.env` as `OPENAI_API_KEY=YOUR_KEY_HERE`. Never commit a real key, paste it into chat, or expose it in the UI or logs. The initial local `.env` contains blank values only. This repository currently has no code that reads it or makes API calls.
+**Live OpenAI (paid)** is an explicit opt-in. A live shift is limited to the first 1–4 jobs per bay (at most 12 jobs total); offline mode supports all ten. The full repeated evaluation proposed by the spec has not been run. The backend runs bays sequentially for auditable call limits, while each displayed bay animates its actual event state. Reloading the browser loses the UI session's replay; CLI reports are written under ignored `runs/`.
 
-Leave `OPENAI_MODEL` blank until the exact Luna-family OpenAI API identifier is officially available, verified, and selected. Internal assistant model labels are not API identifiers. Pin the same selected model and decoding configuration across all three conditions at implementation time; do not silently substitute models.
+## Configuration and safety
 
-## Planned build order
+Copy `.env.example` to `.env` only if `.env` does not already exist. Set `OPENAI_API_KEY` yourself and set `OPENAI_MODEL` to your selected API identifier. The user-selected model for this prototype is `gpt-6-luna`, verified in current official documentation and in real repair calls. It is used unchanged for all conditions and memory writes. No model substitution occurs. Never commit a real key or paste it into chat. The UI never receives it. Credentials are read only by the server-side official OpenAI client, which uses the official endpoint, disables automatic retries, and requests `store=False`. Remote tracing and Gradio analytics are disabled.
 
-1. Deterministic simulator and auditable text traces; establish feasible fixed limits.
-2. Three isolated memory policies and comparison reporting, including unfinished jobs and memory-maintenance tokens.
-3. Gradio bays and event-driven animation replaying actual outcomes.
+Each job has at most 12 tool calls; a non-action or incomplete response ends it unfinished. Repair responses have a 1,024 output-token limit; memory writes have a 1,600 output-token limit. Reasoning/decoding defaults are identical across repair conditions. Output usage includes the API-reported total, including reasoning tokens. There is no estimated dollar price: the till is fictional token cash. Input/output totals include memory writes; maintenance is also shown as a subtotal. Failed or uncertain requests stop the shift, with incomplete usage explicitly marked. There are no automatic paid retries.
 
-These are future milestones, not completed features. Dependency versions, execution commands, tests, and model availability must be verified when implementation begins.
+## Design and memory
+
+[SPEC.md](SPEC.md) preserves the approved version 1 unchanged; its original design-only status text is historical. Its PFAI references are attribution by title/page only. Repair checklists are original adaptations. No private course files or links are distributed, and no open-source license has been selected.
+
+`world.py` holds the hidden deterministic rules. Agent inputs contain only the job ticket, permitted prior memory, current exchanges, and remaining steps. A `StateGraph` runs load → decide → execute → decide → finish → save. Fresh run/mode/job checkpoint threads and isolated store namespaces prevent cross-condition memory leakage. Scoring/event logs are not injected into model context.
+
+- **Groundhog Day:** current-job transcript only; no cross-job store.
+- **Raw notebook:** latest 12 complete action/result exchanges, including full tool results and original tickets/boundaries; the window is fixed during a job and is never summarized.
+- **Four-level memory:** current-job working context plus episodic, semantic, and procedural records. One model call updates notes after each job. Validation checks schema, model/revision/source-job references, supported success, and a 1,000-token serialized note budget using fixed `o200k_base` tokenization. Invalid/oversized updates retain previous notes and still count their usage. This is a local storage budget, not a claim that the tokenizer exactly matches API billing. No embeddings, hidden-answer validation, or fine-tuning is used.
+
+## Verification
+
+```sh
+.venv/bin/python -m pytest -q
+.venv/bin/python -m repair_shop.smoke                 # free, one job per mode
+.venv/bin/python -m repair_shop.smoke --live --jobs-per-mode 1  # paid, explicit
+```
+
+Tests cover all ten simulator jobs, wrong-order no-ops, revision differences, mode isolation, exact notebook windows, fresh runs, step/non-action stops, error handling, usage subtotals, invalid memory, escaped HTML, and stop/reset/replay. UI verification covers desktop and 390px mobile layouts, memory drawers, completion tables, replay, stop, reset, and repeat runs.
+
+**Live smoke evidence (2026-10-28):** one job per mode, all three passed in 8 tool steps each. The 24 successful repair calls reported **14,770 input + 1,472 output = 16,242 tokens**. The following structured-memory request returned HTTP 400; live testing stopped without retry. That rejected request supplied no usage, so the run's accounting is marked incomplete. The maintenance request has since been changed from legacy JSON-object mode to the officially recommended strict JSON schema and covered with mocked tests, but the corrected maintenance path has **not yet been verified live**. These three jobs establish basic model/tool connectivity, not comparative memory performance. No benchmark advantage is claimed.
 
 ## Official documentation checked
 
-Checked **2026-10-28 (UTC)** against the current official documentation, rather than older tutorials. No package version or runtime compatibility has been tested in this documentation-only setup.
+Checked **2026-10-28 (UTC)** against the current official documentation, rather than older tutorials. Installed package versions are recorded in `requirements-lock.txt`; the integration limits above distinguish mocked and real validation.
 
 | Topic | Official source | Design implication |
 | --- | --- | --- |
@@ -43,3 +67,5 @@ Checked **2026-10-28 (UTC)** against the current official documentation, rather 
 | Event updates | [Streaming outputs](https://gradio.app/guides/streaming-outputs) | Generator outputs can update the display as events are replayed. |
 
 The isolation rules and experimental controls above are project design decisions applied to these documented primitives. Recheck the official sources before writing implementation code.
+
+Additional implementation references checked 2026-10-28: [GPT-6 Luna](https://developers.openai.com/api/docs/models/gpt-6-luna), [function calling](https://developers.openai.com/api/docs/guides/function-calling), and [structured outputs](https://developers.openai.com/api/docs/guides/structured-outputs). The maintenance request uses the documented strict JSON-schema format.
