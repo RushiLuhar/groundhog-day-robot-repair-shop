@@ -14,6 +14,22 @@ from .engine import Run, LABELS
 from .model import ModelError
 from .view import render, configuration_description, event_label, esc
 from .reports import export, run_state
+from .recovery import recover_report
+
+
+def selection_description(task,jobs):
+    total=len(get_suite(task).jobs)
+    return f'**{min(int(jobs),total)} of {total} jobs selected per mechanic, per shift.** Jobs run in their listed order.'
+
+
+def final_status(run):
+    status=run.error or ('Run complete.' if run.completed else run.stop_reason or 'Run stopped.')
+    if run.persistence_error:
+        status+=' '+run.persistence_error
+    else:
+        status+=' Results and exact settings are saved locally.'
+    if run.export_error: status+=' '+run.export_error
+    return status
 
 
 def store(): return ExperimentStore()
@@ -43,7 +59,8 @@ def selected_reference(c,ref):
 def show_run(run,running=False,events=None,results=None,calls=None,elapsed=0,state=None):
     return render(run.events if events is None else events,run.results if results is None else results,
         run.experiment.live,'per-mechanic settings',running,error=run.error,selected_jobs=run.selected_jobs,
-        state=state,elapsed=elapsed,calls=run.calls if calls is None else calls,experiment=run.experiment.to_dict())
+        state=state,elapsed=elapsed,calls=run.calls if calls is None else calls,experiment=run.experiment.to_dict(),
+        usage_complete=run.usage_complete,warnings=[run.persistence_error,run.export_error])
 
 def execute(c,ref,speed,request):
     from .app import get_session,LOCK
@@ -70,14 +87,21 @@ def execute(c,ref,speed,request):
             try:
                 for _ in run.run(): pass
             except Exception:
-                run.error='The run stopped after a local error. Returned usage is retained; do not retry an uncertain paid request.'
-                run.stop.set()
+                run.error=run.error or 'The run stopped after a local error. Returned usage is retained; do not retry an uncertain paid request.'
+                run.interrupt('Execution interrupted by a local error; known usage is retained.')
             finally:
                 try:
                     db.checkpoint(run,final=True)
+                except Exception:
+                    run.persistence_error='Saving the run checkpoint failed. Keep this page open and create a report.'
+                try:
                     export(run)
                 except Exception:
-                    run.error='The run ended, but saving its report failed. Keep this page open and try Create report.'
+                    run.export_error='Report export failed. Keep this page open and try Create report.'
+                if run.export_error:
+                    try: db.checkpoint(run,final=True)
+                    except Exception:
+                        run.persistence_error='Saving the run checkpoint failed. Keep this page open and create a report.'
                 messages.put(None)
                 with LOCK:
                     if abandoned.is_set(): session['busy']=False
@@ -91,7 +115,7 @@ def execute(c,ref,speed,request):
             if message is None: break
             event,results,calls=message;shown.append(event);last=time.monotonic()
             yield show_run(run,True,shown,results,calls),f"{event_label(event['kind'],c.live)} · repeat {event['repetition']} · job {event['job']} · {len(results)}/{c.attempts} attempts ended",configuration_description(c)
-        status='Run complete. Results and exact settings are saved locally.' if run.completed else run.error or run.stop_reason or 'Run stopped. Partial results are saved locally.'
+        status=final_status(run)
         yield show_run(run,state=run_state(run)),status,configuration_description(c)
     except (ValueError,ModelError) as e:
         raise gr.Error(str(e)) from None
@@ -104,14 +128,20 @@ def execute(c,ref,speed,request):
 
 class SavedRun:
     """Read-only report adapter. Loading results constructs no model or client."""
-    def __init__(self,data):
-        self.data=deepcopy(data)
+    def __init__(self,data,status=None):
+        data=recover_report(data,uncertain=bool(data.get('live'))) if status=='running' else deepcopy(data)
+        self.data=data
         for k in ('events','results','calls','error','selected_jobs','completed','started_at'):
             setattr(self,k,data[k])
         self.id=data['run_id'];self.experiment=ExperimentConfig.from_dict(data['configuration'])
         self.suite=get_suite(self.experiment.task_set);self.cap=data['cap']
         self.model=SimpleNamespace(name=data['model'],live=data['live'])
-    def report(self): return deepcopy(self.data)
+        self.interrupted=data.get('interrupted',False)
+        self.usage_complete=data.get('usage_complete',not bool(data.get('error')))
+        self.persistence_error=data.get('persistence_error','')
+        self.export_error=data.get('export_error','')
+    def report(self):
+        return {**deepcopy(self.data),'persistence_error':self.persistence_error,'export_error':self.export_error}
     def totals(self): return deepcopy(self.data['usage'])
 
 
@@ -136,6 +166,8 @@ def build_app():
             jobs=gr.Slider(1,10,value=3,step=1,label='Jobs per mechanic, per shift')
             repeats=gr.Slider(1,10,value=1,step=1,label='Repeated shifts (fresh memory each time)')
             live=gr.Checkbox(value=False,label='Use OpenAI (paid calls)')
+        selection=gr.Markdown(selection_description(initial.task_set,initial.jobs_per_bay))
+        all_jobs=gr.Button('Select all jobs in this task set')
         with gr.Accordion('Run limits and animation speed',open=False):
             limit=gr.Number(value=500000,precision=0,label='Stop after this many reported tokens (whole run)')
             speed=gr.Slider(.01,.8,value=.05,step=.01,label='Free demo / replay delay (seconds)')
@@ -226,6 +258,13 @@ def build_app():
         loaded.then(applied,[draft],[workshop,explanation],api_visibility='private')
         loaded.then(lambda t:gr.Slider(maximum=len(get_suite(t).jobs)),task,jobs,api_visibility='private')
         task.input(lambda t,j:gr.Slider(maximum=len(get_suite(t).jobs),value=min(int(j),len(get_suite(t).jobs))),[task,jobs],jobs,queue=False,api_visibility='private')
+        for field in (task,jobs):
+            field.change(selection_description,[task,jobs],selection,queue=False,api_visibility='private')
+        def select_all(d,n,a,t,j,r,l,cap,request:gr.Request):
+            count=len(get_suite(t).jobs)
+            updated=changed(d,n,a,t,count,r,l,cap,request)
+            return gr.Slider(maximum=count,value=count),*updated
+        all_jobs.click(select_all,[draft,*fields],[jobs,draft,workshop,status,explanation],api_visibility='private')
         refresh.click(lambda:(gr.Dropdown(choices=choices()),gr.Dropdown(choices=history_choices())),[],[saved,history],api_visibility='private')
         def start(d,ref,delay,n,a,t,j,r,l,cap,request:gr.Request):
             values=(n,a,t,j,r,l,cap)
@@ -249,7 +288,7 @@ def build_app():
             if not identifier:raise gr.Error('Select a saved run.')
             row=store().load_run(identifier)
             if not row['report']:raise gr.Error('This run stopped before its first checkpoint. No results are available; no requests were retried.')
-            run=SavedRun(row['report']);session['run']=run
+            run=SavedRun(row['report'],row['status']);session['run']=run
             return show_run(run,state=run_state(run)),f"Saved run · {row['status']} · {identifier[:8]} · no model calls",configuration_description(run.experiment)
         view.click(view_saved,[history],[workshop,status,explanation],api_visibility='private')
         def replay(delay,request:gr.Request):
