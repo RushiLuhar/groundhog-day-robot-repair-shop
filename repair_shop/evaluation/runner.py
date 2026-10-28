@@ -7,7 +7,7 @@ import hashlib,json,subprocess,time,uuid
 from ..tasks import get_evaluation_suite
 from ..costs import estimate,total_cost,PRICE_DATE,PRICE_URL,COST_NOTE,RATES
 from .config import EvaluationConfig,LOG_VERSION,MEMORY_VERSION
-from .models import LiveAgent,ScriptedWriter,PROMPTS
+from .models import LiveAgent,ScriptedWriter,PROMPTS,request_reservation
 from .service import ServiceDemo
 from .memory import Memory
 from .observations import observation,supplied,tokens
@@ -52,6 +52,7 @@ class EvaluationRun:
             'supply_version':'newest-evidence-whole-record-v1','consolidation':'one-job-end-writer-v1',
             'prompts':deepcopy(PROMPTS),'task_instructions':self.suite.instructions,'tools':deepcopy(self.suite.tools),
             'pricing':{'date':PRICE_DATE,'url':PRICE_URL,'note':COST_NOTE,'usd_per_million_input_output':deepcopy(RATES)},
+            'service_tier':'default','request_admission_policy':config.request_admission_policy,
             'comparison_note':'Equal token caps are not equal dollar costs. Partial/unequal exposure is not a ranking.'}
         self._manifest['condition_order_by_repetition']=[[c.id for c in config.conditions[(r%len(config.conditions)):]+config.conditions[:(r%len(config.conditions))]] for r in range(config.repetitions)]
         self._manifest=json.loads(json.dumps(self._manifest))
@@ -90,9 +91,20 @@ class EvaluationRun:
         reason=self.budget_reason(c,row)
         if reason:return None,reason
         settings=getattr(c,role);agent=self.agents[c.id,role]
+        reservation=None
+        if self.config.request_admission_policy=='conservative-bytes-v1':
+            reservation=request_reservation(settings,role,self.suite,payload,self.config.live)
+            total=self.totals();cap=self.config.run_estimated_usd_limit
+            if total['input']+total['output']+reservation['input_tokens']+reservation['output_tokens']>self.config.run_total_token_limit:
+                self.stop_reason='Run token admission guard: insufficient allowance for the next bounded request.'
+            elif cap is not None and (reservation['estimated_usd'] is None or total['estimated_usd'] is None or total['estimated_usd']+reservation['estimated_usd']>cap):
+                self.stop_reason='Run USD admission guard: insufficient known-price allowance for the next bounded request.'
+            if self.stop_reason:
+                self.stop.set();self.emit('request_not_admitted',role=role,reservation=reservation);self.save()
+                return None,self.stop_reason
         call={k:row[k] for k in ('condition','repetition','job')}
         call.update(role=role,model=settings.model,status='pending',input=None,output=None,cost_usd=None,
-                    response_status='',end_reason='')
+                    response_status='',end_reason='',reservation=reservation)
         self.calls.append(call)
         try:self.save()
         except Exception:
@@ -112,10 +124,13 @@ class EvaluationRun:
             raise ModelError('Missing or invalid returned usage; no retry.')
         call.update(status='returned',input=reply.input_tokens,output=reply.output_tokens,
                     cost_usd=estimate(settings.model,reply.input_tokens,reply.output_tokens,self.config.live),
-                    response_status=reply.status,end_reason=reply.end_reason,elapsed_seconds=time.monotonic()-start)
+                    response_status=reply.status,end_reason=reply.end_reason,elapsed_seconds=time.monotonic()-start,
+                    provider=deepcopy(getattr(reply,'provider_metadata',{})))
         self.save()
         user_stopped=self.stop.is_set() and not self.stop_reason
         self.budget_reason(c,row)
+        if reservation and (reply.input_tokens>reservation['input_tokens'] or reply.output_tokens>reservation['output_tokens']):
+            self.stop_reason='Returned usage exceeded the conservative reservation; no further requests.';self.stop.set()
         return reply,'Stopped by user after returned usage.' if user_stopped else ''
     def run(self):
         if self.state!='ready':raise ValueError('A run cannot be resumed or executed twice.')

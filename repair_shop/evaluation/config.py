@@ -63,6 +63,7 @@ class EvaluationConfig:
     live: bool=False
     run_total_token_limit: int=500000
     run_estimated_usd_limit: float | None=0.25
+    request_admission_policy: str='returned-usage-v1'
     conditions: tuple[Condition,...]=field(default_factory=default_conditions)
 
     def validate(self):
@@ -71,6 +72,8 @@ class EvaluationConfig:
         if self.task_set!='service-v1' or self.variant!='standard-v1':raise ValueError('Unknown task set or variant.')
         integer(self.jobs,1,8,'jobs');integer(self.repetitions,1,10,'repetitions')
         integer(self.run_total_token_limit,128,10000000,'run total token limit')
+        if self.request_admission_policy not in ('returned-usage-v1','conservative-bytes-v1'):
+            raise ValueError('Unknown request admission policy.')
         if type(self.live) is not bool:raise ValueError('live must be a boolean.')
         if not isinstance(self.conditions,tuple) or not len(self.conditions)>=1:raise ValueError('Choose a nonempty condition list.')
         for c in self.conditions:c.validate()

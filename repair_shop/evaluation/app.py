@@ -17,7 +17,7 @@ def parse(text):
 
 def describe(c):
     lines=[f'### {c.name}',f'**{len(c.conditions)} conditions × {c.jobs} of 8 tickets × {c.repetitions} repetitions = {c.attempts} attempts.**',
-        f'Run token safety limit: {c.run_total_token_limit:,}. Estimated USD safety limit: {c.run_estimated_usd_limit if c.run_estimated_usd_limit is not None else "disabled explicitly"}.',
+        f'Run token safety limit: {c.run_total_token_limit:,}. Estimated USD safety limit: {c.run_estimated_usd_limit if c.run_estimated_usd_limit is not None else "disabled explicitly"}. Admission policy: {c.request_admission_policy}.',
         'Condition order rotates across fresh repetitions; ticket order stays fixed. Current-job raw results and literal logs are identical context policies across conditions. Writer runs once at job end only for structured memory. Limits check returned usage; one request may overshoot. No automatic retry.',
         '| Condition / memory | Repair: model / effort / prompt / output cap | Writer: model / effort / prompt / output cap | Entries / retained tokens / supplied tokens | Tool steps / total job tokens |',
         '| --- | --- | --- | --- | --- |']

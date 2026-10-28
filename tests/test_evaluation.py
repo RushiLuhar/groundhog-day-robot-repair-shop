@@ -203,6 +203,7 @@ def test_adapter_passes_role_prompts_caps_and_records_incomplete_usage():
     r=repair.decide({});args=repair.client.responses.create.call_args.kwargs
     assert r.action is None and r.end_reason=='response output limit' and r.output_tokens==512
     assert args['max_output_tokens']==512 and args['reasoning']=={'effort':'high'} and 'Repair reliably' in args['instructions']
+    assert args['service_tier']=='default'
     repair.settings=replace(Condition('x').writer,response_output_cap=700)
     repair.write({});args=repair.client.responses.create.call_args.kwargs
     assert args['max_output_tokens']==700 and 'At job end' in args['instructions'] and 'tools' not in args
@@ -380,3 +381,30 @@ def test_recovery_of_pending_writer_preserves_pass_and_attempt_uncertainty(tmp_p
     assert d['state']=='interrupted' and row['status']=='success' and row['certified']
     assert row['usage']['unknown_calls']==d['usage']['unknown_calls']==1
     assert not row['usage']['usage_complete'] and row['usage']['input']==90
+
+
+@pytest.mark.parametrize('guard',['tokens','usd'])
+def test_conservative_admission_refuses_before_any_request(guard):
+    class Never:
+        def decide(self,c):raise AssertionError('Admission must prevent invocation')
+    c=EvaluationConfig(jobs=1,live=True,conditions=(Condition('a'),),
+        request_admission_policy='conservative-bytes-v1',
+        run_total_token_limit=128 if guard=='tokens' else 1000000,
+        run_estimated_usd_limit=1 if guard=='tokens' else .000001)
+    r=finish(c,agent_factory=lambda *a:Never())
+    assert r.state=='stopped' and not r.calls and r.attempts[0]['steps']==0
+    assert 'admission guard' in r.stop_reason and r.events[-2]['kind']=='request_not_admitted'
+
+
+def test_admission_records_reservations_and_stops_on_bound_violation():
+    c=EvaluationConfig(jobs=1,live=True,conditions=(Condition('a','structured'),),request_admission_policy='conservative-bytes-v1')
+    r=finish(c,agent_factory=metered)
+    assert r.attempts[0]['certified'] and r.totals()['usage_complete']
+    assert any(x['role']=='writer' for x in r.calls)
+    assert all(x['input']<=x['reservation']['input_tokens'] and x['reservation']['output_tokens']==2048 for x in r.calls)
+    old=c.to_dict();old.pop('request_admission_policy')
+    assert EvaluationConfig.from_dict(old).request_admission_policy=='returned-usage-v1'
+    class Violation(ServiceDemo):
+        def decide(self,c):r=super().decide(c);r.output_tokens=2049;return r
+    r=finish(c,agent_factory=lambda *a:Violation())
+    assert len(r.calls)==1 and r.totals()['output']==2049 and 'exceeded' in r.stop_reason

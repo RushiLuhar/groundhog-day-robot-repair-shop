@@ -94,3 +94,11 @@ Browser verification used the production Gradio callbacks at **1280 × 900** and
 | Tool-step limit | Both selected conditions ended unfinished after one action. |
 
 The original workshop and its legacy data were not used for browser validation. Only the temporary port-7862 preview was started; it is stopped after verification. No paid run, push, PR, merge or deployment is part of this acceptance record.
+
+## Authorized live protocol and request admission
+
+The subsequent owner-authorized exploratory run is frozen in `examples/evaluation-live-2026-10-28.json`: three fresh shifts of the unchanged eight-ticket suite, three memory conditions, Luna with explicit medium reasoning, 2,048 output tokens for both roles, and the original memory/job/step limits. It permits at most 72 attempts and stops at 1,000,000 returned tokens or $1 estimated standard-price spend. This file records that run's approved scope; it is not standing authorization for later paid runs.
+
+`request_admission_policy: conservative-bytes-v1` additionally reserves the next text request before sending: serialized UTF-8 request bytes plus 4,096 tokens of framing/schema allowance, and the full configured output cap. Both token and estimated-USD checks use that reservation. This deliberately overestimates typical text inputs; it is not provider-certified counting. The manifest and request ledger record the policy/reservations. A returned usage bound violation stops further requests without hiding the returned usage. Unknown usage also stops execution, without retries. Legacy v2 configurations that omit this field retain `returned-usage-v1` semantics.
+
+Live requests explicitly select `service_tier=default`, preserving the standard pricing assumption; the ledger records returned model, service tier, cached-input count and reasoning-output count when supplied. Pricing was rechecked against the [official Luna model page](https://developers.openai.com/api/docs/models/gpt-6-luna); the [Responses reference](https://developers.openai.com/api/reference/cli/resources/responses/methods/create) documents standard processing. Estimates retain the existing cache/regional/tax caveats. No prompts, task fixtures or memory rules were tuned before this run. The added admission tests bring offline coverage to **99 passing tests** before paid execution.

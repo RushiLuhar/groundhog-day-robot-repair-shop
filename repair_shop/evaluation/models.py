@@ -15,17 +15,36 @@ RECORD={'type':'object','additionalProperties':False,'properties':{
 FORMAT={'type':'json_schema','name':'typed_observation_memory','strict':True,'schema':{'type':'object','additionalProperties':False,
  'properties':{'records':{'type':'array','items':RECORD}},'required':['records']}}
 
+def request_arguments(settings,role,suite,payload):
+    args={'instructions':PROMPTS[settings.prompt_version],'input':json.dumps(payload),
+          'max_output_tokens':settings.response_output_cap,'service_tier':'default'}
+    if role=='repair':
+        args.update(instructions=args['instructions']+'\n'+suite.instructions,
+                    tools=list(suite.tools),parallel_tool_calls=False)
+    else:args['text']={'format':FORMAT}
+    return args
+
+def request_reservation(settings,role,suite,payload,live):
+    """Conservative text-only admission estimate, not provider-certified token counting."""
+    from ..costs import estimate
+    args=request_arguments(settings,role,suite,payload)
+    args.update(model=settings.model,reasoning={'effort':settings.reasoning},store=False)
+    # A UTF-8 byte per input token plus a large framing/schema allowance. No images,
+    # remote files, server history, hosted tools or implicit context are used here.
+    incoming=len(json.dumps(args,ensure_ascii=False).encode('utf-8'))+4096
+    outgoing=settings.response_output_cap
+    return {'policy':'conservative-bytes-v1','input_tokens':incoming,'output_tokens':outgoing,
+            'estimated_usd':estimate(settings.model,incoming,outgoing,live)}
+
 class LiveAgent(OpenAIModel):
     def __init__(self,config,role,suite):
         super().__init__(name=config.model,reasoning=config.reasoning)
         self.settings=config;self.role=role;self.suite=suite
     def decide(self,context):
-        r=self._call(instructions=PROMPTS[self.settings.prompt_version]+'\n'+self.suite.instructions,
-            input=json.dumps(context),tools=list(self.suite.tools),parallel_tool_calls=False,max_output_tokens=self.settings.response_output_cap)
+        r=self._call(**request_arguments(self.settings,'repair',self.suite,context))
         return self.parse(r,True)
     def write(self,payload):
-        r=self._call(instructions=PROMPTS[self.settings.prompt_version],input=json.dumps(payload),
-            text={'format':FORMAT},max_output_tokens=self.settings.response_output_cap)
+        r=self._call(**request_arguments(self.settings,'writer',self.suite,payload))
         return self.parse(r,False)
     @staticmethod
     def parse(r,repair):
@@ -40,7 +59,11 @@ class LiveAgent(OpenAIModel):
                     if isinstance(args,dict):action={'name':calls[0].name,'arguments':args}
                 except (TypeError,ValueError):pass
             if action is None:reason='missing or invalid single tool action'
-        return Reply(action,r.usage.input_tokens,r.usage.output_tokens,r.output_text or '',r.id,r.status,reason)
+        reply=Reply(action,r.usage.input_tokens,r.usage.output_tokens,r.output_text or '',r.id,r.status,reason)
+        reply.provider_metadata={'model':getattr(r,'model',None),'service_tier':getattr(r,'service_tier',None),
+            'cached_input_tokens':getattr(getattr(r.usage,'input_tokens_details',None),'cached_tokens',None),
+            'reasoning_output_tokens':getattr(getattr(r.usage,'output_tokens_details',None),'reasoning_tokens',None)}
+        return reply
 
 class ScriptedWriter:
     live=False;name='observation-only scripted writer'
