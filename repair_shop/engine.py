@@ -5,6 +5,8 @@ os.environ["LANGSMITH_TRACING"] = "false"
 os.environ["LANGCHAIN_TRACING_V2"] = "false"
 import json
 import uuid
+from datetime import datetime, timezone
+from .costs import estimate, total_cost, PRICE_DATE, PRICE_URL, COST_NOTE
 from copy import deepcopy
 from typing import TypedDict
 from threading import Event
@@ -59,12 +61,16 @@ class State(TypedDict, total=False):
     reason: str
 
 class Run:
-    def __init__(self, model, stop=None, cap=12):
+    def __init__(self, model, stop=None, cap=12, on_event=None):
         if not 1 <= cap <= 12:
             raise ValueError("cap must be 1..12")
         note_tokens(EMPTY_NOTES)  # Resolve tokenizer before any paid calls.
         self.model,self.stop,self.cap = model,stop or Event(),cap
         self.id = uuid.uuid4().hex
+        self.started_at = datetime.now(timezone.utc).isoformat()
+        self.selected_jobs = 0
+        self.completed = False
+        self.on_event = on_event
         self.store,self.checkpointer = InMemoryStore(),InMemorySaver()
         self.events,self.results,self.calls = [],[],[]
         self.world = None
@@ -79,19 +85,22 @@ class Run:
         return deepcopy(item.value) if item else {"history":[],"notes":deepcopy(EMPTY_NOTES),"observed":{}}
 
     def emit(self,kind,state,**extra):
-        event = {"sequence":len(self.events)+1,"kind":kind,"mode":state["mode"],
+        event = {"sequence":len(self.events)+1,"at":datetime.now(timezone.utc).isoformat(),"kind":kind,"mode":state["mode"],
                  "job":state["ticket"]["job"],"ticket":state["ticket"],"steps":state["steps"],**deepcopy(extra)}
         self.events.append(event)
+        if self.on_event:
+            self.on_event(deepcopy(event))
 
     def bill(self,reply,state,kind):
         self.calls.append({"mode":state["mode"],"job":state["ticket"]["job"],"kind":kind,
                            "input":reply.input_tokens,"output":reply.output_tokens,
-                           "response_id":reply.request_id,"status":reply.status})
+                           "response_id":reply.request_id,"status":reply.status,"model":self.model.name,
+                           "cost_usd":estimate(self.model.name,reply.input_tokens,reply.output_tokens,self.model.live)})
 
     def totals(self, mode=None, job=None):
         calls=[x for x in self.calls if (mode is None or x["mode"]==mode) and (job is None or x["job"]==job)]
         return {"input":sum(x["input"] for x in calls),"output":sum(x["output"] for x in calls),
-                "maintenance":sum(x["input"]+x["output"] for x in calls if x["kind"]=="memory"),"calls":len(calls)}
+                "maintenance":sum(x["input"]+x["output"] for x in calls if x["kind"]=="memory"),"calls":len(calls),"cost_usd":total_cost(calls)}
 
     def _graph(self):
         def load(s):
@@ -105,6 +114,8 @@ class Run:
             context={"ticket":s["ticket"],"steps_remaining":self.cap-s["steps"],
                      "prior_memory":s["prior"],"current_job_exchanges":s["exchanges"]}
             self.emit("thinking",s)
+            if self.stop.is_set():
+                return {"done":True,"reason":"stopped by user"}
             try:
                 reply=self.model.decide(deepcopy(context))
             except ModelError as e:
@@ -141,24 +152,28 @@ class Run:
             if s["mode"]=="structured":
                 records["observed"][job]={"ticket":s["ticket"],"passed":s["passed"]}
                 if not self.stop.is_set():
-                    try:
-                        reply=self.model.maintain({"ticket":s["ticket"],"passed":s["passed"],
-                            "exchanges":deepcopy(s["exchanges"]),"previous_notes":deepcopy(records["notes"])})
-                        self.bill(reply,s,"memory")
-                        if reply.status != "completed":
-                            raise ValueError("incomplete maintenance output")
-                        records["notes"]=validate_notes(reply.text,records["observed"])
-                    except (ValueError,TypeError,KeyError):
-                        warning="Memory update rejected; previous validated notes retained. No retry."
-                    except ModelError as e:
-                        self.error=str(e)
-                        self.stop.set()
-                        warning=self.error
+                    self.emit("maintenance_start",s)
+                    if self.stop.is_set():
+                        warning="Memory write skipped after stop."
+                    else:
+                        try:
+                            reply=self.model.maintain({"ticket":s["ticket"],"passed":s["passed"],
+                                "exchanges":deepcopy(s["exchanges"]),"previous_notes":deepcopy(records["notes"])})
+                            self.bill(reply,s,"memory")
+                            if reply.status != "completed":
+                                raise ValueError("incomplete maintenance output")
+                            records["notes"]=validate_notes(reply.text,records["observed"])
+                        except (ValueError,TypeError,KeyError):
+                            warning="Memory update rejected; previous validated notes retained. No retry."
+                        except ModelError as e:
+                            self.error=str(e)
+                            self.stop.set()
+                            warning=self.error
             # No mode stores private scoring/replay data for another mode.
             if s["mode"]!="groundhog":
                 self.store.put(self.namespace(s["mode"]),"records",records)
             self.emit("memory",s,notes=records["notes"] if s["mode"]=="structured" else records["history"] if s["mode"]=="notebook" else [],warning=warning)
-            self.results.append({"mode":s["mode"],"job":job,"passed":s["passed"],"steps":s["steps"],
+            self.results.append({"mode":s["mode"],"model":self.model.name,"job":job,"passed":s["passed"],"steps":s["steps"],
                                  "reason":s["reason"],"warning":warning,**self.totals(s["mode"],job)})
             self.emit("invoice",s,usage=self.totals(s["mode"],job),passed=s["passed"],live=self.model.live)
             return {}
@@ -182,13 +197,18 @@ class Run:
         yield from self.graph.stream(state,config,stream_mode="updates")
 
     def run(self, jobs=JOBS):
+        self.selected_jobs = len(jobs)
         for job in jobs:
             for mode in MODES:
                 if self.stop.is_set():
                     return
                 yield from self.job(mode,job)
+        self.completed = True
 
     def report(self):
         return {"run_id":self.id,"seed":SEED,"model":self.model.name,"live":self.model.live,
+                "started_at":self.started_at,"selected_jobs":self.selected_jobs,
+                "pricing":{"date":PRICE_DATE,"source":PRICE_URL,"note":COST_NOTE},
+                "reasoning":"provider default (unchanged across bays)",
                 "cap":self.cap,"results":self.results,"usage":self.totals(),"error":self.error,
                 "usage_complete":self.error is None,"events":self.events,"calls":self.calls}

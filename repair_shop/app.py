@@ -3,6 +3,9 @@ import os
 os.environ['GRADIO_ANALYTICS_ENABLED']='False'
 import threading
 import time
+import queue
+from copy import deepcopy
+from .reports import export, run_state
 import gradio as gr
 from .engine import Run
 from .model import DemoModel, OpenAIModel, ModelError
@@ -30,20 +33,52 @@ def start(kind, count, speed, request: gr.Request):
         if live and count>4:
             raise ModelError('Live shifts are limited to 4 jobs per bay (12 jobs total).')
         model=OpenAIModel() if live else DemoModel()
+        messages=queue.Queue()
         run=Run(model,session['stop']); session['run']=run
-        yield render(live=live,model=model.name,running=True), 'Shift started. Stop takes effect after any in-flight API request returns.'
-        shown=[]; offset=0
-        for _ in run.run(JOBS[:count]):
-            pending=run.events[offset:]; offset=len(run.events)
-            for event in pending:
-                shown.append(event)
-                yield render(shown,run.results,live,model.name,True,run.error), f'{len(run.results)} jobs settled · {len(run.calls)} calls · {run.totals()["input"]+run.totals()["output"]:,} tokens'
-                if not session['stop'].is_set(): time.sleep(float(speed))
-        yield render(run.events,run.results,live,model.name,False,run.error), 'Stopped.' if session['stop'].is_set() else 'Shift complete. Replay makes no model calls. Start another shift to reset all memory.'
+        run.selected_jobs=count
+        abandoned=threading.Event()
+        def on_event(event):
+            # Snapshot only public simulation data. No prompts, keys or client objects in logs.
+            print(f"run={run.id[:8]} bay={event['mode']} job={event['job']} step={event['steps']} event={event['kind']}",flush=True)
+            messages.put((event,deepcopy(run.results),deepcopy(run.calls)))
+            if not live and not run.stop.is_set(): time.sleep(float(speed))
+        run.on_event=on_event
+        def work():
+            try:
+                for _ in run.run(JOBS[:count]): pass
+            except Exception:
+                run.error='Unexpected local execution error. Shift stopped; usage may be incomplete.'
+                run.stop.set()
+            finally:
+                messages.put(None)
+                with LOCK:
+                    if abandoned.is_set(): session['busy']=False
+        yield render(live=live,model=model.name,running=True,selected_jobs=count), 'Shift started. Stop takes effect after any in-flight API request returns.'
+        worker=threading.Thread(target=work,daemon=True); worker.start()
+        shown=[]; rs=[]; calls=[]; last_event=time.monotonic()
+        try:
+            while True:
+                try: message=messages.get(timeout=1)
+                except queue.Empty:
+                    elapsed=int(time.monotonic()-last_event)
+                    yield render(shown,rs,live,model.name,True,selected_jobs=count,elapsed=elapsed,calls=calls), f'Shift active · {len(rs)}/{count*3} attempts settled · waiting {elapsed}s since last event. Stop will settle the in-flight request.'
+                    continue
+                if message is None: break
+                event,rs,calls=message; shown.append(event); last_event=time.monotonic()
+                yield render(shown,rs,live,model.name,True,selected_jobs=count,calls=calls), f"{event['kind']} · {event['mode']} · job {event['job']} · {len(rs)}/{count*3} attempts settled"
+            # Persist safe exports locally so a browser refresh does not erase the only copy.
+            export(run)
+            status='Shift ended with an error. Known usage recorded; review the error below.' if run.error else 'Stopped.' if not run.completed else 'Shift complete. All scheduled attempts settled. Download the report or replay without model calls.'
+            yield render(run.events,run.results,live,model.name,error=run.error,selected_jobs=count,state=run_state(run),calls=run.calls), status
+        finally:
+            with LOCK:
+                abandoned.set()
+                if worker.is_alive(): run.stop.set()
     except ModelError as exc:
         yield render(error=str(exc)), str(exc)
     finally:
-        with LOCK: session['busy']=False
+        with LOCK:
+            if 'worker' not in locals() or not worker.is_alive(): session['busy']=False
 
 def stop(request: gr.Request):
     get_session(request)['stop'].set()
@@ -55,7 +90,7 @@ def reset(request: gr.Request):
         session['stop'].set()
         raise gr.Error('Stopping the active shift. Reset once it has settled.')
     session['run']=None
-    return render(), 'Fresh shift. All prior memory cleared.'
+    return render(selected_jobs=3), 'Fresh shift. All prior memory cleared.'
 
 def replay(speed, request: gr.Request):
     session=get_session(request)
@@ -71,11 +106,17 @@ def replay(speed, request: gr.Request):
             shown.append(event)
             settled={(e['mode'],e['job']) for e in shown if e['kind']=='invoice'}
             rs=[r for r in run.results if (r['mode'],r['job']) in settled]
-            yield render(shown,rs,run.model.live,run.model.name,True), 'Replaying recorded events · no API calls'
+            yield render(shown,rs,run.model.live,run.model.name,True,selected_jobs=run.selected_jobs,state='replay'), 'Replaying recorded events · no API calls'
             time.sleep(float(speed))
-        yield render(run.events,run.results,run.model.live,run.model.name,False,run.error), 'Replay ended · no API calls'
+        yield render(run.events,run.results,run.model.live,run.model.name,False,run.error,selected_jobs=run.selected_jobs,state=run_state(run),calls=run.calls), 'Replay ended · no API calls'
     finally:
         with LOCK: session['busy']=False
+
+def download_results(request: gr.Request):
+    session=get_session(request)
+    if session['busy']: raise gr.Error('Wait for the shift to settle before exporting results.')
+    if session['run'] is None: raise gr.Error('Run a shift first.')
+    return export(session['run'])
 
 def build_app():
     with gr.Blocks(title='Groundhog Day • Robot Repair Shop',analytics_enabled=False) as app:
@@ -87,7 +128,14 @@ def build_app():
         with gr.Row():
             go=gr.Button('Start shift',variant='primary'); halt=gr.Button('Stop'); again=gr.Button('Replay last shift'); clear=gr.Button('Reset workshop')
         status=gr.Textbox(value='Ready · offline mode · no API calls',label='Shift status',interactive=False)
-        workshop=gr.HTML(render())
+        with gr.Accordion('Share results · portable HTML, JSON and CSV',open=False):
+            gr.Markdown('After the shift ends, prepare a report. HTML opens on any computer without the app or an API key. JSON contains configuration and results; CSV contains the job ledger. Review model-generated memory in the HTML before sharing. Local copies also persist in runs/.')
+            download=gr.Button('Prepare results downloads')
+            files=gr.File(label='Download this shift',file_count='multiple',interactive=False)
+        workshop=gr.HTML(render(selected_jobs=3))
+        download.click(download_results,[],files,api_visibility='private')
+        go.click(lambda: None,[],files,queue=False,api_visibility='private')
+        clear.click(lambda: None,[],files,queue=False,api_visibility='private')
         go.click(start,[kind,count,speed],[workshop,status],concurrency_limit=1,api_visibility='private')
         halt.click(stop,[],status,queue=False,api_visibility='private')
         clear.click(reset,[],[workshop,status],queue=False,api_visibility='private')
