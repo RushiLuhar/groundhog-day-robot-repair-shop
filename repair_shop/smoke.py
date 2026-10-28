@@ -9,7 +9,7 @@ from .world import JOBS
 def main():
     p=argparse.ArgumentParser(); p.add_argument('--live',action='store_true'); p.add_argument('--jobs-per-mode',type=int,default=1)
     args=p.parse_args()
-    if not 1<=args.jobs_per_mode<=4: p.error('choose 1..4 (at most 12 total jobs)')
+    if not 1<=args.jobs_per_mode<=len(JOBS): p.error(f'choose 1..{len(JOBS)} (at most {len(JOBS)*3} repair attempts)')
     try: model=OpenAIModel() if args.live else DemoModel()
     except ModelError as e: print(str(e)); return 1
     run=Run(model)

@@ -30,8 +30,8 @@ def start(kind, count, speed, request: gr.Request):
     live=kind=='Live OpenAI (paid)'
     try:
         count=int(count)
-        if live and count>4:
-            raise ModelError('OpenAI runs allow up to 4 jobs per bay (12 repair attempts total). Choose 4 or fewer.')
+        if not 1 <= count <= len(JOBS):
+            raise ModelError(f'Choose between 1 and {len(JOBS)} jobs per bay.')
         model=OpenAIModel() if live else DemoModel()
         messages=queue.Queue()
         run=Run(model,session['stop']); session['run']=run
@@ -130,8 +130,9 @@ def describe_experiment(kind, count, request: gr.Request):
 def ready_setup(kind, count):
     live=kind=='Live OpenAI (paid)'
     count=int(count)
-    status=('OpenAI selected · choose up to 4 jobs per bay before starting.' if count>4 else
-            'Ready · OpenAI selected (paid) · no model calls yet') if live else 'Ready · free demo selected'
+    status='Ready · OpenAI selected (paid) · no model calls yet' if live else 'Ready · free demo selected'
+    if not 1 <= count <= len(JOBS):
+        status=f'Choose between 1 and {len(JOBS)} jobs per bay before starting.'
     return (render(live=live,model='Model name shown when the shift starts' if live else 'Scripted demo',
                    selected_jobs=count,state='ready'), status,
             experiment_description(live=live,count=count))
@@ -175,7 +176,7 @@ def build_app():
         gr.Markdown('### Run a shift\nTry the free demo or use your configured OpenAI model. Each bay gets the same jobs. Your API key is kept out of the browser and reports.')
         with gr.Row():
             kind=gr.Radio([('Free demo','Offline scripted demo'),('OpenAI (paid)','Live OpenAI (paid)')],value='Offline scripted demo',label='Run mode')
-            count=gr.Slider(1,10,value=3,step=1,label='Jobs per bay (OpenAI: up to 4)')
+            count=gr.Slider(1,len(JOBS),value=3,step=1,label=f'Jobs per bay (up to {len(JOBS)} in either mode)')
             speed=gr.Slider(0.05,0.8,value=0.15,step=0.05,label='Demo and replay delay (seconds)')
         with gr.Row():
             go=gr.Button('Start shift',variant='primary'); halt=gr.Button('Stop'); again=gr.Button('Replay last shift'); clear=gr.Button('Reset workshop')
