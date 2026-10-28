@@ -56,7 +56,7 @@ class OpenAIModel:
         key = config.get("OPENAI_API_KEY") or os.environ.get("OPENAI_API_KEY")
         self.name = config.get("OPENAI_MODEL") or os.environ.get("OPENAI_MODEL")
         if not key or not self.name:
-            raise ModelError("Missing local OPENAI_API_KEY or OPENAI_MODEL configuration.")
+            raise ModelError("OpenAI is not configured. Set OPENAI_API_KEY and OPENAI_MODEL in the local .env file.")
         # Explicit official endpoint: no environment-supplied proxy endpoint or SDK retries.
         self.client = OpenAI(api_key=key, base_url="https://api.openai.com/v1", max_retries=0, timeout=45)
 
@@ -74,7 +74,7 @@ class OpenAIModel:
                     details.append(f"{field}={value}")
             if details:
                 label += "; " + ", ".join(details)
-            raise ModelError(f"OpenAI request stopped ({label}). No automatic retry; usage may be unknown for this request.") from None
+            raise ModelError(f"The OpenAI request failed ({label}). The app did not retry it. Token usage for this request may be missing.") from None
 
     def decide(self, context):
         response = self._call(instructions=SYSTEM, input=json.dumps(context), tools=TOOLS,
@@ -89,7 +89,7 @@ class OpenAIModel:
             except (ValueError,TypeError):
                 pass
         if response.usage is None:
-            raise ModelError("OpenAI returned no usage accounting; stopped without retry.")
+            raise ModelError("OpenAI returned no token count. The shift stopped without retrying the request.")
         return Reply(action,response.usage.input_tokens,response.usage.output_tokens,
                      response.output_text or "",response.id,response.status)
 
@@ -102,7 +102,7 @@ Contradictions should be marked disputed. Keep useful old notes within about 800
         response = self._call(instructions=instructions,input=json.dumps(payload),
                               text={"format":NOTE_FORMAT},max_output_tokens=1600)
         if response.usage is None:
-            raise ModelError("Memory request returned no usage; stopped without retry.")
+            raise ModelError("OpenAI returned no token count for the memory update. The shift stopped without retrying the request.")
         return Reply(None,response.usage.input_tokens,response.usage.output_tokens,
                      response.output_text or "",response.id,response.status)
 

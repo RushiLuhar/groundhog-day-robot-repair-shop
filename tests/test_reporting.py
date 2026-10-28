@@ -78,7 +78,7 @@ def test_thinking_event_visible_while_model_blocked_and_stop_accounts_return(mon
     gen=start('Offline scripted demo',1,.05,req); next(gen)
     try:
         frames=[]
-        while not any('Waiting for model response' in html for html,_ in frames):
+        while not any('Choosing the next action' in html for html,_ in frames):
             frames.append(next(gen))
         assert entered.wait(2)
         stop(req); release.set()

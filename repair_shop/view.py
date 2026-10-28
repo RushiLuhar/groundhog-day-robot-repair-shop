@@ -4,6 +4,30 @@ import json
 from .engine import MODES, LABELS
 from .costs import money, total_cost, COST_NOTE, PRICE_URL
 
+EVENT_LABELS = {'start':'Starting job', 'thinking':'Waiting for model response',
+                'action':'Tool result', 'finish':'Repair attempt ended',
+                'maintenance_start':'Saving memory', 'memory':'Memory updated', 'invoice':'Usage recorded'}
+
+def event_label(kind, live=True):
+    if kind=='thinking' and not live:
+        return 'Choosing the next action'
+    if kind=='maintenance_start' and not live:
+        return 'Saving demo notes'
+    return EVENT_LABELS.get(kind,kind)
+
+
+def readable_reason(reason):
+    return {
+        'passed test':'Final test passed.',
+        'step cap reached':'Reached the step limit.',
+        'stopped by user':'Stopped by you.',
+        'stopped by user after in-flight request; returned usage recorded':'Stopped by you. Token usage from the last request was recorded.',
+        'non-action or incomplete model response':'The model did not return a complete repair action.',
+        'Memory write skipped after stop.':'Stopped before saving new notes.',
+        'Memory update rejected; previous validated notes retained. No retry.':'The new notes failed validation. Previous notes were kept; the app did not retry.'
+    }.get(reason,reason)
+
+
 def esc(v): return html.escape(str(v),quote=True)
 
 CSS = """
@@ -29,7 +53,7 @@ def scene(color, cls):
 <g class="customer"><rect x="183" y="62" width="47" height="33" rx="3" fill="{color}"/><path d="M205 62V53H215" fill="none" stroke="#aeb9b6" stroke-width="3"/><rect x="189" y="72" width="9" height="8" fill="#242839"/><rect x="214" y="72" width="9" height="8" fill="#242839"/><path d="M198 87H215" stroke="#242839" stroke-width="3"/><rect x="179" y="97" width="55" height="29" fill="#727d89"/><rect x="191" y="102" width="29" height="17" fill="#292c3a"/><path d="M194 110H201L205 105L209 114H216" stroke="{color}" stroke-width="2" fill="none"/><path d="M175 100V120M239 100V120" stroke="#a7adab" stroke-width="7"/><rect x="186" y="124" width="13" height="4" fill="#c7c6af"/><rect x="215" y="124" width="13" height="4" fill="#c7c6af"/></g>
 <path class="scanner" d="M174 70H239" stroke="#b7f9d5" stroke-width="2" opacity=".6"/><path class="sparks" d="M160 90L166 85M163 99H172M158 106L165 111" stroke="#ffe2a0" stroke-width="3"/>
 <rect x="275" y="131" width="22" height="18" fill="#e0d1ac"/><path d="M297 135H304V144H297" stroke="#e0d1ac" stroke-width="3" fill="none"/><path class="steam" d="M281 127V119H285V113M292 128V119" fill="none" stroke="#9f9eab" stroke-width="2"/>
-<g class="done-sign"><rect x="161" y="35" width="94" height="22" fill="#c8ef89"/><text x="169" y="50" fill="#182323" font-size="12" font-family="monospace">CLOCKED OUT</text></g><text x="16" y="171" fill="#747487" font-size="8" font-family="monospace">AUTHORIZED TOOLS • QUESTIONABLE COFFEE</text></svg>'''
+<g class="done-sign"><rect x="161" y="35" width="94" height="22" fill="#c8ef89"/><text x="169" y="50" fill="#182323" font-size="12" font-family="monospace">CLOCKED OUT</text></g><text x="16" y="171" fill="#747487" font-size="8" font-family="monospace">ROBOT REPAIRS • BAD COFFEE</text></svg>'''
 
 
 CSS += """
@@ -40,23 +64,23 @@ def experiment_description(live=False, model=None, count=3, phase='planned'):
     """Describe only the selected setup or the actual run; no credential access."""
     count=int(count)
     heading={'planned':'Next shift', 'running':'Current shift', 'completed':'Completed shift',
-             'stopped':'Stopped shift', 'error':'Shift with an error', 'replay':'Recorded shift being replayed'}[phase]
-    engine=esc(model) if model else 'Server-configured OpenAI model · exact name appears when the shift starts' if live else 'Offline scripted demo · no language model'
-    mode_note=('This is a live model experiment. API calls cost money; the ledger includes repair calls and memory-writing calls.' if live else
-               'This is a free rehearsal using a scripted mechanic. It demonstrates the tools and display, but does not tell us which memory approach works better for an AI model.')
+             'stopped':'Stopped shift', 'error':'Shift with an error', 'replay':'Replaying the previous shift'}[phase]
+    engine=esc(model) if live and model else 'Your configured OpenAI model (name shown after you start)' if live else 'Free demo (scripted, no AI model)'
+    mode_note=('OpenAI calls are paid. The results include the cost of both repairs and memory updates.' if live else
+               'The free demo shows how the workshop works. Its results do not measure AI performance.')
     return f'''<section class="experiment-explainer">
-<h3>Does remembering earlier repairs help?</h3>
-<p>We give three mechanics the same repair jobs. The only difference is what each mechanic can remember from earlier jobs. We compare successful repairs, repair steps, tokens used and estimated dollar cost.</p>
-<p><strong>{heading}:</strong> {count} job{'s' if count!=1 else ''} per bay · {count*3} repair attempts in total · first {count} of the fixed ten-job baseline.<br><strong>Engine:</strong> {engine}</p>
+<h3>Does memory help with the next repair?</h3>
+<p>Each bay gets the same jobs, tools and model. We change what the mechanic remembers between jobs, then compare repairs passed, steps taken and cost.</p>
+<p><strong>{heading}:</strong> {count} job{'s' if count!=1 else ''} per bay, {count*3} repair attempts total. Jobs come from the start of the fixed ten-job set.<br><strong>Run mode:</strong> {engine}</p>
 <p>{mode_note}</p>
-<div class="scroll"><table><thead><tr><th>Mechanic</th><th>What carries over to the next job?</th></tr></thead><tbody>
-<tr><td>Groundhog Day</td><td>Nothing. It starts each job without memories of previous repairs.</td></tr>
-<tr><td>Raw notebook</td><td>The last 12 complete action-and-result exchanges, copied verbatim.</td></tr>
-<tr><td>Four-level memory</td><td>Organized notes about past jobs, learned facts and repair procedures. Current-job working memory starts fresh.</td></tr>
+<div class="scroll"><table><thead><tr><th>Bay</th><th>What it remembers</th></tr></thead><tbody>
+<tr><td>Groundhog Day</td><td>Only the current job. Earlier repairs are forgotten.</td></tr>
+<tr><td>Raw notebook</td><td>The last 12 actions and their results, kept word for word.</td></tr>
+<tr><td>Four-level memory</td><td>Current-job details plus saved notes about past repairs, facts and procedures.</td></tr>
 </tbody></table></div>
-<p><strong>What stays the same:</strong> model, reasoning defaults, tools, job order and a maximum of 12 tool steps per job. Every new shift starts with empty memory. Bays take turns; they do not share memories.</p>
-<p><strong>How to read the results:</strong> a repair passes only when its final test succeeds. Reaching the step limit leaves it unfinished. “Shift complete” means every scheduled attempt has ended, even if some repairs failed. Memory-writing tokens are included in the totals. A small run is a useful check, not a reliable model ranking.</p>
-<p class="subtle">Changing controls prepares the next shift; this description stays tied to the current or recorded results until you start again or reset. Sprocket is the fictional mechanic’s name.</p>
+<p>Each job allows up to 12 steps. Each inspection, repair action or test counts as one step. All bays use the same reasoning settings and job order. They work one at a time and keep separate memories. Starting a new shift clears every bay’s memory.</p>
+<p><strong>A repair passes when its final test passes.</strong> “Shift complete” means all attempts have ended, including unfinished repairs. Compare passes alongside steps and cost; a short run is not enough to rank the memory approaches.</p>
+<p class="subtle">Run mode and job count apply to the next shift. This description stays with the displayed results until you start again or reset.</p>
 </section>'''
 
 CSS += """
@@ -69,21 +93,21 @@ def render(events=None, results=None, live=False, model="offline scripted demo",
     expected=selected_jobs*len(MODES)
     state=state or ('error' if error else 'running' if running else 'completed' if results and len(results)==expected else 'stopped' if results else 'ready')
     settled=len(results); passes=sum(r['passed'] for r in results)
-    title={'ready':'READY TO CLOCK IN','running':'SHIFT IN PROGRESS','completed':'SHIFT COMPLETE',
-           'stopped':'SHIFT STOPPED · PARTIAL RESULTS','error':'SHIFT ENDED WITH AN ERROR','replay':'REPLAY · NO NEW API CALLS'}[state]
+    title={'ready':'READY TO START','running':'SHIFT IN PROGRESS','completed':'SHIFT COMPLETE',
+           'stopped':'SHIFT STOPPED · PARTIAL RESULTS','error':'SHIFT STOPPED · ERROR','replay':'REPLAY · NO MODEL CALLS'}[state]
     latest=events[-1] if events else {}
-    phase={'start':'Loading memory','thinking':'Waiting for model response','action':'Applying repair tool',
+    phase={'start':'Loading memory','thinking':event_label('thinking',live),'action':'Using a repair tool',
            'finish':'Repair test passed' if latest.get('passed') else 'Repair attempt ended',
-           'maintenance_start':'Saving structured memory · model call','memory':'Memory settled','invoice':'Invoice recorded'}.get(latest.get('kind'),'Waiting for first job')
+           'maintenance_start':'Saving notes for the next job','memory':'Memory updated','invoice':'Usage recorded'}.get(latest.get('kind'),'Waiting for the first job')
     activity=f"{LABELS.get(latest.get('mode'),'Workshop')} · job {latest.get('job','—')} · {phase}"
     if state in ('running','replay'):
-        detail=activity + (f' · {elapsed}s since last event' if elapsed else '')
+        detail=('Recorded: ' if state=='replay' else '') + activity + (f' · {elapsed}s since last event' if elapsed else '')
     elif state=='completed':
-        detail=f'All {expected} scheduled repair attempts settled. {passes} passed; {settled-passes} unfinished. No more model calls are running.'
+        detail=f'All {expected} repair attempts have ended. {passes} passed; {settled-passes} unfinished.'
     elif state in ('stopped','error'):
-        detail=f'{settled} of {expected} attempts settled; {max(0,expected-settled)} not attempted. No new calls will start.'
+        detail=f'{settled} of {expected} attempts ended; {max(0,expected-settled)} not attempted. The shift has stopped.'
     else:
-        detail='Choose an engine and job count, then start a shift. Each bay receives the same jobs.'
+        detail='Choose a run mode and jobs per bay, then select Start shift.'
     bill_rows=calls if calls is not None else results
     input_tokens=sum(r.get('input',0) for r in bill_rows); output_tokens=sum(r.get('output',0) for r in bill_rows)
     cost=total_cost(bill_rows) if live else 0.0
@@ -96,52 +120,53 @@ def render(events=None, results=None, live=False, model="offline scripted demo",
         done=next((e for e in reversed(es) if e['kind']=='finish' and e['job']==job),None)
         kind=last.get('kind','idle'); rs=[r for r in results if r['mode']==mode]
         cls='idle'; quip='Clock in. Try not to become a spare part.'
-        bay_phase='Waiting for this bay'; tag='WAITING'
+        bay_phase='Waiting to start'; tag='WAITING'
         if a:
             name=a['action']['name']; op=a['action']['arguments'].get('operation',name)
-            cls='inspect' if name=='inspect' else 'active'; bay_phase=f'Tool: {op}'; tag='REPAIRING'
-            quip={'inspect':'Another mystery. My favorite unpaid hobby.','test':'Hide the spare screws. Here comes quality control.',
-                  'vent':'I vent too. Management calls it an attitude problem.','tune':'Genius at work. Please lower your expectations.',
-                  'seal':'Sealed. Unlike my feelings about this job.','reseat_cable':'Your personality was unplugged. Relatable.',
-                  'replace_fuse':'New fuse. Same existential dread.'}.get(op,'Union rules: one catastrophe at a time.')
-            if a['result'].get('ok') is False: cls='rejected'; quip='That was a diagnostic failure. Definitely on purpose.'
+            cls='inspect' if name=='inspect' else 'active'; bay_phase={'inspect':'Inspecting the robot','test':'Testing the repair','vent':'Venting the cooler','tune':'Adjusting the cooler','seal':'Sealing the cooler','reseat_cable':'Reconnecting the cable','replace_fuse':'Replacing the fuse'}.get(op,op); tag='REPAIRING'
+            quip={'inspect':'Let’s see what broke this time.','test':'Let’s test it before anyone asks about the spare screws.',
+                  'vent':'Letting off steam. The robot, for once.','tune':'Adjusting the cooler. Hold the applause.',
+                  'seal':'Sealed. That should keep the mess inside.','reseat_cable':'Loose cable. I’d like to unplug for a bit too.',
+                  'replace_fuse':'New fuse. That’s coming out of your budget.'}.get(op,'One repair at a time. I only have two hands.')
+            if a['result'].get('ok') is False: cls='rejected'; quip='That didn’t work. Nobody put that on the poster.'
         if done:
             cls='passed' if done['passed'] else 'break'; tag='PASS' if done['passed'] else 'UNFINISHED'
-            bay_phase='Repair passed · settling memory and invoice' if done['passed'] else 'Attempt ended · '+done.get('reason','unfinished')
-            quip='Test passed. Put it on my tab. Your tab. Whatever.' if done['passed'] else 'Wrench down. This one still needs work. I need coffee.'
+            bay_phase='Test passed · recording the result' if done['passed'] else 'Attempt ended · '+readable_reason(done.get('reason','unfinished'))
+            quip='Test passed. You’re paying. I’m taking a break.' if done['passed'] else 'Still needs work. I need coffee.'
         if kind=='thinking':
-            cls='thinking'; tag='THINKING'; bay_phase='Waiting for model response · no tool action yet'; quip='Processing. This counts as working, legally.'
+            cls='thinking'; tag='THINKING' if live else 'CHOOSING ACTION'; bay_phase=event_label('thinking',live); quip='Thinking. Yes, that counts as work.'
         elif kind=='maintenance_start':
-            cls='saving'; tag='SAVING MEMORY'; bay_phase='Repair ended · writing memory (billable in live mode)'; quip='Writing this down. Apparently sarcasm is not a memory system.'
+            cls='saving'; tag='SAVING MEMORY'; bay_phase='Saving notes · paid model call' if live else 'Saving demo notes'; quip='Writing this down so I don’t have to learn it twice.'
         elif kind=='invoice':
-            bay_phase='Job settled · waiting for next customer'
+            bay_phase='Usage recorded · waiting for the next job'
             if len(rs)==selected_jobs:
                 cls='clocked-out' if done and done['passed'] else 'break'; tag='CLOCKED OUT'
                 bay_phase=f'BAY DONE · {sum(r["passed"] for r in rs)}/{selected_jobs} passed'
-                quip='Shift over. My excellence has exceeded the coffee budget.' if done and done['passed'] else 'Shift over. Unfinished repairs stay on the record. So do my complaints.'
+                quip='Shift’s over. I’ve earned the bad coffee.' if done and done['passed'] else 'Shift’s over. The unfinished ones are still your problem.'
+        if state=='replay' and es: bay_phase='Recorded: '+bay_phase
         tokens=sum(r['input']+r['output'] for r in rs)
         memory=next((e for e in reversed(es) if e['kind']=='memory'),{})
         working={'job':job or 'waiting','steps_used':last.get('steps',0),'latest_observation':a.get('result',{})}
         color=['#efb974','#94d7c9','#bdacf1'][index]
         cards.append(f'''<article class="bay" style="--accent:{color}"><div class="bay-head"><div><small>BAY 0{index+1}</small><h2>{LABELS[mode]}</h2></div><span class="tag">{tag}</span></div><div class="scene-stage"><div class="quip" role="note" aria-label="Mechanic says">{esc(quip)}</div>{scene(color,cls)}</div>
 <div class="phase">{esc(bay_phase)}</div><div class="hud"><span>CUSTOMER<strong>{esc(last.get('ticket',{}).get('customer','—'))}</strong></span><span>JOB<strong>{job or '—'}/{selected_jobs}</strong></span><span>STEPS<strong>{last.get('steps',0)}/12</strong></span></div>
-<div class="hud receipt"><span>{'SETTLED API TOKENS' if live else 'OFFLINE · NO API BILL'}</span><b>{tokens:,} tokens</b></div>
-<details><summary>Working memory · current job</summary><pre>{esc(json.dumps(working,indent=2))}</pre></details>
-<details><summary>Memory loaded at job start · exact contents</summary><pre>{esc(json.dumps(start.get('prior',[]),indent=2))}</pre></details>
-<details><summary>Memory after maintenance · {'episodic / semantic / procedural' if mode=='structured' else 'raw exchanges' if mode=='notebook' else 'discarded at boundary'}</summary><pre>{esc(json.dumps(memory.get('notes',[]),indent=2))}</pre></details></article>''')
+<div class="hud receipt"><span>{'TOKENS · ENDED ATTEMPTS' if live else 'FREE DEMO · NO MODEL CALLS'}</span><b>{tokens:,} tokens</b></div>
+<details><summary>Current job details</summary><pre>{esc(json.dumps(working,indent=2))}</pre></details>
+<details><summary>Memory used for this job</summary><pre>{esc(json.dumps(start.get('prior',[]),indent=2))}</pre></details>
+<details><summary>Memory kept for the next job</summary><pre>{esc(json.dumps(memory.get('notes',[]),indent=2))}</pre></details></article>''')
     rows=[]
     for mode in MODES:
         rs=[r for r in results if r['mode']==mode]; passed=[r for r in rs if r['passed']]
         bs=[r for r in bill_rows if r['mode']==mode]
         avg=f'{sum(r["steps"] for r in passed)/len(passed):.1f}' if passed else '—'
         maint=sum(r['input']+r['output'] for r in bs if r.get('kind')=='memory') if calls is not None else sum(r['maintenance'] for r in rs)
-        rows.append(f'<tr><td>{LABELS[mode]}</td><td>{esc(model)}</td><td>{len(passed)}/{len(rs)}</td><td>{len(rs)}/{selected_jobs}</td><td>{avg}</td><td>{sum(r["input"] for r in bs):,}</td><td>{sum(r["output"] for r in bs):,}</td><td>{maint:,}</td><td>{money(total_cost(bs) if live else 0)}</td></tr>')
-    jobs=''.join(f'<tr><td>{r["job"]}</td><td>{LABELS[r["mode"]]}</td><td class="{"good" if r["passed"] else "bad"}">{"PASS" if r["passed"] else "UNFINISHED"}</td><td>{r["steps"]}/12</td><td>{r["input"]+r["output"]:,}</td><td>{money(r.get("cost_usd") if live else 0)}</td><td>{esc(r["reason"])} {esc(r.get("warning",""))}</td></tr>' for r in results)
-    timeline=''.join(f'<p>#{e["sequence"]:03} · {esc(e.get("at","")[11:19])} · {LABELS[e["mode"]]} · job {e["job"]} · {esc(e["kind"])} {esc(json.dumps(e.get("result",e.get("usage",e.get("warning","")))))}</p>' for e in events[-60:][::-1])
-    notice='LIVE OPENAI · '+esc(model) if live else 'OFFLINE SCRIPTED DEMO · NOT MODEL PERFORMANCE'
-    return f'''<section class="shop"><header class="mast"><div><div class="eyebrow">A MEMORY EXPERIMENT DISGUISED AS A BAD BUSINESS</div><h1>Groundhog Day<br>Robot Repair Shop<span style="color:#c8ef89">.</span></h1><p>Three robot mechanics. Same customers. Different memories.<br>Real tool events. Terrible coffee. Receipts included.</p><div class="subtle">{notice}</div></div><div class="open-sign">{'SHIFT<br>OVER.' if state=='completed' else 'OPEN<br>AGAIN.'}</div></header>
-<section class="shift-banner {state}" role="status" aria-live="polite"><h2>{title}</h2><p>{esc(detail)}</p><progress value="{settled}" max="{expected}" aria-label="Settled repair attempts"></progress><div class="metrics"><span><b>{settled}/{expected}</b>attempts settled</span><span><b>{passes}</b>passed</span><span><b>{settled-passes}</b>unfinished</span><span><b>{input_tokens+output_tokens:,}</b>known API tokens</span><span><b>{money(cost)}</b>estimated USD{' · partial' if error else ''}</span></div></section>
-{f'<p class="bad">{esc(error)} Usage may be incomplete. No retry was made.</p>' if error else ''}<div class="bays">{''.join(cards)}</div>
-<section class="ledger"><h2>01 / The shift ledger</h2><p class="subtle">Successful-job step averages sit beside completions. Quitting early never counts as efficiency. Memory-writing tokens and cost are included in totals.</p><div class="scroll"><table><thead><tr><th>Memory policy</th><th>Model used</th><th>Passed / attempted</th><th>Settled / scheduled</th><th>Mean steps · passes only</th><th>Input tokens</th><th>Output tokens</th><th>Of which maintenance</th><th>Total $ cost · estimate</th></tr></thead><tbody>{''.join(rows)}</tbody></table></div><p class="subtle">{esc(COST_NOTE)} <a href="{PRICE_URL}">Official pricing</a>. Offline runs cost $0 and measure no model performance.</p><details><summary>Every job · passes and unfinished work</summary><div class="scroll"><table><tr><th>Job</th><th>Policy</th><th>Outcome</th><th>Steps</th><th>Total tokens</th><th>Estimated USD</th><th>Reason</th></tr>{jobs}</table></div></details></section>
-<section class="ledger"><h2>02 / Under the hood</h2><p class="subtle">Animation follows recorded events. Bays run in turn, not in parallel. Thinking and memory-writing states wait on the API; coffee and jokes use no tokens.</p><div class="timeline">{timeline or 'No events yet. Start the offline shift to meet Sprocket.'}</div></section>
-<p class="footnote">FICTIONAL REPAIR RULES · ORIGINAL SVG ART · REDUCED-MOTION PREFERENCES RESPECTED</p></section>'''
+        rows.append(f'<tr><td>{LABELS[mode]}</td><td>{esc(model) if live else "Scripted demo"}</td><td>{len(passed)}/{len(rs)}</td><td>{len(rs)}/{selected_jobs}</td><td>{avg}</td><td>{sum(r["input"] for r in bs):,}</td><td>{sum(r["output"] for r in bs):,}</td><td>{maint:,}</td><td>{money(total_cost(bs) if live else 0)}</td></tr>')
+    jobs=''.join(f'<tr><td>{r["job"]}</td><td>{LABELS[r["mode"]]}</td><td class="{"good" if r["passed"] else "bad"}">{"PASS" if r["passed"] else "UNFINISHED"}</td><td>{r["steps"]}/12</td><td>{r["input"]+r["output"]:,}</td><td>{money(r.get("cost_usd") if live else 0)}</td><td>{esc(readable_reason(r["reason"]))} {esc(readable_reason(r.get("warning","")))}</td></tr>' for r in results)
+    timeline=''.join(f'<p>#{e["sequence"]:03} · {esc(e.get("at","")[11:19])} · {LABELS[e["mode"]]} · job {e["job"]} · {esc(event_label(e["kind"],live))} {esc(json.dumps(e.get("result",e.get("usage",e.get("warning","")))))}</p>' for e in events[-60:][::-1])
+    notice='LIVE OPENAI · '+esc(model) if live else 'FREE DEMO · NO AI MODEL'
+    return f'''<section class="shop"><header class="mast"><div><div class="eyebrow">COMPARE THREE MEMORY APPROACHES</div><h1>Groundhog Day<br>Robot Repair Shop<span style="color:#c8ef89">.</span></h1><p>See how different kinds of memory affect the same repair jobs.</p><div class="subtle">{notice}</div></div><div class="open-sign">{'SHIFT<br>OVER.' if state=='completed' else 'OPEN<br>AGAIN.'}</div></header>
+<section class="shift-banner {state}" role="status" aria-live="polite"><h2>{title}</h2><p>{esc(detail)}</p><progress value="{settled}" max="{expected}" aria-label="Repair attempts ended"></progress><div class="metrics"><span><b>{settled}/{expected}</b>attempts ended</span><span><b>{passes}</b>passed</span><span><b>{settled-passes}</b>unfinished</span><span><b>{input_tokens+output_tokens:,}</b>reported tokens</span><span><b>{money(cost)}</b>estimated cost (USD){' · partial' if error else ''}</span></div></section>
+{f'<p class="bad">{esc(error)}</p>' if error else ''}<div class="bays">{''.join(cards)}</div>
+<section class="ledger"><h2>Results by bay</h2><p class="subtle">The step average includes passing repairs only. Check the pass count alongside it. Token and cost totals include memory updates. Input tokens are text sent to the model; output tokens are text it generates, including reasoning tokens.</p><div class="scroll"><table><thead><tr><th>Memory approach</th><th>Model</th><th>Passed / attempted</th><th>Attempts ended / planned</th><th>Average steps per pass</th><th>Input tokens</th><th>Output tokens</th><th>Tokens used for memory</th><th>Estimated cost (USD)</th></tr></thead><tbody>{''.join(rows)}</tbody></table></div><p class="subtle">Costs are estimates in US dollars. The free demo costs $0. N/A means we do not have a price for this model.</p><details><summary>How cost is estimated</summary><p class="subtle">{esc(COST_NOTE)} <a href="{PRICE_URL}">OpenAI pricing</a></p></details><details><summary>Results for each job</summary><div class="scroll"><table><tr><th>Job</th><th>Memory approach</th><th>Outcome</th><th>Steps</th><th>Total tokens</th><th>Estimated cost (USD)</th><th>What happened</th></tr>{jobs}</table></div></details></section>
+<section class="ledger"><h2>Activity log</h2><p class="subtle">The animation follows these recorded events. {'In OpenAI mode, each bay waits for the model to choose its next action.' if live else 'The free demo chooses actions using a fixed script.'} The jokes are scripted and use no model tokens.</p><div class="timeline">{timeline or 'No activity yet. Start a shift to see the repairs.'}</div></section>
+<p class="footnote">Simulated repairs. Animations follow your device’s reduced-motion setting.</p></section>'''

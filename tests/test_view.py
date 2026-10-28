@@ -12,7 +12,7 @@ def test_failure_render_is_not_success():
     r=Run(Bad()); list(r.job('groundhog',JOBS[0]))
     view=render(r.events,r.results)
     assert 'UNFINISHED' in view and '12/12' in view and 'class="scene break"' in view
-    assert 'Mean steps' in view and '0/1' in view
+    assert 'Average steps per pass' in view and '0/1' in view
 
 def test_html_escapes_untrusted_model_notes():
     e={'sequence':1,'kind':'memory','mode':'structured','job':1,'ticket':{},'steps':1,'notes':'<script>bad()</script>'}

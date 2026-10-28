@@ -3,11 +3,12 @@ PRICE_DATE = '2026-10-28'
 PRICE_URL = 'https://developers.openai.com/api/docs/models/gpt-6-luna'
 # USD per million tokens; verified from the official model page on PRICE_DATE.
 RATES = {'gpt-6-luna': (0.10, 0.50)}
-COST_NOTE = ('Estimated USD at standard uncached text rates checked 2026-10-28. '
-             'Luna: $0.10 input / $0.50 output per million tokens; above 272K input, 2x input and 1.5x output. '
-             'Includes memory calls; excludes cache discounts, cache-write premiums, '
-             'regional/service-tier adjustments and taxes. Not a billing invoice. '
-             'Unknown models show N/A; errors can leave usage/cost incomplete.')
+COST_NOTE = ('Uses OpenAI standard text prices checked on 2026-10-28. '
+             'Luna costs $0.10 per million input tokens and $0.50 per million output tokens. '
+             'Requests above 272,000 input tokens use 2× the input rate and 1.5× the output rate. '
+             'The estimate includes memory updates. It does not account for cache discounts, '
+             'extra cache-write charges, regional or service-tier adjustments, or taxes. '
+             'Your bill may differ. If a request fails, some usage and cost may be missing.')
 
 def estimate(model, input_tokens, output_tokens, live=True):
     if not live:
