@@ -30,11 +30,11 @@ def experiment_values(c):
 def mechanic_values(c,bay):
     m=next(m for m in c.mechanics if m.bay_id==bay)
     return [m.name,m.model,gr.Dropdown(choices=MODEL_EFFORTS[m.model],value=m.reasoning),m.memory,
-            m.notebook_exchanges,m.memory_tokens,m.step_limit,m.repair_output_tokens,m.memory_output_tokens,m.annotation]
+            m.notebook_exchanges,m.memory_tokens,m.step_limit,m.repair_output_tokens,m.memory_output_tokens,m.annotation,m.memory_update_policy]
 
 def collect(draft,name,notes,task,jobs,repeats,live,limit):
     return replace(ExperimentConfig.from_dict(draft),name=name,annotation=notes,task_set=task,
-        jobs_per_bay=int(jobs),repetitions=int(repeats),live=live,max_total_tokens=int(limit)).validate()
+        jobs_per_bay=min(int(jobs),len(get_suite(task).jobs)),repetitions=int(repeats),live=live,max_total_tokens=int(limit)).validate()
 
 def selected_reference(c,ref):
     if ref and store().load_config(ref['id'],ref['version']).to_dict()==c.to_dict(): return ref
@@ -164,8 +164,9 @@ def build_app():
                 repair_tokens=gr.Number(value=1024,precision=0,label='Repair response: maximum output tokens')
                 memory_tokens=gr.Number(value=1600,precision=0,label='Memory response: maximum output tokens')
             mnotes=gr.Textbox(label='Mechanic notes',lines=2)
+            update_policy=gr.Dropdown(choices=[('Merge validated records (v2)','merge_v2'),('Replace all notes (legacy v1)','replace_v1')],value='merge_v2',label='Structured memory update policy')
             apply=gr.Button('Apply mechanic settings');mstatus=gr.Markdown('Changes here take effect when you select Apply mechanic settings.')
-        mfields=[mname,model,reasoning,memory,window,budget,steps,repair_tokens,memory_tokens,mnotes]
+        mfields=[mname,model,reasoning,memory,window,budget,steps,repair_tokens,memory_tokens,mnotes,update_policy]
 
         def edit_mechanic(d,b): return mechanic_values(ExperimentConfig.from_dict(d),b)
         def clicked(d,evt:gr.EventData):
@@ -185,10 +186,10 @@ def build_app():
         }""",api_visibility='private')
         bay.input(edit_mechanic,[draft,bay],mfields,queue=False,api_visibility='private')
         model.input(lambda m:gr.Dropdown(choices=MODEL_EFFORTS[m],value='default'),model,reasoning,queue=False,api_visibility='private')
-        def apply_mechanic(d,b,n,m,r,p,w,budget,steps,out,mem,annotation):
+        def apply_mechanic(d,b,n,m,r,p,w,budget,steps,out,mem,annotation,policy):
             try:
                 c=ExperimentConfig.from_dict(d)
-                setting=MechanicConfig(b,n,m,r,p,int(w),int(budget),int(steps),int(out),int(mem),annotation).validate()
+                setting=MechanicConfig(b,n,m,r,p,int(w),int(budget),int(steps),int(out),int(mem),annotation,memory_update_policy=policy).validate()
                 c=replace(c,mechanics=tuple(setting if x.bay_id==b else x for x in c.mechanics)).validate()
                 return c.to_dict(),f'Applied settings for {n}. Save a version to keep this configuration.'
             except ValueError as e: raise gr.Error(str(e)) from None
@@ -223,7 +224,8 @@ def build_app():
             return [c.to_dict(),ref,*experiment_values(c),*mechanic_values(c,b),f'Loaded {c.name} · version {version}. Select Start experiment to run it.']
         loaded=load.click(load_config,[saved,bay],[draft,reference,*fields,*mfields,saved_status],api_visibility='private')
         loaded.then(applied,[draft],[workshop,explanation],api_visibility='private')
-        task.input(lambda t:gr.Slider(maximum=len(get_suite(t).jobs)),task,jobs,queue=False,api_visibility='private')
+        loaded.then(lambda t:gr.Slider(maximum=len(get_suite(t).jobs)),task,jobs,api_visibility='private')
+        task.input(lambda t,j:gr.Slider(maximum=len(get_suite(t).jobs),value=min(int(j),len(get_suite(t).jobs))),[task,jobs],jobs,queue=False,api_visibility='private')
         refresh.click(lambda:(gr.Dropdown(choices=choices()),gr.Dropdown(choices=history_choices())),[],[saved,history],api_visibility='private')
         def start(d,ref,delay,n,a,t,j,r,l,cap,request:gr.Request):
             values=(n,a,t,j,r,l,cap)
@@ -272,6 +274,7 @@ def build_app():
                 with LOCK:session['busy']=False
         again.click(replay,[speed],[workshop,status,explanation],api_visibility='private')
         download.click(download_results,[],files,api_visibility='private')
+        app.load(lambda:(gr.Dropdown(choices=choices()),gr.Dropdown(choices=history_choices())),[],[saved,history],api_visibility='private')
         for action in (go,clear,view):
             action.click(lambda:None,[],files,queue=False,api_visibility='private')
     return app

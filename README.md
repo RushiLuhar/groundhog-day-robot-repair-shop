@@ -110,3 +110,11 @@ Additional implementation references checked 2026-10-28: [GPT-6 Luna](https://de
 UI/report update references checked 2026-10-28: [OpenAI API pricing](https://developers.openai.com/api/docs/pricing), [GPT-6 Luna pricing](https://developers.openai.com/api/docs/models/gpt-6-luna), and [Gradio download controls](https://gradio.app/docs/gradio/downloadbutton).
 
 Experiment configuration references checked 2026-10-28: [GPT-6 Sol](https://developers.openai.com/api/docs/models/gpt-6-sol), [GPT-6 Astra](https://developers.openai.com/api/docs/models/gpt-6-astra), and [Gradio HTML events](https://gradio.app/docs/gradio/html). The model choices and reasoning options follow these official pages; live verification is limited to the explicitly selected smoke-test model.
+
+## Learning-focused evaluation upgrade
+
+On this implementation branch, **Learning: 32 repairs with delayed repeats** adds costly calibration discovery, immediate and delayed reuse, revision changes, marked replacement-module exceptions and cable-only controls. Select up to 32 jobs in one shift. [The evaluation plan](docs/LEARNING_EVALUATION.md) explains the sequence and what each comparison can establish.
+
+New experiments default to **Merge validated records (v2)** for structured memory. Valid older notes survive omitted updates; valid new records survive an invalid sibling citation. Budget evictions remain deterministic and visible. The mechanic drawers expose which past jobs were supplied and which notes were accepted, rejected or removed. A new phase table compares discovery, repeats, controls and exceptions without claiming causal memory use.
+
+Old saved configurations keep **Replace all notes (legacy v1)**. To use the new retention behavior, change that field on the structured mechanic and save a new configuration version. Past results and task fingerprints remain intact. This upgrade was validated offline and with mocked API responses; no new paid model tests were run.

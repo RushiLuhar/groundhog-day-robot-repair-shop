@@ -29,8 +29,11 @@ class MechanicConfig:
     repair_output_tokens: int = 1024
     memory_output_tokens: int = 1600
     annotation: str = ''
+    memory_update_policy: str = 'merge_v2'
 
     def validate(self):
+        if self.memory_update_policy not in ('replace_v1','merge_v2'):
+            raise ValueError('Unknown structured-memory update policy.')
         if self.bay_id not in BAY_IDS or self.memory not in POLICIES:
             raise ValueError('Unknown bay or memory policy.')
         if self.model not in MODEL_EFFORTS or self.reasoning not in MODEL_EFFORTS[self.model]:
@@ -91,7 +94,7 @@ class ExperimentConfig:
         data=deepcopy(value)
         if not isinstance(data,dict): raise ValueError('Configuration must be an object.')
         try:
-            data['mechanics']=tuple(MechanicConfig(**x) for x in data['mechanics'])
+            data['mechanics']=tuple(MechanicConfig(**{'memory_update_policy':'replace_v1',**x}) for x in data['mechanics'])
             return cls(**data).validate()
         except (KeyError,TypeError) as exc:
             raise ValueError('Configuration has missing or unknown fields.') from exc

@@ -138,7 +138,7 @@ def render(events=None, results=None, live=False, model="offline scripted demo",
         bay_phase='Waiting to start'; tag='WAITING'
         if a:
             name=a['action']['name']; op=a['action']['arguments'].get('operation',name)
-            cls='inspect' if name=='inspect' else 'active'; bay_phase={'inspect':'Inspecting the robot','test':'Testing the repair','vent':'Venting the cooler','tune':'Adjusting the cooler','seal':'Sealing the cooler','reseat_cable':'Reconnecting the cable','replace_fuse':'Replacing the fuse'}.get(op,op); tag='REPAIRING'
+            cls='inspect' if name=='inspect' else 'active'; bay_phase={'inspect':'Inspecting the robot','measure':'Measuring a calibration axis','apply_calibration':'Setting calibration','power':'Switching power','calibrate_sensor':'Calibrating the sensor','test':'Testing the repair','vent':'Venting the cooler','tune':'Adjusting the cooler','seal':'Sealing the cooler','reseat_cable':'Reconnecting the cable','replace_fuse':'Replacing the fuse'}.get(op,op); tag='REPAIRING'
             quip={'inspect':'Let’s see what broke this time.','test':'Let’s test it before anyone asks about the spare screws.',
                   'vent':'Letting off steam. The robot, for once.','tune':'Adjusting the cooler. Hold the applause.',
                   'seal':'Sealed. That should keep the mess inside.','reseat_cable':'Loose cable. I’d like to unplug for a bit too.',
@@ -168,8 +168,10 @@ def render(events=None, results=None, live=False, model="offline scripted demo",
 <div class="phase">{esc(bay_phase)} · repeat {last.get("repetition",1)}/{repeats}</div><div class="hud"><span>CUSTOMER<strong>{esc(last.get('ticket',{}).get('customer','—'))}</strong></span><span>JOB TICKET<strong>{job or '—'}/{selected_jobs}</strong></span><span>ATTEMPT STEPS<strong>{last.get('steps',0)}/{settings.get(mode,{}).get('step_limit',12)}</strong></span></div>
 <div class="hud receipt"><span>{'TOKENS · ENDED ATTEMPTS' if live else 'FREE DEMO · NO MODEL CALLS'}</span><b>{tokens:,} tokens</b></div>
 <details><summary>Current job details</summary><pre>{esc(json.dumps(working,indent=2))}</pre></details>
+<details><summary>Memory evidence supplied to this job</summary><pre>{esc(json.dumps(start.get("memory_audit",{}),indent=2))}</pre><p class="subtle">Matching family/revision does not prove a note was used or applies to this unit. A newer note may replace an older citation without losing the fact.</p></details>
 <details><summary>Memory used for this job</summary><pre>{esc(json.dumps(start.get('prior',[]),indent=2))}</pre></details>
 {memory_warning}
+<details><summary>Memory update audit</summary><pre>{esc(json.dumps(memory.get("update_audit",{}),indent=2))}</pre></details>
 <details><summary>Memory kept for the next job</summary><pre>{esc(json.dumps(memory.get('notes',[]),indent=2))}</pre></details></article>''')
     rows=[]
     for mode in MODES:
@@ -185,6 +187,7 @@ def render(events=None, results=None, live=False, model="offline scripted demo",
 <section class="shift-banner {state}" role="status" aria-live="polite"><h2>{title}</h2><p>{esc(detail)}</p><progress value="{settled}" max="{expected}" aria-label="Repair attempts ended"></progress><div class="metrics"><span><b>{settled}/{expected}</b>attempts ended</span><span><b>{passes}</b>passed</span><span><b>{settled-passes}</b>unfinished</span><span><b>{input_tokens+output_tokens:,}</b>reported tokens</span><span><b>{money(cost)}</b>estimated cost (USD){' · partial' if error else ''}</span></div></section>
 {f'<p class="bad">{esc(error)}</p>' if error else ''}<div class="bays">{''.join(cards)}</div>
 <section class="ledger"><h2>Results by bay</h2><p class="subtle">Each row summarizes one bay’s attempts. The step average includes passing attempts only. Check the pass count alongside it. Token and cost totals include memory updates. Input tokens are text sent to the model; output tokens are text it generates, including reasoning tokens.</p><div class="scroll"><table><thead><tr><th>Mechanic / memory</th><th>Model</th><th>Passed / ended attempts</th><th>Attempts ended / planned</th><th>Average steps per passing attempt</th><th>Input tokens</th><th>Output tokens</th><th>Tokens used for memory</th><th>Estimated cost (USD)</th></tr></thead><tbody>{''.join(rows)}</tbody></table></div><p class="subtle">Costs are estimates in US dollars. The free demo costs $0. N/A means we do not have a price for this model.</p><details><summary>How cost is estimated</summary><p class="subtle">{esc(COST_NOTE)} <a href="{PRICE_URL}">OpenAI pricing</a></p></details><details><summary>Results for each attempt</summary><div class="scroll"><table><tr><th>Repeat / job</th><th>Mechanic / memory</th><th>Outcome</th><th>Steps</th><th>Total tokens</th><th>Estimated cost (USD)</th><th>What happened</th></tr>{jobs}</table></div></details></section>
+{learning_summary(results,live)}
 <section class="ledger"><h2>Activity log</h2><p class="subtle">The animation follows these recorded events. {'In OpenAI mode, each bay waits for the model to choose its next action.' if live else 'The free demo chooses actions using a fixed script.'} The jokes are scripted and use no model tokens.</p><div class="timeline">{timeline or 'No activity yet. Start a shift to see the repairs.'}</div></section>
 <p class="footnote">Simulated repairs. Animations follow your device’s reduced-motion setting.</p></section>'''
 
@@ -195,7 +198,7 @@ CSS += """
 def configuration_description(config):
     from .tasks import get_suite
     suite=get_suite(config.task_set)
-    rows=''.join(f"<tr><td>{esc(m.name)}</td><td>{esc(m.model)} / {esc(m.reasoning)}</td><td>{esc(LABELS[m.memory])}; notebook {m.notebook_exchanges} exchanges; notes {m.memory_tokens} tokens</td><td>{m.step_limit}</td></tr>" for m in config.mechanics)
+    rows=''.join(f"<tr><td>{esc(m.name)}</td><td>{esc(m.model)} / {esc(m.reasoning)}</td><td>{esc(LABELS[m.memory])}; notebook {m.notebook_exchanges} exchanges; notes {m.memory_tokens} tokens; {esc(m.memory_update_policy)}</td><td>{m.step_limit}</td></tr>" for m in config.mechanics)
     tickets=''.join(f"<li>Job {j.number}: {esc(j.ticket())}</li>" for j in suite.jobs[:config.jobs_per_bay])
     return f"""<section class="experiment-explainer"><h3>{esc(config.name)}</h3>
 <p>{esc(config.annotation)}</p><p><b>{'OpenAI (paid)' if config.live else 'Free scripted demo'}</b> · {config.jobs_per_bay} jobs × 3 mechanics × {config.repetitions} repeated shifts = <b>{config.attempts} repair attempts</b>.</p>
@@ -206,3 +209,17 @@ def configuration_description(config):
 <p>Run token limit: {config.max_total_tokens:,}. The app checks returned usage after every request and stops before the next request once this limit is reached. One in-flight request can exceed it. Repair and memory calls both count.</p>
 <h3>{esc(suite.title)}</h3><p>{esc(suite.description)}</p><details><summary>Selected job tickets</summary><ol>{tickets}</ol></details>
 <p class="subtle">Task version {esc(suite.id)} · fingerprint {suite.fingerprint[:12]}. Saved run snapshots preserve these settings. Form edits apply only to the next run.</p></section>"""
+
+
+def learning_summary(results,live=False):
+    phases=list(dict.fromkeys(r.get('task_metrics',{}).get('phase') for r in results))
+    phases=[p for p in phases if p]
+    if not phases:return ''
+    rows=[]
+    for phase in phases:
+        for bay in MODES:
+            rs=[r for r in results if r['mode']==bay and r.get('task_metrics',{}).get('phase')==phase]
+            if not rs:continue
+            supplied=sum(bool(r.get('memory_audit',{}).get('matching_jobs_supplied')) for r in rs)
+            rows.append(f'<tr><td>{esc(phase)}</td><td>{esc(bay)}</td><td>{sum(r["passed"] for r in rs)}/{len(rs)}</td><td>{sum(r["steps"] for r in rs)/len(rs):.1f}</td><td>{sum(r["task_metrics"].get("diagnostic_calls",0) for r in rs)}</td><td>{supplied}/{len(rs)}</td><td>{sum(r["input"]+r["output"] for r in rs):,}</td><td>{money(total_cost(rs) if live else 0)}</td></tr>')
+    return '<section class="ledger"><h2>Learning opportunities and controls</h2><p class="subtle">Compare discovery with repeats, revision changes and exceptions. Step averages include every ended attempt, including unfinished repairs. Supplied evidence means notes or exchanges citing an earlier job with the same family/revision were in the input; it does not prove correct use or a causal benefit. Demo results illustrate the mechanism only.</p><div class="scroll"><table><tr><th>Phase</th><th>Bay ID</th><th>Passed / ended</th><th>Mean steps (all attempts)</th><th>Measurement calls</th><th>Attempts supplied matching evidence</th><th>Total tokens</th><th>Estimated USD</th></tr>'+''.join(rows)+'</table></div></section>'

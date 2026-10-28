@@ -65,3 +65,12 @@ def test_per_mechanic_settings_reach_official_request():
     kwargs=m.client.responses.create.call_args.kwargs
     assert kwargs['reasoning']=={'effort':'high'} and kwargs['max_output_tokens']==900
     assert '480 tokens' in kwargs['instructions'] and 'ROBOT family' in kwargs['instructions']
+
+
+def test_learning_tools_and_output_limit_reason():
+    from repair_shop.tasks import get_suite
+    resp=response(status='incomplete');resp.incomplete_details=N(reason='max_output_tokens')
+    m=fake_model(resp);m.tools=list(get_suite('learning-v1').tools)
+    reply=m.decide({})
+    assert reply.end_reason=='response output limit reached' and reply.output_tokens==7
+    assert 'repair using operate' not in m.client.responses.create.call_args.kwargs['instructions']

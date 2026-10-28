@@ -47,3 +47,9 @@ Keep unique consecutive job numbers and valid component/operation names. Choose 
 6. Add tests for solvability, wrong actions, scarce resources, revision changes, hidden-state separation, deterministic replay and step limits. Run the full offline suite before requesting any paid test.
 
 The current runner selects the first N tickets in registered order. It does not shuffle or sample them. To test a longer accumulating memory history, define a longer ordered suite; repeating a shift resets memory. Manuals are deferred; the contract describes the future retrieval interface.
+
+## Learning: 32 ordered jobs
+
+`learning-v1` lives in `learning.py`. Factory calibrations are stable within family/revision and require three separate measurement tools to discover. The sequence includes immediate and delayed repeats, compound cable repairs, revised calibrations, marked replacement modules and cable-only controls. The current UI supports all 32 jobs in a single shift; repetitions still reset memory.
+
+A `LearningJob` stores private `target` values and scorer-only `phase`, plus flags for calibration fault, cable fault and replacement module. `ticket()` reveals none of those private fields. Inspection reveals the module marking and current condition; measurements reveal one axis error at a time. There are no manuals. See [the sequence and evaluation plan](../../docs/LEARNING_EVALUATION.md). New collections must use a new suite identity and fingerprint, not edit the published sequence.

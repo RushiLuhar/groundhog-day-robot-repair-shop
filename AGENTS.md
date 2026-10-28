@@ -44,3 +44,7 @@ Read `docs/TASK_DEFINITION_SPEC.md` and `repair_shop/tasks/README.md` before add
 Run simulator, engine, model, storage and reporting tests after behavior changes. Verify the browser at desktop and mobile widths, including configuration round trips, task selection, stop/reset, replay, saved run loading and report export. Distinguish these offline checks from live tests in the final report.
 
 Inspect the complete diff and staged files for secrets, private data, unrelated edits and generated output. Work on the implementation branch, update its existing PR, and leave main unmerged for review. Never force-push. Preserve user changes.
+
+## Learning evaluations
+
+Read `docs/LEARNING_EVALUATION.md` before changing the 32-job learning suite or memory retention. Keep `baseline-v1` and `diagnostic-v1` unchanged. Never feed scorer-only phase labels or hidden calibration targets to an agent. Memory audit means evidence was supplied, not that it was causally useful. Legacy configurations without `memory_update_policy` must continue to select `replace_v1`; new configurations default to `merge_v2`. Record rejected candidates, omissions, deduplication and budget removals without hiding their token cost. Work on a new branch/PR after the preceding implementation has merged.
