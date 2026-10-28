@@ -1,6 +1,7 @@
 """Bounded official OpenAI client and clearly labelled offline demonstration model."""
 import json
 import os
+import re
 from dataclasses import dataclass
 from pathlib import Path
 from dotenv import dotenv_values
@@ -65,6 +66,14 @@ class OpenAIModel:
         except Exception as exc:
             code = getattr(exc, "status_code", None)
             label = f"HTTP {code}" if code else type(exc).__name__
+            # Retain only safe machine-readable diagnostics, never the raw body/message.
+            details = []
+            for field in ("code", "param"):
+                value = getattr(exc, field, None)
+                if isinstance(value, str) and re.fullmatch(r"[A-Za-z][A-Za-z0-9_.]{0,79}", value):
+                    details.append(f"{field}={value}")
+            if details:
+                label += "; " + ", ".join(details)
             raise ModelError(f"OpenAI request stopped ({label}). No automatic retry; usage may be unknown for this request.") from None
 
     def decide(self, context):

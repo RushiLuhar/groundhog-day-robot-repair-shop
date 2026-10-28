@@ -74,3 +74,14 @@ def test_valid_notes_preserve_distinct_revisions_and_cap():
     assert validate_notes(json.dumps(notes),observed)==notes
     notes['semantic'][0]['text']='very long observation ' * 1500
     with pytest.raises(ValueError): validate_notes(json.dumps(notes),observed)
+
+def test_structured_notes_enter_next_job_with_fresh_transcript():
+    model=Spy(); run=Run(model)
+    list(run.job('structured',JOBS[0]))
+    saved=deepcopy(run.records('structured')['notes'])
+    assert saved['episodic']
+    list(run.job('structured',JOBS[1]))
+    first=next(c for c in model.contexts if c['ticket']['job']==2)
+    assert first['prior_memory']==saved
+    assert first['current_job_exchanges']==[]
+    assert run.totals()['maintenance']==32

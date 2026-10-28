@@ -38,3 +38,14 @@ def test_maintenance_bound_and_usage():
     assert m.client.responses.create.call_args.kwargs['max_output_tokens']==1600
     assert r.input_tokens==19
     assert m.client.responses.create.call_args.kwargs['text']['format']['type']=='json_schema'
+
+def test_safe_machine_error_details_without_raw_body():
+    class Rejected(Exception):
+        status_code=400
+        code='unsupported_parameter'
+        param='text.format'
+    m=fake_model(response()); m.client.responses.create.side_effect=Rejected('raw sensitive message')
+    with pytest.raises(ModelError) as exc: m.maintain({})
+    assert 'code=unsupported_parameter' in str(exc.value)
+    assert 'param=text.format' in str(exc.value)
+    assert 'raw sensitive' not in str(exc.value)
