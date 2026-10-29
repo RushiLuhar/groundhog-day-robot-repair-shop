@@ -39,7 +39,7 @@ class EvaluationRun:
         self.stop=stop or Event();self.checkpoint=on_checkpoint;self.on_event=on_event;self.renderer=renderer
         self.state='ready';self.error='';self.stop_reason='';self.persistence_error='';self.export_error=''
         self.calls=[];self.events=[];self.attempts=[];self.memories={};self.active=None
-        self._started=None;self.elapsed_seconds=0
+        self._started=None;self.elapsed_seconds=0;self._elapsed_before=0
         self.agents={}
         for c in config.conditions:
             for role in ('repair','writer') if c.memory=='structured' else ('repair',):
@@ -138,6 +138,7 @@ class EvaluationRun:
         try:
             for row in self.attempts:
                 if self.stop.is_set():break
+                if row['status']!='unattempted':continue
                 self.active=row;c=next(c for c in self.config.conditions if c.id==row['condition'])
                 mem=self.memories.setdefault((row['repetition'],c.id),Memory())
                 world=self.suite.create_world(self.suite.jobs[row['job']-1])
@@ -221,7 +222,7 @@ class EvaluationRun:
                 self.active['status']='interrupted';self.active['reason']=self.error
             self.active=None
         finally:
-            self.elapsed_seconds=time.monotonic()-self._started
+            self.elapsed_seconds=self._elapsed_before+time.monotonic()-self._started
             try:self.save()
             except Exception:self.persistence_error='Final checkpoint failed; export the in-memory report.'
     def report(self):
@@ -230,8 +231,92 @@ class EvaluationRun:
         return {'schema_version':2,'run_id':self.id,'started_at':self.started_at,'state':self.state,
             'manifest':self.manifest,'attempts':rows,'calls':deepcopy(self.calls),'events':deepcopy(self.events),
             'usage':self.totals(),'error':self.error,'stop_reason':self.stop_reason,
-            'elapsed_seconds':time.monotonic()-self._started if self.state=='running' and self._started else self.elapsed_seconds,
+            'elapsed_seconds':self._elapsed_before+time.monotonic()-self._started if self.state=='running' and self._started else self.elapsed_seconds,
             'persistence_error':self.persistence_error,'export_error':self.export_error}
+
+
+def continue_unattempted(report,config,**kwargs):
+    """Explicit USD extension only; preserve every started attempt and its charges.
+
+    Creates a new linked run. Never used by startup/UI recovery, never retries a
+    partial attempt, and refuses uncertain usage or changes to scientific controls.
+    Callers must obtain authorization for the new *combined* ceiling first.
+    """
+    prior=deepcopy(report)
+    def require(ok,message):
+        if not ok:raise ValueError(message)
+    require(prior['state']=='stopped' and prior['stop_reason'].startswith('Run USD admission guard:'),
+            'Only a settled USD-admission stop can be explicitly extended.')
+    require(not any(prior.get(k) for k in ('error','persistence_error','export_error')),
+            'Failed or uncertain execution cannot be continued.')
+    require(all(c['status']=='returned' for c in prior['calls']) and prior['usage']==aggregate(prior['calls']),
+            'Continuation requires complete, reconciled returned usage.')
+    old=EvaluationConfig.from_dict(prior['manifest']['config']);config.validate()
+    changed=config.to_dict();changed['name']=old.name;changed['run_estimated_usd_limit']=old.run_estimated_usd_limit
+    require(changed==old.to_dict(),'Only name and the combined USD ceiling may change.')
+    require(old.run_estimated_usd_limit is not None and config.run_estimated_usd_limit is not None
+            and config.run_estimated_usd_limit>old.run_estimated_usd_limit,'USD ceiling must increase explicitly.')
+    manifest=deepcopy(prior['manifest']);fingerprint=manifest.pop('fingerprint')
+    require(hashlib.sha256(json.dumps(manifest,sort_keys=True).encode()).hexdigest()==fingerprint,
+            'Prior manifest fingerprint does not match.')
+    # Use offline adapters for validation so malformed input cannot construct a live client.
+    factory=kwargs.pop('agent_factory',None)
+    run=EvaluationRun(config,agent_factory=lambda settings,role,suite:None,**kwargs)
+    for key in ('task','variant','ordered_jobs','condition_order_by_repetition','log_version','memory_version',
+                'supply_version','consolidation','prompts','task_instructions','tools','pricing','service_tier','request_admission_policy'):
+        require(run.manifest[key]==prior['manifest'][key],'Runtime contract changed: '+key)
+    key=lambda r:tuple(r[k] for k in ('repetition','condition','job'))
+    require([key(r) for r in run.attempts]==[key(r) for r in prior['attempts']], 'Attempt schedule changed.')
+    ended=[(e['repetition'],e['condition'],e['job']) for e in prior['events'] if e['kind']=='attempt_ended']
+    started=[r for r in prior['attempts'] if r['status']!='unattempted']
+    require(ended==[key(r) for r in started] and len(set(ended))==len(ended),'Started attempts are not settled exactly once.')
+    unseen=False
+    for row in prior['attempts']:
+        if row['status']=='unattempted':
+            unseen=True
+            require(not row['raw_events'] and row['steps']==0 and not any(key(c)==key(row) for c in prior['calls']),
+                    'Unattempted position contains work or charges.')
+            continue
+        require(not unseen and row['status'] in ('success','unfinished','interrupted'), 'Completed prefix is invalid.')
+        require(not any(row[k] for k in ('writer_error','infrastructure_error','logging_error')), 'Errored attempt cannot be continued.')
+        require(row['usage']==aggregate([c for c in prior['calls'] if key(c)==key(row)]),'Attempt usage does not reconcile.')
+        c=next(c for c in config.conditions if c.id==row['condition'])
+        mem=run.memories.setdefault((row['repetition'],c.id),Memory())
+        supplied_before,audit=mem.supply(c)
+        require(supplied_before==row['memory_input'] and audit==row['memory_supply_audit'],'Memory supply replay differs.')
+        world=run.suite.create_world(run.suite.jobs[row['job']-1])
+        logs=[]
+        for raw in row['raw_events']:
+            require(world.call(raw['action']['name'],raw['action']['arguments'])==raw['result'],'Tool replay differs.')
+            logs.append(observation(raw['entry_id'],raw['job'],raw['action'],raw['result']))
+        require(logs==row['observation_log'] and len(logs)==row['steps'] and world.passed==row['certified'],
+                'Observation/certification replay differs.')
+        if c.memory!='none':mem.observe(logs)
+        if c.memory=='rolling':require(mem.retain_rolling(logs,c)==row['memory_update_audit'],'Rolling retention replay differs.')
+        if c.memory=='structured' and row['writer_output']:
+            require(mem.merge(row['writer_output']['text'],c)==row['memory_update_audit'],'Writer merge replay differs.')
+        restored=mem.records if c.memory=='structured' else supplied(mem.history) if c.memory=='rolling' else []
+        require(restored==row['memory_after'],'Retained memory replay differs.')
+    require(unseen,'No unattempted positions remain.')
+    require(all(key(c) in set(ended) for c in prior['calls']),'Call is outside the completed prefix.')
+    run.attempts=deepcopy(prior['attempts'])
+    for row in run.attempts:row.pop('usage',None)
+    run.calls=deepcopy(prior['calls']);run.events=deepcopy(prior['events'])
+    run._elapsed_before=prior['elapsed_seconds'];run.elapsed_seconds=run._elapsed_before
+    run._manifest['continuation']={'policy':'skip-all-started-v1','prior_manifest':prior['manifest'],
+        'prior_report_sha256':hashlib.sha256(json.dumps(prior,sort_keys=True).encode()).hexdigest(),
+        'carried_calls':len(run.calls),'carried_attempts':len(started),'carried_usage':prior['usage'],
+        'carried_elapsed_seconds':prior['elapsed_seconds'],'note':'USD ceiling applies to carried plus new usage; no started attempt is retried.'}
+    run._manifest.pop('fingerprint')
+    run._manifest['fingerprint']=hashlib.sha256(json.dumps(run._manifest,sort_keys=True).encode()).hexdigest()
+    run.emit('explicit_usd_extension',prior_fingerprint=fingerprint,prior_limit=old.run_estimated_usd_limit,
+             combined_limit=config.run_estimated_usd_limit,skipped_started_attempts=len(started))
+    for c in config.conditions:
+        for role in ('repair','writer') if c.memory=='structured' else ('repair',):
+            settings=getattr(c,role)
+            run.agents[c.id,role]=(factory(settings,role,run.suite) if factory else LiveAgent(settings,role,run.suite)
+                if config.live else ServiceDemo() if role=='repair' else ScriptedWriter())
+    return run
 
 
 def recovered(report):
