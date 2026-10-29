@@ -189,7 +189,9 @@ def test_config_rejection_presets_and_no_implicit_legacy_conversion():
     for name in ('reasoning','model','budget'):
         p=preset(name);assert len(p.conditions)==2 and p.conditions[0].writer==p.conditions[1].writer
     assert preset().attempts==24
-    with pytest.raises(ValueError):replace(preset('model'),live=True,run_estimated_usd_limit=.1).validate()
+    priced=replace(preset('model'),live=True,run_estimated_usd_limit=.1).validate()
+    unpriced=replace(priced.conditions[0],repair=replace(priced.conditions[0].repair,model='gpt-6-astra'))
+    with pytest.raises(ValueError):replace(priced,conditions=(unpriced,)).validate()
     with pytest.raises(ValueError):replace(preset(),conditions=()).validate()
     with pytest.raises(ValueError):Condition('bad',repair=AgentConfig(reasoning='invented')).validate()
     with pytest.raises(ValueError):Condition('bad',writer=AgentConfig()).validate()
