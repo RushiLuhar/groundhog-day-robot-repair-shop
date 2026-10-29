@@ -1,0 +1,1299 @@
+{
+  "comparison": "Matched repair-model comparison on identical tasks/prompts/role/memory/job/token settings. Sol combined USD ceiling explicitly increased from $0.50 to $10 after 11 started positions; those calls/charges persist and the interrupted position was not retried. Luna USD ceiling remained $0.50. Independent stochastic runs, no general ranking.",
+  "luna_source": {
+    "commit": "f20daf098f365bfc99f7db2973e7a0a46a32108b",
+    "dirty": false
+  },
+  "sol_source": {
+    "commit": "f18a9b8ede78374f1c1a9dc292418328ce633616",
+    "dirty": false
+  },
+  "non_usd_protocol_equivalence_checked": true,
+  "usd_limits": {
+    "luna": 0.5,
+    "sol_initial": 0.5,
+    "sol_combined_extension": 10
+  },
+  "luna_full_run": {
+    "none": {
+      "scheduled": 24,
+      "started": 24,
+      "certified": 24,
+      "unfinished": 0,
+      "interrupted": 0,
+      "unattempted": 0,
+      "infrastructure_errors": 0,
+      "writer_errors": 0,
+      "logging_errors": 0,
+      "steps": 248,
+      "roles": {
+        "repair": {
+          "input": 500239,
+          "output": 24278
+        },
+        "writer": {
+          "input": 0,
+          "output": 0
+        }
+      },
+      "known_tokens": 524517,
+      "known_estimated_usd": 0.0621629,
+      "unknown_calls": 0,
+      "elapsed_seconds": 454.97222424898064
+    },
+    "rolling": {
+      "scheduled": 24,
+      "started": 24,
+      "certified": 21,
+      "unfinished": 3,
+      "interrupted": 0,
+      "unattempted": 0,
+      "infrastructure_errors": 0,
+      "writer_errors": 0,
+      "logging_errors": 0,
+      "steps": 211,
+      "roles": {
+        "repair": {
+          "input": 733792,
+          "output": 34284
+        },
+        "writer": {
+          "input": 0,
+          "output": 0
+        }
+      },
+      "known_tokens": 768076,
+      "known_estimated_usd": 0.09052120000000001,
+      "unknown_calls": 0,
+      "elapsed_seconds": 518.0110024181195
+    },
+    "structured": {
+      "scheduled": 24,
+      "started": 24,
+      "certified": 22,
+      "unfinished": 2,
+      "interrupted": 0,
+      "unattempted": 0,
+      "infrastructure_errors": 0,
+      "writer_errors": 0,
+      "logging_errors": 0,
+      "steps": 205,
+      "roles": {
+        "repair": {
+          "input": 536631,
+          "output": 22735
+        },
+        "writer": {
+          "input": 77977,
+          "output": 15669
+        }
+      },
+      "known_tokens": 653012,
+      "known_estimated_usd": 0.0806628,
+      "unknown_calls": 0,
+      "elapsed_seconds": 589.1260112510645
+    }
+  },
+  "sol_full_run": {
+    "none": {
+      "scheduled": 24,
+      "started": 24,
+      "certified": 24,
+      "unfinished": 0,
+      "interrupted": 0,
+      "unattempted": 0,
+      "infrastructure_errors": 0,
+      "writer_errors": 0,
+      "logging_errors": 0,
+      "steps": 234,
+      "roles": {
+        "repair": {
+          "input": 456741,
+          "output": 13491
+        },
+        "writer": {
+          "input": 0,
+          "output": 0
+        }
+      },
+      "known_tokens": 470232,
+      "known_estimated_usd": 1.048392,
+      "unknown_calls": 0,
+      "elapsed_seconds": 363.3223492500838
+    },
+    "rolling": {
+      "scheduled": 24,
+      "started": 24,
+      "certified": 20,
+      "unfinished": 3,
+      "interrupted": 1,
+      "unattempted": 0,
+      "infrastructure_errors": 0,
+      "writer_errors": 0,
+      "logging_errors": 0,
+      "steps": 197,
+      "roles": {
+        "repair": {
+          "input": 670387,
+          "output": 14099
+        },
+        "writer": {
+          "input": 0,
+          "output": 0
+        }
+      },
+      "known_tokens": 684486,
+      "known_estimated_usd": 1.481764,
+      "unknown_calls": 0,
+      "elapsed_seconds": 328.2424143330427
+    },
+    "structured": {
+      "scheduled": 24,
+      "started": 24,
+      "certified": 24,
+      "unfinished": 0,
+      "interrupted": 0,
+      "unattempted": 0,
+      "infrastructure_errors": 0,
+      "writer_errors": 0,
+      "logging_errors": 0,
+      "steps": 204,
+      "roles": {
+        "repair": {
+          "input": 544860,
+          "output": 12959
+        },
+        "writer": {
+          "input": 78755,
+          "output": 15941
+        }
+      },
+      "known_tokens": 652515,
+      "known_estimated_usd": 1.235156,
+      "unknown_calls": 0,
+      "elapsed_seconds": 494.28892699989956
+    }
+  },
+  "same_condition_terminal_pairs": {
+    "selection": "Every Sol success/unfinished attempt paired with the same Luna condition/shift/ticket. Global budget interruption and unattempted positions excluded from efficiency comparison; retained in full coverage.",
+    "positions": [
+      {
+        "repetition": 1,
+        "condition": "none",
+        "job": 1
+      },
+      {
+        "repetition": 1,
+        "condition": "none",
+        "job": 2
+      },
+      {
+        "repetition": 1,
+        "condition": "none",
+        "job": 3
+      },
+      {
+        "repetition": 1,
+        "condition": "none",
+        "job": 4
+      },
+      {
+        "repetition": 1,
+        "condition": "none",
+        "job": 5
+      },
+      {
+        "repetition": 1,
+        "condition": "none",
+        "job": 6
+      },
+      {
+        "repetition": 1,
+        "condition": "none",
+        "job": 7
+      },
+      {
+        "repetition": 1,
+        "condition": "none",
+        "job": 8
+      },
+      {
+        "repetition": 1,
+        "condition": "rolling",
+        "job": 1
+      },
+      {
+        "repetition": 1,
+        "condition": "rolling",
+        "job": 2
+      },
+      {
+        "repetition": 1,
+        "condition": "rolling",
+        "job": 3
+      },
+      {
+        "repetition": 1,
+        "condition": "rolling",
+        "job": 5
+      },
+      {
+        "repetition": 1,
+        "condition": "rolling",
+        "job": 6
+      },
+      {
+        "repetition": 1,
+        "condition": "rolling",
+        "job": 7
+      },
+      {
+        "repetition": 1,
+        "condition": "rolling",
+        "job": 8
+      },
+      {
+        "repetition": 1,
+        "condition": "structured",
+        "job": 1
+      },
+      {
+        "repetition": 1,
+        "condition": "structured",
+        "job": 2
+      },
+      {
+        "repetition": 1,
+        "condition": "structured",
+        "job": 3
+      },
+      {
+        "repetition": 1,
+        "condition": "structured",
+        "job": 4
+      },
+      {
+        "repetition": 1,
+        "condition": "structured",
+        "job": 5
+      },
+      {
+        "repetition": 1,
+        "condition": "structured",
+        "job": 6
+      },
+      {
+        "repetition": 1,
+        "condition": "structured",
+        "job": 7
+      },
+      {
+        "repetition": 1,
+        "condition": "structured",
+        "job": 8
+      },
+      {
+        "repetition": 2,
+        "condition": "none",
+        "job": 1
+      },
+      {
+        "repetition": 2,
+        "condition": "none",
+        "job": 2
+      },
+      {
+        "repetition": 2,
+        "condition": "none",
+        "job": 3
+      },
+      {
+        "repetition": 2,
+        "condition": "none",
+        "job": 4
+      },
+      {
+        "repetition": 2,
+        "condition": "none",
+        "job": 5
+      },
+      {
+        "repetition": 2,
+        "condition": "none",
+        "job": 6
+      },
+      {
+        "repetition": 2,
+        "condition": "none",
+        "job": 7
+      },
+      {
+        "repetition": 2,
+        "condition": "none",
+        "job": 8
+      },
+      {
+        "repetition": 2,
+        "condition": "rolling",
+        "job": 1
+      },
+      {
+        "repetition": 2,
+        "condition": "rolling",
+        "job": 2
+      },
+      {
+        "repetition": 2,
+        "condition": "rolling",
+        "job": 3
+      },
+      {
+        "repetition": 2,
+        "condition": "rolling",
+        "job": 4
+      },
+      {
+        "repetition": 2,
+        "condition": "rolling",
+        "job": 5
+      },
+      {
+        "repetition": 2,
+        "condition": "rolling",
+        "job": 6
+      },
+      {
+        "repetition": 2,
+        "condition": "rolling",
+        "job": 7
+      },
+      {
+        "repetition": 2,
+        "condition": "rolling",
+        "job": 8
+      },
+      {
+        "repetition": 2,
+        "condition": "structured",
+        "job": 1
+      },
+      {
+        "repetition": 2,
+        "condition": "structured",
+        "job": 2
+      },
+      {
+        "repetition": 2,
+        "condition": "structured",
+        "job": 3
+      },
+      {
+        "repetition": 2,
+        "condition": "structured",
+        "job": 4
+      },
+      {
+        "repetition": 2,
+        "condition": "structured",
+        "job": 5
+      },
+      {
+        "repetition": 2,
+        "condition": "structured",
+        "job": 6
+      },
+      {
+        "repetition": 2,
+        "condition": "structured",
+        "job": 7
+      },
+      {
+        "repetition": 2,
+        "condition": "structured",
+        "job": 8
+      },
+      {
+        "repetition": 3,
+        "condition": "none",
+        "job": 1
+      },
+      {
+        "repetition": 3,
+        "condition": "none",
+        "job": 2
+      },
+      {
+        "repetition": 3,
+        "condition": "none",
+        "job": 3
+      },
+      {
+        "repetition": 3,
+        "condition": "none",
+        "job": 4
+      },
+      {
+        "repetition": 3,
+        "condition": "none",
+        "job": 5
+      },
+      {
+        "repetition": 3,
+        "condition": "none",
+        "job": 6
+      },
+      {
+        "repetition": 3,
+        "condition": "none",
+        "job": 7
+      },
+      {
+        "repetition": 3,
+        "condition": "none",
+        "job": 8
+      },
+      {
+        "repetition": 3,
+        "condition": "rolling",
+        "job": 1
+      },
+      {
+        "repetition": 3,
+        "condition": "rolling",
+        "job": 2
+      },
+      {
+        "repetition": 3,
+        "condition": "rolling",
+        "job": 3
+      },
+      {
+        "repetition": 3,
+        "condition": "rolling",
+        "job": 4
+      },
+      {
+        "repetition": 3,
+        "condition": "rolling",
+        "job": 5
+      },
+      {
+        "repetition": 3,
+        "condition": "rolling",
+        "job": 6
+      },
+      {
+        "repetition": 3,
+        "condition": "rolling",
+        "job": 7
+      },
+      {
+        "repetition": 3,
+        "condition": "rolling",
+        "job": 8
+      },
+      {
+        "repetition": 3,
+        "condition": "structured",
+        "job": 1
+      },
+      {
+        "repetition": 3,
+        "condition": "structured",
+        "job": 2
+      },
+      {
+        "repetition": 3,
+        "condition": "structured",
+        "job": 3
+      },
+      {
+        "repetition": 3,
+        "condition": "structured",
+        "job": 4
+      },
+      {
+        "repetition": 3,
+        "condition": "structured",
+        "job": 5
+      },
+      {
+        "repetition": 3,
+        "condition": "structured",
+        "job": 6
+      },
+      {
+        "repetition": 3,
+        "condition": "structured",
+        "job": 7
+      },
+      {
+        "repetition": 3,
+        "condition": "structured",
+        "job": 8
+      }
+    ],
+    "by_condition": {
+      "none": {
+        "luna": {
+          "scheduled": 24,
+          "certified": 24,
+          "unfinished": 0,
+          "interrupted": 0,
+          "unattempted": 0,
+          "steps": 248,
+          "sensor_samples": 48,
+          "roles": {
+            "repair": {
+              "input": 500239,
+              "output": 24278
+            },
+            "writer": {
+              "input": 0,
+              "output": 0
+            }
+          },
+          "known_tokens": 524517,
+          "known_estimated_usd": 0.0621629,
+          "elapsed_seconds": 454.97222424898064
+        },
+        "sol": {
+          "scheduled": 24,
+          "certified": 24,
+          "unfinished": 0,
+          "interrupted": 0,
+          "unattempted": 0,
+          "steps": 234,
+          "sensor_samples": 46,
+          "roles": {
+            "repair": {
+              "input": 456741,
+              "output": 13491
+            },
+            "writer": {
+              "input": 0,
+              "output": 0
+            }
+          },
+          "known_tokens": 470232,
+          "known_estimated_usd": 1.048392,
+          "elapsed_seconds": 363.3223492500838
+        }
+      },
+      "rolling": {
+        "luna": {
+          "scheduled": 23,
+          "certified": 20,
+          "unfinished": 3,
+          "interrupted": 0,
+          "unattempted": 0,
+          "steps": 200,
+          "sensor_samples": 23,
+          "roles": {
+            "repair": {
+              "input": 690183,
+              "output": 32991
+            },
+            "writer": {
+              "input": 0,
+              "output": 0
+            }
+          },
+          "known_tokens": 723174,
+          "known_estimated_usd": 0.0855138,
+          "elapsed_seconds": 493.7402236261405
+        },
+        "sol": {
+          "scheduled": 23,
+          "certified": 20,
+          "unfinished": 3,
+          "interrupted": 0,
+          "unattempted": 0,
+          "steps": 188,
+          "sensor_samples": 18,
+          "roles": {
+            "repair": {
+              "input": 636177,
+              "output": 13602
+            },
+            "writer": {
+              "input": 0,
+              "output": 0
+            }
+          },
+          "known_tokens": 649779,
+          "known_estimated_usd": 1.408374,
+          "elapsed_seconds": 315.2789708750206
+        }
+      },
+      "structured": {
+        "luna": {
+          "scheduled": 24,
+          "certified": 22,
+          "unfinished": 2,
+          "interrupted": 0,
+          "unattempted": 0,
+          "steps": 205,
+          "sensor_samples": 18,
+          "roles": {
+            "repair": {
+              "input": 536631,
+              "output": 22735
+            },
+            "writer": {
+              "input": 77977,
+              "output": 15669
+            }
+          },
+          "known_tokens": 653012,
+          "known_estimated_usd": 0.0806628,
+          "elapsed_seconds": 589.1260112510645
+        },
+        "sol": {
+          "scheduled": 24,
+          "certified": 24,
+          "unfinished": 0,
+          "interrupted": 0,
+          "unattempted": 0,
+          "steps": 204,
+          "sensor_samples": 18,
+          "roles": {
+            "repair": {
+              "input": 544860,
+              "output": 12959
+            },
+            "writer": {
+              "input": 78755,
+              "output": 15941
+            }
+          },
+          "known_tokens": 652515,
+          "known_estimated_usd": 1.235156,
+          "elapsed_seconds": 494.28892699989956
+        }
+      }
+    }
+  },
+  "common_all_condition_pairs": {
+    "selection": "Only shift/ticket groups where all three conditions completed terminal attempts in both runs.",
+    "positions": [
+      {
+        "repetition": 1,
+        "job": 1
+      },
+      {
+        "repetition": 1,
+        "job": 2
+      },
+      {
+        "repetition": 1,
+        "job": 3
+      },
+      {
+        "repetition": 1,
+        "job": 5
+      },
+      {
+        "repetition": 1,
+        "job": 6
+      },
+      {
+        "repetition": 1,
+        "job": 7
+      },
+      {
+        "repetition": 1,
+        "job": 8
+      },
+      {
+        "repetition": 2,
+        "job": 1
+      },
+      {
+        "repetition": 2,
+        "job": 2
+      },
+      {
+        "repetition": 2,
+        "job": 3
+      },
+      {
+        "repetition": 2,
+        "job": 4
+      },
+      {
+        "repetition": 2,
+        "job": 5
+      },
+      {
+        "repetition": 2,
+        "job": 6
+      },
+      {
+        "repetition": 2,
+        "job": 7
+      },
+      {
+        "repetition": 2,
+        "job": 8
+      },
+      {
+        "repetition": 3,
+        "job": 1
+      },
+      {
+        "repetition": 3,
+        "job": 2
+      },
+      {
+        "repetition": 3,
+        "job": 3
+      },
+      {
+        "repetition": 3,
+        "job": 4
+      },
+      {
+        "repetition": 3,
+        "job": 5
+      },
+      {
+        "repetition": 3,
+        "job": 6
+      },
+      {
+        "repetition": 3,
+        "job": 7
+      },
+      {
+        "repetition": 3,
+        "job": 8
+      }
+    ],
+    "by_condition": {
+      "none": {
+        "luna": {
+          "scheduled": 23,
+          "certified": 23,
+          "unfinished": 0,
+          "interrupted": 0,
+          "unattempted": 0,
+          "steps": 235,
+          "sensor_samples": 46,
+          "roles": {
+            "repair": {
+              "input": 472530,
+              "output": 22900
+            },
+            "writer": {
+              "input": 0,
+              "output": 0
+            }
+          },
+          "known_tokens": 495430,
+          "known_estimated_usd": 0.058703000000000005,
+          "elapsed_seconds": 426.46118220698554
+        },
+        "sol": {
+          "scheduled": 23,
+          "certified": 23,
+          "unfinished": 0,
+          "interrupted": 0,
+          "unattempted": 0,
+          "steps": 222,
+          "sensor_samples": 44,
+          "roles": {
+            "repair": {
+              "input": 431943,
+              "output": 12567
+            },
+            "writer": {
+              "input": 0,
+              "output": 0
+            }
+          },
+          "known_tokens": 444510,
+          "known_estimated_usd": 0.989556,
+          "elapsed_seconds": 337.3841929580667
+        }
+      },
+      "rolling": {
+        "luna": {
+          "scheduled": 23,
+          "certified": 20,
+          "unfinished": 3,
+          "interrupted": 0,
+          "unattempted": 0,
+          "steps": 200,
+          "sensor_samples": 23,
+          "roles": {
+            "repair": {
+              "input": 690183,
+              "output": 32991
+            },
+            "writer": {
+              "input": 0,
+              "output": 0
+            }
+          },
+          "known_tokens": 723174,
+          "known_estimated_usd": 0.0855138,
+          "elapsed_seconds": 493.7402236261405
+        },
+        "sol": {
+          "scheduled": 23,
+          "certified": 20,
+          "unfinished": 3,
+          "interrupted": 0,
+          "unattempted": 0,
+          "steps": 188,
+          "sensor_samples": 18,
+          "roles": {
+            "repair": {
+              "input": 636177,
+              "output": 13602
+            },
+            "writer": {
+              "input": 0,
+              "output": 0
+            }
+          },
+          "known_tokens": 649779,
+          "known_estimated_usd": 1.408374,
+          "elapsed_seconds": 315.2789708750206
+        }
+      },
+      "structured": {
+        "luna": {
+          "scheduled": 23,
+          "certified": 21,
+          "unfinished": 2,
+          "interrupted": 0,
+          "unattempted": 0,
+          "steps": 195,
+          "sensor_samples": 18,
+          "roles": {
+            "repair": {
+              "input": 512112,
+              "output": 21502
+            },
+            "writer": {
+              "input": 74060,
+              "output": 15092
+            }
+          },
+          "known_tokens": 622766,
+          "known_estimated_usd": 0.0769142,
+          "elapsed_seconds": 560.5001170850592
+        },
+        "sol": {
+          "scheduled": 23,
+          "certified": 23,
+          "unfinished": 0,
+          "interrupted": 0,
+          "unattempted": 0,
+          "steps": 194,
+          "sensor_samples": 18,
+          "roles": {
+            "repair": {
+              "input": 520311,
+              "output": 12352
+            },
+            "writer": {
+              "input": 74835,
+              "output": 15318
+            }
+          },
+          "known_tokens": 622816,
+          "known_estimated_usd": 1.1792845,
+          "elapsed_seconds": 468.5180405828869
+        }
+      }
+    }
+  },
+  "interrupted_history_positions": [
+    {
+      "repetition": 1,
+      "condition": "rolling",
+      "job": 5
+    },
+    {
+      "repetition": 1,
+      "condition": "rolling",
+      "job": 6
+    },
+    {
+      "repetition": 1,
+      "condition": "rolling",
+      "job": 7
+    },
+    {
+      "repetition": 1,
+      "condition": "rolling",
+      "job": 8
+    }
+  ],
+  "uninterrupted_history_terminal_pairs": {
+    "selection": "Terminal same-condition pairs excluding later tickets in a condition/shift whose prior Sol attempt was interrupted. This removes the first-shift rolling history affected by the spend stop.",
+    "by_condition": {
+      "none": {
+        "luna": {
+          "scheduled": 24,
+          "certified": 24,
+          "unfinished": 0,
+          "interrupted": 0,
+          "unattempted": 0,
+          "steps": 248,
+          "sensor_samples": 48,
+          "roles": {
+            "repair": {
+              "input": 500239,
+              "output": 24278
+            },
+            "writer": {
+              "input": 0,
+              "output": 0
+            }
+          },
+          "known_tokens": 524517,
+          "known_estimated_usd": 0.0621629,
+          "elapsed_seconds": 454.97222424898064
+        },
+        "sol": {
+          "scheduled": 24,
+          "certified": 24,
+          "unfinished": 0,
+          "interrupted": 0,
+          "unattempted": 0,
+          "steps": 234,
+          "sensor_samples": 46,
+          "roles": {
+            "repair": {
+              "input": 456741,
+              "output": 13491
+            },
+            "writer": {
+              "input": 0,
+              "output": 0
+            }
+          },
+          "known_tokens": 470232,
+          "known_estimated_usd": 1.048392,
+          "elapsed_seconds": 363.3223492500838
+        }
+      },
+      "rolling": {
+        "luna": {
+          "scheduled": 19,
+          "certified": 17,
+          "unfinished": 2,
+          "interrupted": 0,
+          "unattempted": 0,
+          "steps": 164,
+          "sensor_samples": 18,
+          "roles": {
+            "repair": {
+              "input": 549502,
+              "output": 23880
+            },
+            "writer": {
+              "input": 0,
+              "output": 0
+            }
+          },
+          "known_tokens": 573382,
+          "known_estimated_usd": 0.0668902,
+          "elapsed_seconds": 370.311906626157
+        },
+        "sol": {
+          "scheduled": 19,
+          "certified": 17,
+          "unfinished": 2,
+          "interrupted": 0,
+          "unattempted": 0,
+          "steps": 153,
+          "sensor_samples": 14,
+          "roles": {
+            "repair": {
+              "input": 499577,
+              "output": 10603
+            },
+            "writer": {
+              "input": 0,
+              "output": 0
+            }
+          },
+          "known_tokens": 510180,
+          "known_estimated_usd": 1.105184,
+          "elapsed_seconds": 249.16569620807422
+        }
+      },
+      "structured": {
+        "luna": {
+          "scheduled": 24,
+          "certified": 22,
+          "unfinished": 2,
+          "interrupted": 0,
+          "unattempted": 0,
+          "steps": 205,
+          "sensor_samples": 18,
+          "roles": {
+            "repair": {
+              "input": 536631,
+              "output": 22735
+            },
+            "writer": {
+              "input": 77977,
+              "output": 15669
+            }
+          },
+          "known_tokens": 653012,
+          "known_estimated_usd": 0.0806628,
+          "elapsed_seconds": 589.1260112510645
+        },
+        "sol": {
+          "scheduled": 24,
+          "certified": 24,
+          "unfinished": 0,
+          "interrupted": 0,
+          "unattempted": 0,
+          "steps": 204,
+          "sensor_samples": 18,
+          "roles": {
+            "repair": {
+              "input": 544860,
+              "output": 12959
+            },
+            "writer": {
+              "input": 78755,
+              "output": 15941
+            }
+          },
+          "known_tokens": 652515,
+          "known_estimated_usd": 1.235156,
+          "elapsed_seconds": 494.28892699989956
+        }
+      }
+    }
+  },
+  "uninterrupted_history_common_groups": {
+    "positions": [
+      {
+        "repetition": 1,
+        "job": 1
+      },
+      {
+        "repetition": 1,
+        "job": 2
+      },
+      {
+        "repetition": 1,
+        "job": 3
+      },
+      {
+        "repetition": 2,
+        "job": 1
+      },
+      {
+        "repetition": 2,
+        "job": 2
+      },
+      {
+        "repetition": 2,
+        "job": 3
+      },
+      {
+        "repetition": 2,
+        "job": 4
+      },
+      {
+        "repetition": 2,
+        "job": 5
+      },
+      {
+        "repetition": 2,
+        "job": 6
+      },
+      {
+        "repetition": 2,
+        "job": 7
+      },
+      {
+        "repetition": 2,
+        "job": 8
+      },
+      {
+        "repetition": 3,
+        "job": 1
+      },
+      {
+        "repetition": 3,
+        "job": 2
+      },
+      {
+        "repetition": 3,
+        "job": 3
+      },
+      {
+        "repetition": 3,
+        "job": 4
+      },
+      {
+        "repetition": 3,
+        "job": 5
+      },
+      {
+        "repetition": 3,
+        "job": 6
+      },
+      {
+        "repetition": 3,
+        "job": 7
+      },
+      {
+        "repetition": 3,
+        "job": 8
+      }
+    ],
+    "by_condition": {
+      "none": {
+        "luna": {
+          "scheduled": 19,
+          "certified": 19,
+          "unfinished": 0,
+          "interrupted": 0,
+          "unattempted": 0,
+          "steps": 189,
+          "sensor_samples": 38,
+          "roles": {
+            "repair": {
+              "input": 373775,
+              "output": 18339
+            },
+            "writer": {
+              "input": 0,
+              "output": 0
+            }
+          },
+          "known_tokens": 392114,
+          "known_estimated_usd": 0.046547000000000005,
+          "elapsed_seconds": 331.74444183293963
+        },
+        "sol": {
+          "scheduled": 19,
+          "certified": 19,
+          "unfinished": 0,
+          "interrupted": 0,
+          "unattempted": 0,
+          "steps": 181,
+          "sensor_samples": 36,
+          "roles": {
+            "repair": {
+              "input": 351387,
+              "output": 10230
+            },
+            "writer": {
+              "input": 0,
+              "output": 0
+            }
+          },
+          "known_tokens": 361617,
+          "known_estimated_usd": 0.805074,
+          "elapsed_seconds": 271.7761500830529
+        }
+      },
+      "rolling": {
+        "luna": {
+          "scheduled": 19,
+          "certified": 17,
+          "unfinished": 2,
+          "interrupted": 0,
+          "unattempted": 0,
+          "steps": 164,
+          "sensor_samples": 18,
+          "roles": {
+            "repair": {
+              "input": 549502,
+              "output": 23880
+            },
+            "writer": {
+              "input": 0,
+              "output": 0
+            }
+          },
+          "known_tokens": 573382,
+          "known_estimated_usd": 0.0668902,
+          "elapsed_seconds": 370.311906626157
+        },
+        "sol": {
+          "scheduled": 19,
+          "certified": 17,
+          "unfinished": 2,
+          "interrupted": 0,
+          "unattempted": 0,
+          "steps": 153,
+          "sensor_samples": 14,
+          "roles": {
+            "repair": {
+              "input": 499577,
+              "output": 10603
+            },
+            "writer": {
+              "input": 0,
+              "output": 0
+            }
+          },
+          "known_tokens": 510180,
+          "known_estimated_usd": 1.105184,
+          "elapsed_seconds": 249.16569620807422
+        }
+      },
+      "structured": {
+        "luna": {
+          "scheduled": 19,
+          "certified": 18,
+          "unfinished": 1,
+          "interrupted": 0,
+          "unattempted": 0,
+          "steps": 157,
+          "sensor_samples": 14,
+          "roles": {
+            "repair": {
+              "input": 398151,
+              "output": 17272
+            },
+            "writer": {
+              "input": 59259,
+              "output": 13147
+            }
+          },
+          "known_tokens": 487829,
+          "known_estimated_usd": 0.060950500000000005,
+          "elapsed_seconds": 445.0479409589898
+        },
+        "sol": {
+          "scheduled": 19,
+          "certified": 19,
+          "unfinished": 0,
+          "interrupted": 0,
+          "unattempted": 0,
+          "steps": 157,
+          "sensor_samples": 14,
+          "roles": {
+            "repair": {
+              "input": 406068,
+              "output": 9752
+            },
+            "writer": {
+              "input": 59952,
+              "output": 12109
+            }
+          },
+          "known_tokens": 487881,
+          "known_estimated_usd": 0.9217057,
+          "elapsed_seconds": 372.4965410408913
+        }
+      }
+    }
+  }
+}

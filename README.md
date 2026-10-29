@@ -32,6 +32,8 @@ The subsequent [memory-first combined intervention](docs/LIVE_EVALUATION_TUNED_2
 
 The [controlled Sol repair comparison](docs/LIVE_EVALUATION_SOL_2026-10-29.md) changed only the repair model, keeping the Luna writer and tuned protocol fixed. Its $0.50 admission guard stopped execution at **10 certified, one interrupted and 61 unattempted** positions ($0.4415131 estimated). The three common early tickets had the same action counts as tuned Luna; later exceptions and compound work were not reached. [The world and task explainer](docs/EVALUATION_WORLD.md) describes the machinery, seven tools, hidden state and independent certification.
 
+The [authorized Sol continuation](docs/LIVE_EVALUATION_SOL_EXTENDED_2026-10-29.md) preserved that interrupted attempt and all prior charges, then executed only the 61 untouched positions under a $10 combined ceiling after **120 offline tests passed**. Final coverage: **68 certified, three job-token failures, one preserved interruption, zero unattempted**; 1,807,233 tokens and $3.765312 estimated. Structured and no memory both certified 24/24; structured used 30 fewer actions but 38.8% more tokens and cost 17.8% more. Matched Luna comparisons and interruption-history sensitivity data are included.
+
 ## Put an experiment together
 
 1. Name the experiment and add notes or a hypothesis. Choose a task set, jobs per mechanic and repeated shifts. The selected prefix is shown as “N of M jobs”; **Select all jobs in this task set** explicitly selects the full suite. Changing task sets preserves the chosen count where possible.
