@@ -72,8 +72,8 @@ class EvaluationConfig:
     def validate(self):
         if self.schema_version!=2:raise ValueError('Use the legacy workshop for schema-v1 experiments; no implicit migration.')
         if not isinstance(self.name,str) or not self.name.strip() or len(self.name)>120:raise ValueError('Invalid experiment name.')
-        if self.task_set not in ('service-v1','service-v2') or self.variant!='standard-v1':raise ValueError('Unknown task set or variant.')
-        integer(self.jobs,1,8,'jobs');integer(self.repetitions,1,10,'repetitions')
+        if self.task_set not in ('service-v1','service-v2','service-repeat-v1') or self.variant!='standard-v1':raise ValueError('Unknown task set or variant.')
+        integer(self.jobs,1,2 if self.task_set=='service-repeat-v1' else 8,'jobs');integer(self.repetitions,1,10,'repetitions')
         integer(self.run_total_token_limit,128,10000000,'run total token limit')
         if self.request_admission_policy not in ('returned-usage-v1','conservative-bytes-v1'):
             raise ValueError('Unknown request admission policy.')

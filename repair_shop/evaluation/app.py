@@ -16,7 +16,9 @@ def parse(text):
     except (ValueError,TypeError) as e:raise gr.Error(str(e)) from None
 
 def describe(c):
-    lines=[f'### {c.name}',f'**Task: {c.task_set} / {c.variant}. {len(c.conditions)} conditions × {c.jobs} of 8 tickets × {c.repetitions} repetitions = {c.attempts} attempts.**',
+    from ..tasks import get_evaluation_suite
+    available=len(get_evaluation_suite(c.task_set,c.variant).jobs)
+    lines=[f'### {c.name}',f'**Task: {c.task_set} / {c.variant}. {len(c.conditions)} conditions × {c.jobs} of {available} tickets × {c.repetitions} repetitions = {c.attempts} attempts.**',
         f'Run token safety limit: {c.run_total_token_limit:,}. Estimated USD safety limit: {c.run_estimated_usd_limit if c.run_estimated_usd_limit is not None else "disabled explicitly"}. Admission policy: {c.request_admission_policy}.',
         'Condition order rotates across fresh repetitions; ticket order stays fixed. Current-job raw results and literal logs are identical context policies across conditions. Writer runs once at job end only for structured memory. Limits check returned usage; one request may overshoot. No automatic retry.',
         '| Condition / memory | Repair: model / effort / prompt / output cap | Writer: model / effort / prompt / output cap | Entries / retained tokens / supplied tokens | Tool steps / total job tokens |',
@@ -133,7 +135,7 @@ class Controller:
 def build_app(controller=None):
     ctl=controller or Controller();initial=preset()
     with gr.Blocks(title='Paired agent evaluations',analytics_enabled=False) as app:
-        gr.Markdown('# Paired agent evaluations\nCompare memory, reasoning, models and limits on the same eight tickets. The original robot workshop and historical experiments remain separate. No live pilot has been authorized by this configuration.')
+        gr.Markdown('# Paired agent evaluations\nCompare memory, reasoning, models and limits on the same selected tickets. The original robot workshop and historical experiments remain separate. Loading a configuration does not start a live run.')
         reference=gr.State(None)
         with gr.Row():
             presets=gr.Dropdown(['memory','reasoning','model','budget','tuned-v2','tuned-memory-first'],value='memory',label='Comparison preset')
