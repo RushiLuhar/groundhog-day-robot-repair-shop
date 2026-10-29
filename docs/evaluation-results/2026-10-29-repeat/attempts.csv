@@ -1,0 +1,19 @@
+repetition,condition,job,status,certified,steps,sensor_samples,invalid_actions,failed_tests,repair_input,repair_output,writer_input,writer_output,known_tokens,estimated_usd,unknown_calls,elapsed_seconds,supplied_memory_tokens,supplied_items,reason
+1,none,1,success,True,9,2,0,0,16485,767,0,0,17252,0.002032,0,15.192927542026155,1,0,Independent test passed.
+1,rolling,1,success,True,9,2,0,0,16593,962,0,0,17555,0.0021403,0,16.738474708981812,1,0,Independent test passed.
+1,structured,1,success,True,9,2,0,0,16629,959,2100,822,20510,0.0027634,0,24.706011833040975,4,0,Independent test passed.
+1,none,2,success,True,9,2,0,0,16499,854,0,0,17353,0.0020769,0,15.93363716598833,1,0,Independent test passed.
+1,rolling,2,success,True,7,0,0,0,17646,876,0,0,18522,0.0022026,0,14.429683083028067,807,9,Independent test passed.
+1,structured,2,success,True,7,0,0,0,13040,885,2469,854,17248,0.0024203999999999996,0,22.518129375006538,164,1,Independent test passed.
+2,rolling,1,success,True,9,2,0,0,16607,881,0,0,17488,0.0021012,0,15.630460792046506,1,0,Independent test passed.
+2,structured,1,success,True,9,2,0,0,16676,909,2100,448,20133,0.0025561000000000004,0,21.058175000012852,4,0,Independent test passed.
+2,none,1,success,True,9,2,0,0,16485,859,0,0,17344,0.002078,0,15.232766834029462,1,0,Independent test passed.
+2,rolling,2,success,True,7,0,0,0,17693,897,0,0,18590,0.0022178,0,13.80864833301166,807,9,Independent test passed.
+2,structured,2,success,True,7,0,0,0,12956,864,2459,489,16768,0.002218,0,20.61962620803388,154,1,Independent test passed.
+2,none,2,success,True,9,2,0,0,16485,807,0,0,17292,0.002052,0,14.626994082995225,1,0,Independent test passed.
+3,structured,1,success,True,9,2,0,0,16643,953,2100,496,20192,0.0025988,0,22.88590066600591,4,0,Independent test passed.
+3,none,1,success,True,9,2,0,0,16485,991,0,0,17476,0.002144,0,17.959888125013094,1,0,Independent test passed.
+3,rolling,1,success,True,9,2,0,0,16593,1042,0,0,17635,0.0021803,0,17.610152457957156,1,0,Independent test passed.
+3,structured,2,success,True,7,0,0,0,13010,771,2460,1158,17399,0.0025115,0,26.944948749965988,155,1,Independent test passed.
+3,none,2,success,True,9,2,0,0,16485,886,0,0,17371,0.0020915,0,15.980409208044875,1,0,Independent test passed.
+3,rolling,2,success,True,7,0,0,0,17646,1026,0,0,18672,0.0022776,0,18.375519042019732,807,9,Independent test passed.

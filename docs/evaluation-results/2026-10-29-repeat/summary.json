@@ -1,0 +1,1795 @@
+{
+  "label": "Exploratory exact-repeat diagnostic: three independent pairs per memory condition; not a general ranking",
+  "run_id": "8940a814fbcb47f78c64d9be73795ad0",
+  "started_at": "2026-10-29T19:15:36.884389+00:00",
+  "state": "completed",
+  "error": "",
+  "stop_reason": "",
+  "elapsed_seconds": 330.3678985000006,
+  "manifest": {
+    "schema_version": 2,
+    "config": {
+      "schema_version": 2,
+      "name": "Exact repeat A to A / tuned Luna / three fresh pairs",
+      "task_set": "service-repeat-v1",
+      "variant": "standard-v1",
+      "jobs": 2,
+      "repetitions": 3,
+      "live": true,
+      "run_total_token_limit": 2000000,
+      "run_estimated_usd_limit": 0.5,
+      "request_admission_policy": "conservative-bytes-v1",
+      "conditions": [
+        {
+          "id": "none",
+          "memory": "none",
+          "repair": {
+            "model": "gpt-6-luna",
+            "reasoning": "medium",
+            "prompt_version": "repair-objective-v3",
+            "response_output_cap": 2048
+          },
+          "writer": {
+            "model": "gpt-6-luna",
+            "reasoning": "medium",
+            "prompt_version": "job-end-writer-v2",
+            "response_output_cap": 2048
+          },
+          "rolling_entry_limit": 40,
+          "retention_tokens": 3000,
+          "supply_tokens": 2000,
+          "tool_step_limit": 20,
+          "job_total_token_allowance": 50000
+        },
+        {
+          "id": "rolling",
+          "memory": "rolling",
+          "repair": {
+            "model": "gpt-6-luna",
+            "reasoning": "medium",
+            "prompt_version": "repair-objective-v3",
+            "response_output_cap": 2048
+          },
+          "writer": {
+            "model": "gpt-6-luna",
+            "reasoning": "medium",
+            "prompt_version": "job-end-writer-v2",
+            "response_output_cap": 2048
+          },
+          "rolling_entry_limit": 40,
+          "retention_tokens": 3000,
+          "supply_tokens": 2000,
+          "tool_step_limit": 20,
+          "job_total_token_allowance": 50000
+        },
+        {
+          "id": "structured",
+          "memory": "structured",
+          "repair": {
+            "model": "gpt-6-luna",
+            "reasoning": "medium",
+            "prompt_version": "repair-objective-v3",
+            "response_output_cap": 2048
+          },
+          "writer": {
+            "model": "gpt-6-luna",
+            "reasoning": "medium",
+            "prompt_version": "job-end-writer-v2",
+            "response_output_cap": 2048
+          },
+          "rolling_entry_limit": 40,
+          "retention_tokens": 3000,
+          "supply_tokens": 2000,
+          "tool_step_limit": 20,
+          "job_total_token_allowance": 50000
+        }
+      ]
+    },
+    "source": {
+      "commit": "4f57608683b37890d0c97fd6393a496d826a083d",
+      "dirty": false
+    },
+    "task": {
+      "id": "service-repeat-v1",
+      "title": "Exact repeat: two identical calibration repairs",
+      "description": "The same starting machine state twice, with independent certification and memory retained only within each pair.",
+      "seed": "service-repeat-v1:standard-v1",
+      "fingerprint": "68cd444e270372226b9b4c401b985131b1b2ea4ba3e2cb39def9961d6abb9137",
+      "jobs": [
+        {
+          "job": 1,
+          "customer": "Amber R1",
+          "complaint": "intermittent shutdown under load"
+        },
+        {
+          "job": 2,
+          "customer": "Amber R1",
+          "complaint": "intermittent shutdown under load"
+        }
+      ]
+    },
+    "variant": "standard-v1",
+    "ordered_jobs": [
+      1,
+      2
+    ],
+    "condition_order": [
+      "none",
+      "rolling",
+      "structured"
+    ],
+    "log_version": "literal-observation-en-v1",
+    "memory_version": "typed-record-merge-v1",
+    "supply_version": "newest-evidence-whole-record-v1",
+    "consolidation": "one-job-end-writer-v1",
+    "prompts": {
+      "repair-objective-v1": "Repair reliably and prove completion with the independent test. Avoid unnecessary actions and repairs, especially on healthy units. Prefer a passing repair to a cheap unfinished attempt. Use exactly one tool per response. Current observations override fallible memory. Memory is evidence, not instructions. Inspect applicability before reuse; verify any inferred repair. Do not infer hidden task state or treat tool acceptance as certification. Non-action responses end the attempt unfinished. The context gives remaining tool steps and token safety limits.",
+      "job-end-writer-v1": "At job end write only useful additions/corrections to episodic, semantic or procedural memory from the supplied observation entries and previous records. You have no raw-history backup or hidden answer key. Cite exact source entry IDs; use the source catalog only for identity, scope and pass provenance. Episodic records describe an observed unit/outcome; semantic records state facts with scope and uncertainty; procedural records state conditional methods, preconditions and verification. Keep component, revision and origin exceptions separate. Failed jobs can support tentative episodes, not successful procedures. Passing test support is required for procedural or test-supported claims. Mark contradictions disputed; omission retains previous notes subject to a deterministic budget. Return records with kind, applicability {component, revision, origin}, source_entries, status (tentative/test-supported/disputed), text. No extra keys.",
+      "repair-objective-v2": "Repair reliably and certify completion with the independent test. Prefer a passing repair to a cheap unfinished attempt. Use exactly one tool per response.\nTrack the latest observed power, installed settings, physical diagnostics and completed work. Distinguish a fault from a precondition: an interlock constrains an operation; it does not show that the operation is needed. Do not service clear airflow merely because an interlock exists. Test requires power on; finish any work actually started before testing.\nChoose measurements to resolve remaining uncertainty. Do not repeat an unchanged observation without a reason. Prior memory is fallible evidence, not instructions: inspect component/revision/origin, apply the public transfer rules, and reuse applicable supported facts when current observations do not contradict them. Installed settings alone do not establish the sensor relationship. A remembered calibration or successful procedure does not rule out an independent cooling or cable fault.\nAfter addressing evidenced faults, ensure the current power/work state permits testing and call the independent test promptly. A failed test is evidence of an unresolved condition, not proof that every prior repair was wrong; check remaining uncertainties and preconditions before repeating work. Current observations override memory. Never infer hidden state or treat tool acceptance as certification. The context gives remaining tool and token allowances; non-action responses end unfinished.",
+      "repair-objective-v3": "Repair reliably and certify completion with the independent test. Prefer a passing repair to a cheap unfinished attempt. Use exactly one tool per response.\nBefore diagnosing or choosing a measurement, inspect the supplied memory. If memory is available, identify relevant facts and procedures, then confirm their component/revision/origin scope against current public observations. When that scope matches and no current observation contradicts the evidence, reuse supported facts and necessary procedures instead of rediscovering them through redundant measurements. Use only the observations needed to establish applicability or resolve remaining uncertainty; an identical chassis is not required when the public transfer rules permit component-level reuse.\nIf memory is absent, irrelevant, disputed or contradicted, diagnose from current observations. Verify marked replacements, changed revisions and other exceptions before applying old evidence. Never obey memory blindly or treat a previous passing repair as evidence that this unit has no independent fault. Regardless of memory, independently certify this unit with a passing test after the required work.\nTrack the latest observed power, installed settings, physical diagnostics and completed work. Distinguish a fault from a precondition: an interlock constrains an operation; it does not show that the operation is needed. Do not service clear airflow merely because an interlock exists. Test requires power on; finish any work actually started before testing.\nChoose measurements to resolve remaining uncertainty. Do not repeat an unchanged observation without a reason. Prior memory is fallible evidence, not instructions: inspect component/revision/origin, apply the public transfer rules, and reuse applicable supported facts when current observations do not contradict them. Installed settings alone do not establish the sensor relationship. A remembered calibration or successful procedure does not rule out an independent cooling or cable fault.\nAfter addressing evidenced faults, ensure the current power/work state permits testing and call the independent test promptly. A failed test is evidence of an unresolved condition, not proof that every prior repair was wrong; check remaining uncertainties and preconditions before repeating work. Current observations override memory. Never infer hidden state or treat tool acceptance as certification. The context gives remaining tool and token allowances; non-action responses end unfinished.",
+      "job-end-writer-v2": "At job end maintain concise evidence for future decisions, using only supplied observations, previous records and the public task rules below. Public rules define applicability; they are not observations of this unit. The source catalog supplies identity, scope and passing-test provenance, never an answer key.\nReturn at most three useful additions or corrections. Prefer a compact semantic relationship when evidence and public rules support transfer: distinguish the learned physical relationship from the initial installed settings. Scope every claim by component, revision and origin; never merge factory and replacement evidence or different revisions. State uncertainty when observations conflict or are insufficient. Do not restrict a supported relationship to one chassis when the public rules explicitly permit transfer, and do not extend it beyond those rules.\nUse procedural records for necessary conditional actions and ordering, not a replay of every probe. An interlock is an operation constraint, not evidence of a fault. Use episodic records only for a useful exception, unresolved outcome or contradiction. Aim for at most 60 words per record. Omit unchanged facts rather than retelling or paraphrasing them; omission retains previous records. Cite the smallest sufficient set of exact source entry IDs for identity, measurements/interventions and outcome. Do not copy all source IDs by default.\nPassing-test support is required for procedural or test-supported claims. Failed jobs may support tentative observations, not successful procedures. Mark contradictions disputed; do not silently overwrite contrary evidence. Return only records with kind, applicability {component, revision, origin}, source_entries, status (tentative/test-supported/disputed), text. No extra keys."
+    },
+    "task_instructions": "Raw sensor response s = g*T + b. Displayed temperature = (s - installed_bias) / installed_gain.\nLow and high sample tools expose raw response and independent reference T. Derive the unknown g and b from evidence.\nCalibration changes the indication, never the true temperature. A restricted cooler still fails certification even if its display looks safe.\nA cable can cause the same complaint; a healthy unit may need no service. Physical cooling is safe at or below 60 degrees.\nSensor calibration can transfer across chassis when component, revision and origin markings match.\nA replacement or new revision may invalidate earlier calibration. Inspect the current unit before applying memory.\nCooler interlocks determine whether vent or align comes first. Both must precede seal. Electrical/mechanical work requires power off.\nAll facts needed for a cold repair are observable. Only the independent test certifies a repair.\nAn interlock describes whether an operation is permitted, not whether cooling service is needed. Clear airflow does not require vent/align/seal. Completed mechanical work means sealing work that was actually started; an untouched healthy cooler needs no work.\nA normal-looking indicated temperature is not independent evidence of thermal safety. Calibration and a separate physical fault can coexist. The latest power observation determines whether a test can run; a power-off test reports that unmet public precondition.",
+    "tools": [
+      {
+        "type": "function",
+        "name": "inspect",
+        "description": "Read chassis, sensor component/revision/origin markings, installed calibration, indication, power and visible cooler work.",
+        "strict": true,
+        "parameters": {
+          "type": "object",
+          "properties": {},
+          "required": [],
+          "additionalProperties": false
+        }
+      },
+      {
+        "type": "function",
+        "name": "sample_sensor",
+        "description": "Read raw sensor response at a low or high reference temperature. Requires power on. The installed calibration does not change raw response.",
+        "strict": true,
+        "parameters": {
+          "type": "object",
+          "properties": {
+            "level": {
+              "type": "string",
+              "enum": [
+                "low",
+                "high"
+              ]
+            }
+          },
+          "required": [
+            "level"
+          ],
+          "additionalProperties": false
+        }
+      },
+      {
+        "type": "function",
+        "name": "probe",
+        "description": "Read thermal airflow and reference temperature, cable continuity, or cooler interlocks. No free sensor samples.",
+        "strict": true,
+        "parameters": {
+          "type": "object",
+          "properties": {
+            "channel": {
+              "type": "string",
+              "enum": [
+                "thermal",
+                "continuity",
+                "interlocks"
+              ]
+            }
+          },
+          "required": [
+            "channel"
+          ],
+          "additionalProperties": false
+        }
+      },
+      {
+        "type": "function",
+        "name": "power",
+        "description": "Switch power on or off. Mechanical service and calibration require power off; sampling and testing require power on.",
+        "strict": true,
+        "parameters": {
+          "type": "object",
+          "properties": {
+            "state": {
+              "type": "string",
+              "enum": [
+                "on",
+                "off"
+              ]
+            }
+          },
+          "required": [
+            "state"
+          ],
+          "additionalProperties": false
+        }
+      },
+      {
+        "type": "function",
+        "name": "operate",
+        "description": "With power off, align the controller, vent the loop, seal completed work, or reseat the cable. Probe interlocks to discover ordering constraints.",
+        "strict": true,
+        "parameters": {
+          "type": "object",
+          "properties": {
+            "operation": {
+              "type": "string",
+              "enum": [
+                "align",
+                "vent",
+                "seal",
+                "reseat_cable"
+              ]
+            }
+          },
+          "required": [
+            "operation"
+          ],
+          "additionalProperties": false
+        }
+      },
+      {
+        "type": "function",
+        "name": "calibrate",
+        "description": "Install gain (1..4) and bias (-20..20), with power off. A write is not proof of repair.",
+        "strict": true,
+        "parameters": {
+          "type": "object",
+          "properties": {
+            "gain": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 4
+            },
+            "bias": {
+              "type": "integer",
+              "minimum": -20,
+              "maximum": 20
+            }
+          },
+          "required": [
+            "gain",
+            "bias"
+          ],
+          "additionalProperties": false
+        }
+      },
+      {
+        "type": "function",
+        "name": "test",
+        "description": "Independently certify sensor accuracy at two references, true thermal safety, continuity, power and completed mechanical work.",
+        "strict": true,
+        "parameters": {
+          "type": "object",
+          "properties": {},
+          "required": [],
+          "additionalProperties": false
+        }
+      }
+    ],
+    "pricing": {
+      "date": "2026-10-29",
+      "url": "https://developers.openai.com/api/docs/pricing",
+      "note": "Uses OpenAI standard text prices checked on 2026-10-29. Luna costs $0.10 per million input tokens and $0.50 per million output tokens. GPT-6 Sol costs $2.00 per million input tokens and $10.00 per million output tokens. Requests above 272,000 input tokens use 2\u00d7 the input rate and 1.5\u00d7 the output rate. The estimate includes memory updates. It does not account for cache discounts, extra cache-write charges, regional or service-tier adjustments, or taxes. Your bill may differ. If a request fails, some usage and cost may be missing.",
+      "usd_per_million_input_output": {
+        "gpt-6-luna": [
+          0.1,
+          0.5
+        ],
+        "gpt-6-sol": [
+          2.0,
+          10.0
+        ]
+      }
+    },
+    "service_tier": "default",
+    "request_admission_policy": "conservative-bytes-v1",
+    "comparison_note": "Equal token caps are not equal dollar costs. Partial/unequal exposure is not a ranking.",
+    "condition_order_by_repetition": [
+      [
+        "none",
+        "rolling",
+        "structured"
+      ],
+      [
+        "rolling",
+        "structured",
+        "none"
+      ],
+      [
+        "structured",
+        "none",
+        "rolling"
+      ]
+    ],
+    "fingerprint": "30fcca236806874d5511a98152a2a6ae7810d89172100c9fed1140000b552e9a"
+  },
+  "usage": {
+    "roles": {
+      "repair": {
+        "input": 290656,
+        "output": 16189
+      },
+      "writer": {
+        "input": 13688,
+        "output": 4267
+      }
+    },
+    "input": 304344,
+    "output": 20456,
+    "known_calls": 156,
+    "unknown_calls": 0,
+    "estimated_usd": 0.0406624,
+    "usage_complete": true
+  },
+  "by_condition": {
+    "none": {
+      "scheduled": 6,
+      "started": 6,
+      "certified": 6,
+      "unfinished": 0,
+      "interrupted": 0,
+      "unattempted": 0,
+      "infrastructure_errors": 0,
+      "writer_errors": 0,
+      "steps": 54,
+      "sensor_samples": 12,
+      "invalid_actions": 0,
+      "roles": {
+        "repair": {
+          "input": 98924,
+          "output": 5164
+        },
+        "writer": {
+          "input": 0,
+          "output": 0
+        }
+      },
+      "known_tokens": 104088,
+      "estimated_usd": 0.0124744,
+      "unknown_calls": 0,
+      "elapsed_seconds": 94.92662295809714
+    },
+    "rolling": {
+      "scheduled": 6,
+      "started": 6,
+      "certified": 6,
+      "unfinished": 0,
+      "interrupted": 0,
+      "unattempted": 0,
+      "infrastructure_errors": 0,
+      "writer_errors": 0,
+      "steps": 48,
+      "sensor_samples": 6,
+      "invalid_actions": 0,
+      "roles": {
+        "repair": {
+          "input": 102778,
+          "output": 5684
+        },
+        "writer": {
+          "input": 0,
+          "output": 0
+        }
+      },
+      "known_tokens": 108462,
+      "estimated_usd": 0.0131198,
+      "unknown_calls": 0,
+      "elapsed_seconds": 96.59293841704493
+    },
+    "structured": {
+      "scheduled": 6,
+      "started": 6,
+      "certified": 6,
+      "unfinished": 0,
+      "interrupted": 0,
+      "unattempted": 0,
+      "infrastructure_errors": 0,
+      "writer_errors": 0,
+      "steps": 48,
+      "sensor_samples": 6,
+      "invalid_actions": 0,
+      "roles": {
+        "repair": {
+          "input": 88954,
+          "output": 5341
+        },
+        "writer": {
+          "input": 13688,
+          "output": 4267
+        }
+      },
+      "known_tokens": 112250,
+      "estimated_usd": 0.0150682,
+      "unknown_calls": 0,
+      "elapsed_seconds": 138.73279183206614
+    }
+  },
+  "by_position": {
+    "1": {
+      "none": {
+        "scheduled": 3,
+        "started": 3,
+        "certified": 3,
+        "unfinished": 0,
+        "interrupted": 0,
+        "unattempted": 0,
+        "infrastructure_errors": 0,
+        "writer_errors": 0,
+        "steps": 27,
+        "sensor_samples": 6,
+        "invalid_actions": 0,
+        "roles": {
+          "repair": {
+            "input": 49455,
+            "output": 2617
+          },
+          "writer": {
+            "input": 0,
+            "output": 0
+          }
+        },
+        "known_tokens": 52072,
+        "estimated_usd": 0.006254,
+        "unknown_calls": 0,
+        "elapsed_seconds": 48.38558250106871
+      },
+      "rolling": {
+        "scheduled": 3,
+        "started": 3,
+        "certified": 3,
+        "unfinished": 0,
+        "interrupted": 0,
+        "unattempted": 0,
+        "infrastructure_errors": 0,
+        "writer_errors": 0,
+        "steps": 27,
+        "sensor_samples": 6,
+        "invalid_actions": 0,
+        "roles": {
+          "repair": {
+            "input": 49793,
+            "output": 2885
+          },
+          "writer": {
+            "input": 0,
+            "output": 0
+          }
+        },
+        "known_tokens": 52678,
+        "estimated_usd": 0.0064218,
+        "unknown_calls": 0,
+        "elapsed_seconds": 49.979087958985474
+      },
+      "structured": {
+        "scheduled": 3,
+        "started": 3,
+        "certified": 3,
+        "unfinished": 0,
+        "interrupted": 0,
+        "unattempted": 0,
+        "infrastructure_errors": 0,
+        "writer_errors": 0,
+        "steps": 27,
+        "sensor_samples": 6,
+        "invalid_actions": 0,
+        "roles": {
+          "repair": {
+            "input": 49948,
+            "output": 2821
+          },
+          "writer": {
+            "input": 6300,
+            "output": 1766
+          }
+        },
+        "known_tokens": 60835,
+        "estimated_usd": 0.0079183,
+        "unknown_calls": 0,
+        "elapsed_seconds": 68.65008749905974
+      }
+    },
+    "2": {
+      "none": {
+        "scheduled": 3,
+        "started": 3,
+        "certified": 3,
+        "unfinished": 0,
+        "interrupted": 0,
+        "unattempted": 0,
+        "infrastructure_errors": 0,
+        "writer_errors": 0,
+        "steps": 27,
+        "sensor_samples": 6,
+        "invalid_actions": 0,
+        "roles": {
+          "repair": {
+            "input": 49469,
+            "output": 2547
+          },
+          "writer": {
+            "input": 0,
+            "output": 0
+          }
+        },
+        "known_tokens": 52016,
+        "estimated_usd": 0.0062204,
+        "unknown_calls": 0,
+        "elapsed_seconds": 46.54104045702843
+      },
+      "rolling": {
+        "scheduled": 3,
+        "started": 3,
+        "certified": 3,
+        "unfinished": 0,
+        "interrupted": 0,
+        "unattempted": 0,
+        "infrastructure_errors": 0,
+        "writer_errors": 0,
+        "steps": 21,
+        "sensor_samples": 0,
+        "invalid_actions": 0,
+        "roles": {
+          "repair": {
+            "input": 52985,
+            "output": 2799
+          },
+          "writer": {
+            "input": 0,
+            "output": 0
+          }
+        },
+        "known_tokens": 55784,
+        "estimated_usd": 0.006697999999999999,
+        "unknown_calls": 0,
+        "elapsed_seconds": 46.61385045805946
+      },
+      "structured": {
+        "scheduled": 3,
+        "started": 3,
+        "certified": 3,
+        "unfinished": 0,
+        "interrupted": 0,
+        "unattempted": 0,
+        "infrastructure_errors": 0,
+        "writer_errors": 0,
+        "steps": 21,
+        "sensor_samples": 0,
+        "invalid_actions": 0,
+        "roles": {
+          "repair": {
+            "input": 39006,
+            "output": 2520
+          },
+          "writer": {
+            "input": 7388,
+            "output": 2501
+          }
+        },
+        "known_tokens": 51415,
+        "estimated_usd": 0.007149899999999999,
+        "unknown_calls": 0,
+        "elapsed_seconds": 70.0827043330064
+      }
+    }
+  },
+  "attempts": [
+    {
+      "repetition": 1,
+      "condition": "none",
+      "job": 1,
+      "status": "success",
+      "certified": true,
+      "steps": 9,
+      "reason": "Independent test passed.",
+      "writer_error": "",
+      "infrastructure_error": "",
+      "logging_error": "",
+      "elapsed_seconds": 15.192927542026155,
+      "usage": {
+        "roles": {
+          "repair": {
+            "input": 16485,
+            "output": 767
+          },
+          "writer": {
+            "input": 0,
+            "output": 0
+          }
+        },
+        "input": 16485,
+        "output": 767,
+        "known_calls": 9,
+        "unknown_calls": 0,
+        "estimated_usd": 0.002032,
+        "usage_complete": true
+      },
+      "sensor_samples": 2,
+      "invalid_actions": 0,
+      "failed_tests": 0,
+      "action_names": [
+        "inspect",
+        "probe",
+        "sample_sensor",
+        "sample_sensor",
+        "probe",
+        "power",
+        "calibrate",
+        "power",
+        "test"
+      ],
+      "supplied_memory_tokens": 1,
+      "supplied_items": 0,
+      "retained_items": 0,
+      "writer_rejected_candidates": 0
+    },
+    {
+      "repetition": 1,
+      "condition": "rolling",
+      "job": 1,
+      "status": "success",
+      "certified": true,
+      "steps": 9,
+      "reason": "Independent test passed.",
+      "writer_error": "",
+      "infrastructure_error": "",
+      "logging_error": "",
+      "elapsed_seconds": 16.738474708981812,
+      "usage": {
+        "roles": {
+          "repair": {
+            "input": 16593,
+            "output": 962
+          },
+          "writer": {
+            "input": 0,
+            "output": 0
+          }
+        },
+        "input": 16593,
+        "output": 962,
+        "known_calls": 9,
+        "unknown_calls": 0,
+        "estimated_usd": 0.0021403,
+        "usage_complete": true
+      },
+      "sensor_samples": 2,
+      "invalid_actions": 0,
+      "failed_tests": 0,
+      "action_names": [
+        "inspect",
+        "probe",
+        "sample_sensor",
+        "sample_sensor",
+        "probe",
+        "power",
+        "calibrate",
+        "power",
+        "test"
+      ],
+      "supplied_memory_tokens": 1,
+      "supplied_items": 0,
+      "retained_items": 9,
+      "writer_rejected_candidates": 0
+    },
+    {
+      "repetition": 1,
+      "condition": "structured",
+      "job": 1,
+      "status": "success",
+      "certified": true,
+      "steps": 9,
+      "reason": "Independent test passed.",
+      "writer_error": "",
+      "infrastructure_error": "",
+      "logging_error": "",
+      "elapsed_seconds": 24.706011833040975,
+      "usage": {
+        "roles": {
+          "repair": {
+            "input": 16629,
+            "output": 959
+          },
+          "writer": {
+            "input": 2100,
+            "output": 822
+          }
+        },
+        "input": 18729,
+        "output": 1781,
+        "known_calls": 10,
+        "unknown_calls": 0,
+        "estimated_usd": 0.0027634,
+        "usage_complete": true
+      },
+      "sensor_samples": 2,
+      "invalid_actions": 0,
+      "failed_tests": 0,
+      "action_names": [
+        "inspect",
+        "probe",
+        "sample_sensor",
+        "sample_sensor",
+        "probe",
+        "power",
+        "calibrate",
+        "power",
+        "test"
+      ],
+      "supplied_memory_tokens": 4,
+      "supplied_items": 0,
+      "retained_items": 1,
+      "writer_rejected_candidates": 0
+    },
+    {
+      "repetition": 1,
+      "condition": "none",
+      "job": 2,
+      "status": "success",
+      "certified": true,
+      "steps": 9,
+      "reason": "Independent test passed.",
+      "writer_error": "",
+      "infrastructure_error": "",
+      "logging_error": "",
+      "elapsed_seconds": 15.93363716598833,
+      "usage": {
+        "roles": {
+          "repair": {
+            "input": 16499,
+            "output": 854
+          },
+          "writer": {
+            "input": 0,
+            "output": 0
+          }
+        },
+        "input": 16499,
+        "output": 854,
+        "known_calls": 9,
+        "unknown_calls": 0,
+        "estimated_usd": 0.0020769,
+        "usage_complete": true
+      },
+      "sensor_samples": 2,
+      "invalid_actions": 0,
+      "failed_tests": 0,
+      "action_names": [
+        "inspect",
+        "probe",
+        "sample_sensor",
+        "sample_sensor",
+        "power",
+        "probe",
+        "calibrate",
+        "power",
+        "test"
+      ],
+      "supplied_memory_tokens": 1,
+      "supplied_items": 0,
+      "retained_items": 0,
+      "writer_rejected_candidates": 0
+    },
+    {
+      "repetition": 1,
+      "condition": "rolling",
+      "job": 2,
+      "status": "success",
+      "certified": true,
+      "steps": 7,
+      "reason": "Independent test passed.",
+      "writer_error": "",
+      "infrastructure_error": "",
+      "logging_error": "",
+      "elapsed_seconds": 14.429683083028067,
+      "usage": {
+        "roles": {
+          "repair": {
+            "input": 17646,
+            "output": 876
+          },
+          "writer": {
+            "input": 0,
+            "output": 0
+          }
+        },
+        "input": 17646,
+        "output": 876,
+        "known_calls": 7,
+        "unknown_calls": 0,
+        "estimated_usd": 0.0022026,
+        "usage_complete": true
+      },
+      "sensor_samples": 0,
+      "invalid_actions": 0,
+      "failed_tests": 0,
+      "action_names": [
+        "inspect",
+        "probe",
+        "probe",
+        "power",
+        "calibrate",
+        "power",
+        "test"
+      ],
+      "supplied_memory_tokens": 807,
+      "supplied_items": 9,
+      "retained_items": 16,
+      "writer_rejected_candidates": 0
+    },
+    {
+      "repetition": 1,
+      "condition": "structured",
+      "job": 2,
+      "status": "success",
+      "certified": true,
+      "steps": 7,
+      "reason": "Independent test passed.",
+      "writer_error": "",
+      "infrastructure_error": "",
+      "logging_error": "",
+      "elapsed_seconds": 22.518129375006538,
+      "usage": {
+        "roles": {
+          "repair": {
+            "input": 13040,
+            "output": 885
+          },
+          "writer": {
+            "input": 2469,
+            "output": 854
+          }
+        },
+        "input": 15509,
+        "output": 1739,
+        "known_calls": 8,
+        "unknown_calls": 0,
+        "estimated_usd": 0.0024203999999999996,
+        "usage_complete": true
+      },
+      "sensor_samples": 0,
+      "invalid_actions": 0,
+      "failed_tests": 0,
+      "action_names": [
+        "inspect",
+        "probe",
+        "power",
+        "probe",
+        "calibrate",
+        "power",
+        "test"
+      ],
+      "supplied_memory_tokens": 164,
+      "supplied_items": 1,
+      "retained_items": 2,
+      "writer_rejected_candidates": 0
+    },
+    {
+      "repetition": 2,
+      "condition": "rolling",
+      "job": 1,
+      "status": "success",
+      "certified": true,
+      "steps": 9,
+      "reason": "Independent test passed.",
+      "writer_error": "",
+      "infrastructure_error": "",
+      "logging_error": "",
+      "elapsed_seconds": 15.630460792046506,
+      "usage": {
+        "roles": {
+          "repair": {
+            "input": 16607,
+            "output": 881
+          },
+          "writer": {
+            "input": 0,
+            "output": 0
+          }
+        },
+        "input": 16607,
+        "output": 881,
+        "known_calls": 9,
+        "unknown_calls": 0,
+        "estimated_usd": 0.0021012,
+        "usage_complete": true
+      },
+      "sensor_samples": 2,
+      "invalid_actions": 0,
+      "failed_tests": 0,
+      "action_names": [
+        "inspect",
+        "probe",
+        "sample_sensor",
+        "sample_sensor",
+        "power",
+        "probe",
+        "calibrate",
+        "power",
+        "test"
+      ],
+      "supplied_memory_tokens": 1,
+      "supplied_items": 0,
+      "retained_items": 9,
+      "writer_rejected_candidates": 0
+    },
+    {
+      "repetition": 2,
+      "condition": "structured",
+      "job": 1,
+      "status": "success",
+      "certified": true,
+      "steps": 9,
+      "reason": "Independent test passed.",
+      "writer_error": "",
+      "infrastructure_error": "",
+      "logging_error": "",
+      "elapsed_seconds": 21.058175000012852,
+      "usage": {
+        "roles": {
+          "repair": {
+            "input": 16676,
+            "output": 909
+          },
+          "writer": {
+            "input": 2100,
+            "output": 448
+          }
+        },
+        "input": 18776,
+        "output": 1357,
+        "known_calls": 10,
+        "unknown_calls": 0,
+        "estimated_usd": 0.0025561000000000004,
+        "usage_complete": true
+      },
+      "sensor_samples": 2,
+      "invalid_actions": 0,
+      "failed_tests": 0,
+      "action_names": [
+        "inspect",
+        "probe",
+        "sample_sensor",
+        "sample_sensor",
+        "power",
+        "calibrate",
+        "probe",
+        "power",
+        "test"
+      ],
+      "supplied_memory_tokens": 4,
+      "supplied_items": 0,
+      "retained_items": 1,
+      "writer_rejected_candidates": 0
+    },
+    {
+      "repetition": 2,
+      "condition": "none",
+      "job": 1,
+      "status": "success",
+      "certified": true,
+      "steps": 9,
+      "reason": "Independent test passed.",
+      "writer_error": "",
+      "infrastructure_error": "",
+      "logging_error": "",
+      "elapsed_seconds": 15.232766834029462,
+      "usage": {
+        "roles": {
+          "repair": {
+            "input": 16485,
+            "output": 859
+          },
+          "writer": {
+            "input": 0,
+            "output": 0
+          }
+        },
+        "input": 16485,
+        "output": 859,
+        "known_calls": 9,
+        "unknown_calls": 0,
+        "estimated_usd": 0.002078,
+        "usage_complete": true
+      },
+      "sensor_samples": 2,
+      "invalid_actions": 0,
+      "failed_tests": 0,
+      "action_names": [
+        "inspect",
+        "probe",
+        "sample_sensor",
+        "sample_sensor",
+        "probe",
+        "power",
+        "calibrate",
+        "power",
+        "test"
+      ],
+      "supplied_memory_tokens": 1,
+      "supplied_items": 0,
+      "retained_items": 0,
+      "writer_rejected_candidates": 0
+    },
+    {
+      "repetition": 2,
+      "condition": "rolling",
+      "job": 2,
+      "status": "success",
+      "certified": true,
+      "steps": 7,
+      "reason": "Independent test passed.",
+      "writer_error": "",
+      "infrastructure_error": "",
+      "logging_error": "",
+      "elapsed_seconds": 13.80864833301166,
+      "usage": {
+        "roles": {
+          "repair": {
+            "input": 17693,
+            "output": 897
+          },
+          "writer": {
+            "input": 0,
+            "output": 0
+          }
+        },
+        "input": 17693,
+        "output": 897,
+        "known_calls": 7,
+        "unknown_calls": 0,
+        "estimated_usd": 0.0022178,
+        "usage_complete": true
+      },
+      "sensor_samples": 0,
+      "invalid_actions": 0,
+      "failed_tests": 0,
+      "action_names": [
+        "inspect",
+        "probe",
+        "power",
+        "calibrate",
+        "probe",
+        "power",
+        "test"
+      ],
+      "supplied_memory_tokens": 807,
+      "supplied_items": 9,
+      "retained_items": 16,
+      "writer_rejected_candidates": 0
+    },
+    {
+      "repetition": 2,
+      "condition": "structured",
+      "job": 2,
+      "status": "success",
+      "certified": true,
+      "steps": 7,
+      "reason": "Independent test passed.",
+      "writer_error": "",
+      "infrastructure_error": "",
+      "logging_error": "",
+      "elapsed_seconds": 20.61962620803388,
+      "usage": {
+        "roles": {
+          "repair": {
+            "input": 12956,
+            "output": 864
+          },
+          "writer": {
+            "input": 2459,
+            "output": 489
+          }
+        },
+        "input": 15415,
+        "output": 1353,
+        "known_calls": 8,
+        "unknown_calls": 0,
+        "estimated_usd": 0.002218,
+        "usage_complete": true
+      },
+      "sensor_samples": 0,
+      "invalid_actions": 0,
+      "failed_tests": 0,
+      "action_names": [
+        "inspect",
+        "probe",
+        "probe",
+        "power",
+        "calibrate",
+        "power",
+        "test"
+      ],
+      "supplied_memory_tokens": 154,
+      "supplied_items": 1,
+      "retained_items": 1,
+      "writer_rejected_candidates": 0
+    },
+    {
+      "repetition": 2,
+      "condition": "none",
+      "job": 2,
+      "status": "success",
+      "certified": true,
+      "steps": 9,
+      "reason": "Independent test passed.",
+      "writer_error": "",
+      "infrastructure_error": "",
+      "logging_error": "",
+      "elapsed_seconds": 14.626994082995225,
+      "usage": {
+        "roles": {
+          "repair": {
+            "input": 16485,
+            "output": 807
+          },
+          "writer": {
+            "input": 0,
+            "output": 0
+          }
+        },
+        "input": 16485,
+        "output": 807,
+        "known_calls": 9,
+        "unknown_calls": 0,
+        "estimated_usd": 0.002052,
+        "usage_complete": true
+      },
+      "sensor_samples": 2,
+      "invalid_actions": 0,
+      "failed_tests": 0,
+      "action_names": [
+        "inspect",
+        "probe",
+        "sample_sensor",
+        "sample_sensor",
+        "probe",
+        "power",
+        "calibrate",
+        "power",
+        "test"
+      ],
+      "supplied_memory_tokens": 1,
+      "supplied_items": 0,
+      "retained_items": 0,
+      "writer_rejected_candidates": 0
+    },
+    {
+      "repetition": 3,
+      "condition": "structured",
+      "job": 1,
+      "status": "success",
+      "certified": true,
+      "steps": 9,
+      "reason": "Independent test passed.",
+      "writer_error": "",
+      "infrastructure_error": "",
+      "logging_error": "",
+      "elapsed_seconds": 22.88590066600591,
+      "usage": {
+        "roles": {
+          "repair": {
+            "input": 16643,
+            "output": 953
+          },
+          "writer": {
+            "input": 2100,
+            "output": 496
+          }
+        },
+        "input": 18743,
+        "output": 1449,
+        "known_calls": 10,
+        "unknown_calls": 0,
+        "estimated_usd": 0.0025988,
+        "usage_complete": true
+      },
+      "sensor_samples": 2,
+      "invalid_actions": 0,
+      "failed_tests": 0,
+      "action_names": [
+        "inspect",
+        "probe",
+        "sample_sensor",
+        "sample_sensor",
+        "power",
+        "probe",
+        "calibrate",
+        "power",
+        "test"
+      ],
+      "supplied_memory_tokens": 4,
+      "supplied_items": 0,
+      "retained_items": 1,
+      "writer_rejected_candidates": 0
+    },
+    {
+      "repetition": 3,
+      "condition": "none",
+      "job": 1,
+      "status": "success",
+      "certified": true,
+      "steps": 9,
+      "reason": "Independent test passed.",
+      "writer_error": "",
+      "infrastructure_error": "",
+      "logging_error": "",
+      "elapsed_seconds": 17.959888125013094,
+      "usage": {
+        "roles": {
+          "repair": {
+            "input": 16485,
+            "output": 991
+          },
+          "writer": {
+            "input": 0,
+            "output": 0
+          }
+        },
+        "input": 16485,
+        "output": 991,
+        "known_calls": 9,
+        "unknown_calls": 0,
+        "estimated_usd": 0.002144,
+        "usage_complete": true
+      },
+      "sensor_samples": 2,
+      "invalid_actions": 0,
+      "failed_tests": 0,
+      "action_names": [
+        "inspect",
+        "probe",
+        "sample_sensor",
+        "sample_sensor",
+        "probe",
+        "power",
+        "calibrate",
+        "power",
+        "test"
+      ],
+      "supplied_memory_tokens": 1,
+      "supplied_items": 0,
+      "retained_items": 0,
+      "writer_rejected_candidates": 0
+    },
+    {
+      "repetition": 3,
+      "condition": "rolling",
+      "job": 1,
+      "status": "success",
+      "certified": true,
+      "steps": 9,
+      "reason": "Independent test passed.",
+      "writer_error": "",
+      "infrastructure_error": "",
+      "logging_error": "",
+      "elapsed_seconds": 17.610152457957156,
+      "usage": {
+        "roles": {
+          "repair": {
+            "input": 16593,
+            "output": 1042
+          },
+          "writer": {
+            "input": 0,
+            "output": 0
+          }
+        },
+        "input": 16593,
+        "output": 1042,
+        "known_calls": 9,
+        "unknown_calls": 0,
+        "estimated_usd": 0.0021803,
+        "usage_complete": true
+      },
+      "sensor_samples": 2,
+      "invalid_actions": 0,
+      "failed_tests": 0,
+      "action_names": [
+        "inspect",
+        "probe",
+        "sample_sensor",
+        "sample_sensor",
+        "probe",
+        "power",
+        "calibrate",
+        "power",
+        "test"
+      ],
+      "supplied_memory_tokens": 1,
+      "supplied_items": 0,
+      "retained_items": 9,
+      "writer_rejected_candidates": 0
+    },
+    {
+      "repetition": 3,
+      "condition": "structured",
+      "job": 2,
+      "status": "success",
+      "certified": true,
+      "steps": 7,
+      "reason": "Independent test passed.",
+      "writer_error": "",
+      "infrastructure_error": "",
+      "logging_error": "",
+      "elapsed_seconds": 26.944948749965988,
+      "usage": {
+        "roles": {
+          "repair": {
+            "input": 13010,
+            "output": 771
+          },
+          "writer": {
+            "input": 2460,
+            "output": 1158
+          }
+        },
+        "input": 15470,
+        "output": 1929,
+        "known_calls": 8,
+        "unknown_calls": 0,
+        "estimated_usd": 0.0025115,
+        "usage_complete": true
+      },
+      "sensor_samples": 0,
+      "invalid_actions": 0,
+      "failed_tests": 0,
+      "action_names": [
+        "inspect",
+        "probe",
+        "power",
+        "calibrate",
+        "probe",
+        "power",
+        "test"
+      ],
+      "supplied_memory_tokens": 155,
+      "supplied_items": 1,
+      "retained_items": 2,
+      "writer_rejected_candidates": 0
+    },
+    {
+      "repetition": 3,
+      "condition": "none",
+      "job": 2,
+      "status": "success",
+      "certified": true,
+      "steps": 9,
+      "reason": "Independent test passed.",
+      "writer_error": "",
+      "infrastructure_error": "",
+      "logging_error": "",
+      "elapsed_seconds": 15.980409208044875,
+      "usage": {
+        "roles": {
+          "repair": {
+            "input": 16485,
+            "output": 886
+          },
+          "writer": {
+            "input": 0,
+            "output": 0
+          }
+        },
+        "input": 16485,
+        "output": 886,
+        "known_calls": 9,
+        "unknown_calls": 0,
+        "estimated_usd": 0.0020915,
+        "usage_complete": true
+      },
+      "sensor_samples": 2,
+      "invalid_actions": 0,
+      "failed_tests": 0,
+      "action_names": [
+        "inspect",
+        "probe",
+        "sample_sensor",
+        "sample_sensor",
+        "probe",
+        "power",
+        "calibrate",
+        "power",
+        "test"
+      ],
+      "supplied_memory_tokens": 1,
+      "supplied_items": 0,
+      "retained_items": 0,
+      "writer_rejected_candidates": 0
+    },
+    {
+      "repetition": 3,
+      "condition": "rolling",
+      "job": 2,
+      "status": "success",
+      "certified": true,
+      "steps": 7,
+      "reason": "Independent test passed.",
+      "writer_error": "",
+      "infrastructure_error": "",
+      "logging_error": "",
+      "elapsed_seconds": 18.375519042019732,
+      "usage": {
+        "roles": {
+          "repair": {
+            "input": 17646,
+            "output": 1026
+          },
+          "writer": {
+            "input": 0,
+            "output": 0
+          }
+        },
+        "input": 17646,
+        "output": 1026,
+        "known_calls": 7,
+        "unknown_calls": 0,
+        "estimated_usd": 0.0022776,
+        "usage_complete": true
+      },
+      "sensor_samples": 0,
+      "invalid_actions": 0,
+      "failed_tests": 0,
+      "action_names": [
+        "inspect",
+        "probe",
+        "probe",
+        "power",
+        "calibrate",
+        "power",
+        "test"
+      ],
+      "supplied_memory_tokens": 807,
+      "supplied_items": 9,
+      "retained_items": 16,
+      "writer_rejected_candidates": 0
+    }
+  ],
+  "pairs": [
+    {
+      "repetition": 1,
+      "condition": "none",
+      "a1_status": "success",
+      "a1_certified": true,
+      "a1_steps": 9,
+      "a1_sensor_samples": 2,
+      "a1_invalid_actions": 0,
+      "a1_failed_tests": 0,
+      "a1_elapsed_seconds": 15.192927542026155,
+      "a1_repair_input": 16485,
+      "a1_repair_output": 767,
+      "a1_writer_input": 0,
+      "a1_writer_output": 0,
+      "a1_tokens": 17252,
+      "a1_estimated_usd": 0.002032,
+      "a2_status": "success",
+      "a2_certified": true,
+      "a2_steps": 9,
+      "a2_sensor_samples": 2,
+      "a2_invalid_actions": 0,
+      "a2_failed_tests": 0,
+      "a2_elapsed_seconds": 15.93363716598833,
+      "a2_repair_input": 16499,
+      "a2_repair_output": 854,
+      "a2_writer_input": 0,
+      "a2_writer_output": 0,
+      "a2_tokens": 17353,
+      "a2_estimated_usd": 0.0020769,
+      "a1_log_entries": 9,
+      "a1_log_tokens": 789,
+      "a2_supplied_memory_tokens": 1,
+      "a2_supplied_items": 0,
+      "first_experience_retained_and_supplied": false
+    },
+    {
+      "repetition": 1,
+      "condition": "rolling",
+      "a1_status": "success",
+      "a1_certified": true,
+      "a1_steps": 9,
+      "a1_sensor_samples": 2,
+      "a1_invalid_actions": 0,
+      "a1_failed_tests": 0,
+      "a1_elapsed_seconds": 16.738474708981812,
+      "a1_repair_input": 16593,
+      "a1_repair_output": 962,
+      "a1_writer_input": 0,
+      "a1_writer_output": 0,
+      "a1_tokens": 17555,
+      "a1_estimated_usd": 0.0021403,
+      "a2_status": "success",
+      "a2_certified": true,
+      "a2_steps": 7,
+      "a2_sensor_samples": 0,
+      "a2_invalid_actions": 0,
+      "a2_failed_tests": 0,
+      "a2_elapsed_seconds": 14.429683083028067,
+      "a2_repair_input": 17646,
+      "a2_repair_output": 876,
+      "a2_writer_input": 0,
+      "a2_writer_output": 0,
+      "a2_tokens": 18522,
+      "a2_estimated_usd": 0.0022026,
+      "a1_log_entries": 9,
+      "a1_log_tokens": 807,
+      "a2_supplied_memory_tokens": 807,
+      "a2_supplied_items": 9,
+      "first_experience_retained_and_supplied": true,
+      "partial_jobs": []
+    },
+    {
+      "repetition": 1,
+      "condition": "structured",
+      "a1_status": "success",
+      "a1_certified": true,
+      "a1_steps": 9,
+      "a1_sensor_samples": 2,
+      "a1_invalid_actions": 0,
+      "a1_failed_tests": 0,
+      "a1_elapsed_seconds": 24.706011833040975,
+      "a1_repair_input": 16629,
+      "a1_repair_output": 959,
+      "a1_writer_input": 2100,
+      "a1_writer_output": 822,
+      "a1_tokens": 20510,
+      "a1_estimated_usd": 0.0027634,
+      "a2_status": "success",
+      "a2_certified": true,
+      "a2_steps": 7,
+      "a2_sensor_samples": 0,
+      "a2_invalid_actions": 0,
+      "a2_failed_tests": 0,
+      "a2_elapsed_seconds": 22.518129375006538,
+      "a2_repair_input": 13040,
+      "a2_repair_output": 885,
+      "a2_writer_input": 2469,
+      "a2_writer_output": 854,
+      "a2_tokens": 17248,
+      "a2_estimated_usd": 0.0024203999999999996,
+      "a1_log_entries": 9,
+      "a1_log_tokens": 807,
+      "a2_supplied_memory_tokens": 164,
+      "a2_supplied_items": 1,
+      "first_experience_retained_and_supplied": true,
+      "all_sources_from_a1": true,
+      "passing_test_cited": true
+    },
+    {
+      "repetition": 2,
+      "condition": "none",
+      "a1_status": "success",
+      "a1_certified": true,
+      "a1_steps": 9,
+      "a1_sensor_samples": 2,
+      "a1_invalid_actions": 0,
+      "a1_failed_tests": 0,
+      "a1_elapsed_seconds": 15.232766834029462,
+      "a1_repair_input": 16485,
+      "a1_repair_output": 859,
+      "a1_writer_input": 0,
+      "a1_writer_output": 0,
+      "a1_tokens": 17344,
+      "a1_estimated_usd": 0.002078,
+      "a2_status": "success",
+      "a2_certified": true,
+      "a2_steps": 9,
+      "a2_sensor_samples": 2,
+      "a2_invalid_actions": 0,
+      "a2_failed_tests": 0,
+      "a2_elapsed_seconds": 14.626994082995225,
+      "a2_repair_input": 16485,
+      "a2_repair_output": 807,
+      "a2_writer_input": 0,
+      "a2_writer_output": 0,
+      "a2_tokens": 17292,
+      "a2_estimated_usd": 0.002052,
+      "a1_log_entries": 9,
+      "a1_log_tokens": 789,
+      "a2_supplied_memory_tokens": 1,
+      "a2_supplied_items": 0,
+      "first_experience_retained_and_supplied": false
+    },
+    {
+      "repetition": 2,
+      "condition": "rolling",
+      "a1_status": "success",
+      "a1_certified": true,
+      "a1_steps": 9,
+      "a1_sensor_samples": 2,
+      "a1_invalid_actions": 0,
+      "a1_failed_tests": 0,
+      "a1_elapsed_seconds": 15.630460792046506,
+      "a1_repair_input": 16607,
+      "a1_repair_output": 881,
+      "a1_writer_input": 0,
+      "a1_writer_output": 0,
+      "a1_tokens": 17488,
+      "a1_estimated_usd": 0.0021012,
+      "a2_status": "success",
+      "a2_certified": true,
+      "a2_steps": 7,
+      "a2_sensor_samples": 0,
+      "a2_invalid_actions": 0,
+      "a2_failed_tests": 0,
+      "a2_elapsed_seconds": 13.80864833301166,
+      "a2_repair_input": 17693,
+      "a2_repair_output": 897,
+      "a2_writer_input": 0,
+      "a2_writer_output": 0,
+      "a2_tokens": 18590,
+      "a2_estimated_usd": 0.0022178,
+      "a1_log_entries": 9,
+      "a1_log_tokens": 807,
+      "a2_supplied_memory_tokens": 807,
+      "a2_supplied_items": 9,
+      "first_experience_retained_and_supplied": true,
+      "partial_jobs": []
+    },
+    {
+      "repetition": 2,
+      "condition": "structured",
+      "a1_status": "success",
+      "a1_certified": true,
+      "a1_steps": 9,
+      "a1_sensor_samples": 2,
+      "a1_invalid_actions": 0,
+      "a1_failed_tests": 0,
+      "a1_elapsed_seconds": 21.058175000012852,
+      "a1_repair_input": 16676,
+      "a1_repair_output": 909,
+      "a1_writer_input": 2100,
+      "a1_writer_output": 448,
+      "a1_tokens": 20133,
+      "a1_estimated_usd": 0.0025561000000000004,
+      "a2_status": "success",
+      "a2_certified": true,
+      "a2_steps": 7,
+      "a2_sensor_samples": 0,
+      "a2_invalid_actions": 0,
+      "a2_failed_tests": 0,
+      "a2_elapsed_seconds": 20.61962620803388,
+      "a2_repair_input": 12956,
+      "a2_repair_output": 864,
+      "a2_writer_input": 2459,
+      "a2_writer_output": 489,
+      "a2_tokens": 16768,
+      "a2_estimated_usd": 0.002218,
+      "a1_log_entries": 9,
+      "a1_log_tokens": 807,
+      "a2_supplied_memory_tokens": 154,
+      "a2_supplied_items": 1,
+      "first_experience_retained_and_supplied": true,
+      "all_sources_from_a1": true,
+      "passing_test_cited": true
+    },
+    {
+      "repetition": 3,
+      "condition": "none",
+      "a1_status": "success",
+      "a1_certified": true,
+      "a1_steps": 9,
+      "a1_sensor_samples": 2,
+      "a1_invalid_actions": 0,
+      "a1_failed_tests": 0,
+      "a1_elapsed_seconds": 17.959888125013094,
+      "a1_repair_input": 16485,
+      "a1_repair_output": 991,
+      "a1_writer_input": 0,
+      "a1_writer_output": 0,
+      "a1_tokens": 17476,
+      "a1_estimated_usd": 0.002144,
+      "a2_status": "success",
+      "a2_certified": true,
+      "a2_steps": 9,
+      "a2_sensor_samples": 2,
+      "a2_invalid_actions": 0,
+      "a2_failed_tests": 0,
+      "a2_elapsed_seconds": 15.980409208044875,
+      "a2_repair_input": 16485,
+      "a2_repair_output": 886,
+      "a2_writer_input": 0,
+      "a2_writer_output": 0,
+      "a2_tokens": 17371,
+      "a2_estimated_usd": 0.0020915,
+      "a1_log_entries": 9,
+      "a1_log_tokens": 789,
+      "a2_supplied_memory_tokens": 1,
+      "a2_supplied_items": 0,
+      "first_experience_retained_and_supplied": false
+    },
+    {
+      "repetition": 3,
+      "condition": "rolling",
+      "a1_status": "success",
+      "a1_certified": true,
+      "a1_steps": 9,
+      "a1_sensor_samples": 2,
+      "a1_invalid_actions": 0,
+      "a1_failed_tests": 0,
+      "a1_elapsed_seconds": 17.610152457957156,
+      "a1_repair_input": 16593,
+      "a1_repair_output": 1042,
+      "a1_writer_input": 0,
+      "a1_writer_output": 0,
+      "a1_tokens": 17635,
+      "a1_estimated_usd": 0.0021803,
+      "a2_status": "success",
+      "a2_certified": true,
+      "a2_steps": 7,
+      "a2_sensor_samples": 0,
+      "a2_invalid_actions": 0,
+      "a2_failed_tests": 0,
+      "a2_elapsed_seconds": 18.375519042019732,
+      "a2_repair_input": 17646,
+      "a2_repair_output": 1026,
+      "a2_writer_input": 0,
+      "a2_writer_output": 0,
+      "a2_tokens": 18672,
+      "a2_estimated_usd": 0.0022776,
+      "a1_log_entries": 9,
+      "a1_log_tokens": 807,
+      "a2_supplied_memory_tokens": 807,
+      "a2_supplied_items": 9,
+      "first_experience_retained_and_supplied": true,
+      "partial_jobs": []
+    },
+    {
+      "repetition": 3,
+      "condition": "structured",
+      "a1_status": "success",
+      "a1_certified": true,
+      "a1_steps": 9,
+      "a1_sensor_samples": 2,
+      "a1_invalid_actions": 0,
+      "a1_failed_tests": 0,
+      "a1_elapsed_seconds": 22.88590066600591,
+      "a1_repair_input": 16643,
+      "a1_repair_output": 953,
+      "a1_writer_input": 2100,
+      "a1_writer_output": 496,
+      "a1_tokens": 20192,
+      "a1_estimated_usd": 0.0025988,
+      "a2_status": "success",
+      "a2_certified": true,
+      "a2_steps": 7,
+      "a2_sensor_samples": 0,
+      "a2_invalid_actions": 0,
+      "a2_failed_tests": 0,
+      "a2_elapsed_seconds": 26.944948749965988,
+      "a2_repair_input": 13010,
+      "a2_repair_output": 771,
+      "a2_writer_input": 2460,
+      "a2_writer_output": 1158,
+      "a2_tokens": 17399,
+      "a2_estimated_usd": 0.0025115,
+      "a1_log_entries": 9,
+      "a1_log_tokens": 807,
+      "a2_supplied_memory_tokens": 155,
+      "a2_supplied_items": 1,
+      "first_experience_retained_and_supplied": true,
+      "all_sources_from_a1": true,
+      "passing_test_cited": true
+    }
+  ],
+  "request_summary": {
+    "calls": 156,
+    "returned_calls": 156,
+    "incomplete_responses": 0,
+    "reservation_violations": 0,
+    "job_allowance_crossings": 0
+  },
+  "provider": {
+    "configured_models": [
+      "gpt-6-luna"
+    ],
+    "returned_models": [
+      "gpt-6-luna"
+    ]
+  }
+}
