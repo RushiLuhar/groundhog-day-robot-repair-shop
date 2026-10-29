@@ -30,6 +30,8 @@ The [50k job-budget follow-up](docs/LIVE_EVALUATION_50K_2026-10-28.md) completed
 
 The subsequent [memory-first combined intervention](docs/LIVE_EVALUATION_TUNED_2026-10-28.md) used repair-v3, writer-v2 and service-v2 after **107 offline tests passed**. It completed 72 attempts: **67 certified**, five compound budget failures, 1,945,605 tokens and $0.2333469 estimated. Structured memory showed repeat/transfer reuse, but no memory certified more repairs at lower overall cost. The **tuned-memory-first** preset remains offline by default. Prompt and task changes were combined, so the result does not isolate one cause.
 
+The [controlled Sol repair comparison](docs/LIVE_EVALUATION_SOL_2026-10-29.md) changed only the repair model, keeping the Luna writer and tuned protocol fixed. Its $0.50 admission guard stopped execution at **10 certified, one interrupted and 61 unattempted** positions ($0.4415131 estimated). The three common early tickets had the same action counts as tuned Luna; later exceptions and compound work were not reached. [The world and task explainer](docs/EVALUATION_WORLD.md) describes the machinery, seven tools, hidden state and independent certification.
+
 ## Put an experiment together
 
 1. Name the experiment and add notes or a hypothesis. Choose a task set, jobs per mechanic and repeated shifts. The selected prefix is shown as “N of M jobs”; **Select all jobs in this task set** explicitly selects the full suite. Changing task sets preserves the chosen count where possible.
