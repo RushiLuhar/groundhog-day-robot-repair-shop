@@ -20,6 +20,20 @@ Open **http://127.0.0.1:7860** on the same computer. The launcher creates a deta
 
 The server binds only to localhost; no public Gradio link is created. The first tokenizer preparation downloads its vocabulary. Dependency versions are in `requirements-lock.txt`.
 
+## Paired evaluation harness (v2)
+
+The new condition-based harness runs separately with `.venv/bin/python -m repair_shop.evaluation.app` on localhost port **7862**. It accepts arbitrary condition lists, independent repair/writer settings and the eight-ticket `service-v1` suite. See [the implementation guide and execution plan](docs/EVALUATION_HARNESS_V2.md) and [offline 24-attempt example](examples/evaluation-memory-pilot.json). Legacy workshop instructions below retain their original semantics and storage. No live pilot is authorized by the example.
+
+The [October 28 live evaluation](docs/LIVE_EVALUATION_2026-10-28.md) records a bounded Luna run, matched outcomes, role usage, trace findings and proposed follow-ups. It stopped at the run-token admission guard after 46 started attempts; its partial results do not establish a general memory ranking.
+
+The [50k job-budget follow-up](docs/LIVE_EVALUATION_50K_2026-10-28.md) completed all 72 attempts: 65 certified, seven unfinished, 1,922,632 reported tokens and $0.2340464 estimated cost. [Versioned prompt/task tuning](docs/EVALUATION_TUNING_V2.md) follows that analysis and is available as the offline **tuned-v2** preset. That initial repair-v2 preset was not run live; historical v1 tasks, prompts and examples remain unchanged.
+
+The subsequent [memory-first combined intervention](docs/LIVE_EVALUATION_TUNED_2026-10-28.md) used repair-v3, writer-v2 and service-v2 after **107 offline tests passed**. It completed 72 attempts: **67 certified**, five compound budget failures, 1,945,605 tokens and $0.2333469 estimated. Structured memory showed repeat/transfer reuse, but no memory certified more repairs at lower overall cost. The **tuned-memory-first** preset remains offline by default. Prompt and task changes were combined, so the result does not isolate one cause.
+
+The [controlled Sol repair comparison](docs/LIVE_EVALUATION_SOL_2026-10-29.md) changed only the repair model, keeping the Luna writer and tuned protocol fixed. Its $0.50 admission guard stopped execution at **10 certified, one interrupted and 61 unattempted** positions ($0.4415131 estimated). The three common early tickets had the same action counts as tuned Luna; later exceptions and compound work were not reached. [The world and task explainer](docs/EVALUATION_WORLD.md) describes the machinery, seven tools, hidden state and independent certification.
+
+The [authorized Sol continuation](docs/LIVE_EVALUATION_SOL_EXTENDED_2026-10-29.md) preserved that interrupted attempt and all prior charges, then executed only the 61 untouched positions under a $10 combined ceiling after **120 offline tests passed**. Final coverage: **68 certified, three job-token failures, one preserved interruption, zero unattempted**; 1,807,233 tokens and $3.765312 estimated. Structured and no memory both certified 24/24; structured used 30 fewer actions but 38.8% more tokens and cost 17.8% more. Matched Luna comparisons and interruption-history sensitivity data are included.
+
 ## Put an experiment together
 
 1. Name the experiment and add notes or a hypothesis. Choose a task set, jobs per mechanic and repeated shifts. The selected prefix is shown as “N of M jobs”; **Select all jobs in this task set** explicitly selects the full suite. Changing task sets preserves the chosen count where possible.

@@ -1,0 +1,524 @@
+{
+  "comparison": "Repair-model-only intervention on identical tasks/prompts/settings; independent stochastic runs. Fixed spend creates truncated, unequal coverage. No broad model ranking.",
+  "luna_source": {
+    "commit": "f20daf098f365bfc99f7db2973e7a0a46a32108b",
+    "dirty": false
+  },
+  "sol_source": {
+    "commit": "e2e31c1be151cd5f14114ea4254dfc533e7f695d",
+    "dirty": false
+  },
+  "protocol_equivalence_checked": true,
+  "luna_full_run": {
+    "none": {
+      "scheduled": 24,
+      "started": 24,
+      "certified": 24,
+      "unfinished": 0,
+      "interrupted": 0,
+      "unattempted": 0,
+      "infrastructure_errors": 0,
+      "writer_errors": 0,
+      "logging_errors": 0,
+      "steps": 248,
+      "roles": {
+        "repair": {
+          "input": 500239,
+          "output": 24278
+        },
+        "writer": {
+          "input": 0,
+          "output": 0
+        }
+      },
+      "known_tokens": 524517,
+      "known_estimated_usd": 0.0621629,
+      "unknown_calls": 0,
+      "elapsed_seconds": 454.97222424898064
+    },
+    "rolling": {
+      "scheduled": 24,
+      "started": 24,
+      "certified": 21,
+      "unfinished": 3,
+      "interrupted": 0,
+      "unattempted": 0,
+      "infrastructure_errors": 0,
+      "writer_errors": 0,
+      "logging_errors": 0,
+      "steps": 211,
+      "roles": {
+        "repair": {
+          "input": 733792,
+          "output": 34284
+        },
+        "writer": {
+          "input": 0,
+          "output": 0
+        }
+      },
+      "known_tokens": 768076,
+      "known_estimated_usd": 0.09052120000000001,
+      "unknown_calls": 0,
+      "elapsed_seconds": 518.0110024181195
+    },
+    "structured": {
+      "scheduled": 24,
+      "started": 24,
+      "certified": 22,
+      "unfinished": 2,
+      "interrupted": 0,
+      "unattempted": 0,
+      "infrastructure_errors": 0,
+      "writer_errors": 0,
+      "logging_errors": 0,
+      "steps": 205,
+      "roles": {
+        "repair": {
+          "input": 536631,
+          "output": 22735
+        },
+        "writer": {
+          "input": 77977,
+          "output": 15669
+        }
+      },
+      "known_tokens": 653012,
+      "known_estimated_usd": 0.0806628,
+      "unknown_calls": 0,
+      "elapsed_seconds": 589.1260112510645
+    }
+  },
+  "sol_full_run": {
+    "none": {
+      "scheduled": 24,
+      "started": 4,
+      "certified": 4,
+      "unfinished": 0,
+      "interrupted": 0,
+      "unattempted": 20,
+      "infrastructure_errors": 0,
+      "writer_errors": 0,
+      "logging_errors": 0,
+      "steps": 37,
+      "roles": {
+        "repair": {
+          "input": 70125,
+          "output": 2233
+        },
+        "writer": {
+          "input": 0,
+          "output": 0
+        }
+      },
+      "known_tokens": 72358,
+      "known_estimated_usd": 0.16258,
+      "unknown_calls": 0,
+      "elapsed_seconds": 67.09303179301787
+    },
+    "rolling": {
+      "scheduled": 24,
+      "started": 4,
+      "certified": 3,
+      "unfinished": 0,
+      "interrupted": 1,
+      "unattempted": 20,
+      "infrastructure_errors": 0,
+      "writer_errors": 0,
+      "logging_errors": 0,
+      "steps": 30,
+      "roles": {
+        "repair": {
+          "input": 83825,
+          "output": 1737
+        },
+        "writer": {
+          "input": 0,
+          "output": 0
+        }
+      },
+      "known_tokens": 85562,
+      "known_estimated_usd": 0.18502000000000002,
+      "unknown_calls": 0,
+      "elapsed_seconds": 47.367067832965404
+    },
+    "structured": {
+      "scheduled": 24,
+      "started": 3,
+      "certified": 3,
+      "unfinished": 0,
+      "interrupted": 0,
+      "unattempted": 21,
+      "infrastructure_errors": 0,
+      "writer_errors": 0,
+      "logging_errors": 0,
+      "steps": 21,
+      "roles": {
+        "repair": {
+          "input": 40015,
+          "output": 1242
+        },
+        "writer": {
+          "input": 7126,
+          "output": 1501
+        }
+      },
+      "known_tokens": 49884,
+      "known_estimated_usd": 0.0939131,
+      "unknown_calls": 0,
+      "elapsed_seconds": 51.33773329097312
+    }
+  },
+  "same_condition_terminal_pairs": {
+    "selection": "Every Sol success/unfinished attempt paired with the same Luna condition/shift/ticket. Global budget interruption and unattempted positions excluded from efficiency comparison; retained in full coverage.",
+    "positions": [
+      {
+        "repetition": 1,
+        "condition": "none",
+        "job": 1
+      },
+      {
+        "repetition": 1,
+        "condition": "none",
+        "job": 2
+      },
+      {
+        "repetition": 1,
+        "condition": "none",
+        "job": 3
+      },
+      {
+        "repetition": 1,
+        "condition": "none",
+        "job": 4
+      },
+      {
+        "repetition": 1,
+        "condition": "rolling",
+        "job": 1
+      },
+      {
+        "repetition": 1,
+        "condition": "rolling",
+        "job": 2
+      },
+      {
+        "repetition": 1,
+        "condition": "rolling",
+        "job": 3
+      },
+      {
+        "repetition": 1,
+        "condition": "structured",
+        "job": 1
+      },
+      {
+        "repetition": 1,
+        "condition": "structured",
+        "job": 2
+      },
+      {
+        "repetition": 1,
+        "condition": "structured",
+        "job": 3
+      }
+    ],
+    "by_condition": {
+      "none": {
+        "luna": {
+          "scheduled": 4,
+          "certified": 4,
+          "unfinished": 0,
+          "interrupted": 0,
+          "unattempted": 0,
+          "steps": 38,
+          "sensor_samples": 8,
+          "roles": {
+            "repair": {
+              "input": 73022,
+              "output": 3659
+            },
+            "writer": {
+              "input": 0,
+              "output": 0
+            }
+          },
+          "known_tokens": 76681,
+          "known_estimated_usd": 0.0091317,
+          "elapsed_seconds": 67.14603525097482
+        },
+        "sol": {
+          "scheduled": 4,
+          "certified": 4,
+          "unfinished": 0,
+          "interrupted": 0,
+          "unattempted": 0,
+          "steps": 37,
+          "sensor_samples": 8,
+          "roles": {
+            "repair": {
+              "input": 70125,
+              "output": 2233
+            },
+            "writer": {
+              "input": 0,
+              "output": 0
+            }
+          },
+          "known_tokens": 72358,
+          "known_estimated_usd": 0.16258,
+          "elapsed_seconds": 67.09303179301787
+        }
+      },
+      "rolling": {
+        "luna": {
+          "scheduled": 3,
+          "certified": 3,
+          "unfinished": 0,
+          "interrupted": 0,
+          "unattempted": 0,
+          "steps": 21,
+          "sensor_samples": 2,
+          "roles": {
+            "repair": {
+              "input": 49672,
+              "output": 2394
+            },
+            "writer": {
+              "input": 0,
+              "output": 0
+            }
+          },
+          "known_tokens": 52066,
+          "known_estimated_usd": 0.0061642,
+          "elapsed_seconds": 36.12796829198487
+        },
+        "sol": {
+          "scheduled": 3,
+          "certified": 3,
+          "unfinished": 0,
+          "interrupted": 0,
+          "unattempted": 0,
+          "steps": 21,
+          "sensor_samples": 2,
+          "roles": {
+            "repair": {
+              "input": 49615,
+              "output": 1240
+            },
+            "writer": {
+              "input": 0,
+              "output": 0
+            }
+          },
+          "known_tokens": 50855,
+          "known_estimated_usd": 0.11163000000000001,
+          "elapsed_seconds": 34.40362437494332
+        }
+      },
+      "structured": {
+        "luna": {
+          "scheduled": 3,
+          "certified": 3,
+          "unfinished": 0,
+          "interrupted": 0,
+          "unattempted": 0,
+          "steps": 21,
+          "sensor_samples": 2,
+          "roles": {
+            "repair": {
+              "input": 40053,
+              "output": 2160
+            },
+            "writer": {
+              "input": 7128,
+              "output": 2299
+            }
+          },
+          "known_tokens": 51640,
+          "known_estimated_usd": 0.006947600000000001,
+          "elapsed_seconds": 62.65781258302741
+        },
+        "sol": {
+          "scheduled": 3,
+          "certified": 3,
+          "unfinished": 0,
+          "interrupted": 0,
+          "unattempted": 0,
+          "steps": 21,
+          "sensor_samples": 2,
+          "roles": {
+            "repair": {
+              "input": 40015,
+              "output": 1242
+            },
+            "writer": {
+              "input": 7126,
+              "output": 1501
+            }
+          },
+          "known_tokens": 49884,
+          "known_estimated_usd": 0.0939131,
+          "elapsed_seconds": 51.33773329097312
+        }
+      }
+    }
+  },
+  "common_all_condition_pairs": {
+    "selection": "Only shift/ticket groups where all three conditions completed terminal attempts in both runs.",
+    "positions": [
+      {
+        "repetition": 1,
+        "job": 1
+      },
+      {
+        "repetition": 1,
+        "job": 2
+      },
+      {
+        "repetition": 1,
+        "job": 3
+      }
+    ],
+    "by_condition": {
+      "none": {
+        "luna": {
+          "scheduled": 3,
+          "certified": 3,
+          "unfinished": 0,
+          "interrupted": 0,
+          "unattempted": 0,
+          "steps": 25,
+          "sensor_samples": 6,
+          "roles": {
+            "repair": {
+              "input": 45313,
+              "output": 2281
+            },
+            "writer": {
+              "input": 0,
+              "output": 0
+            }
+          },
+          "known_tokens": 47594,
+          "known_estimated_usd": 0.0056718,
+          "elapsed_seconds": 38.63499320897972
+        },
+        "sol": {
+          "scheduled": 3,
+          "certified": 3,
+          "unfinished": 0,
+          "interrupted": 0,
+          "unattempted": 0,
+          "steps": 25,
+          "sensor_samples": 6,
+          "roles": {
+            "repair": {
+              "input": 45327,
+              "output": 1309
+            },
+            "writer": {
+              "input": 0,
+              "output": 0
+            }
+          },
+          "known_tokens": 46636,
+          "known_estimated_usd": 0.103744,
+          "elapsed_seconds": 41.15487550100079
+        }
+      },
+      "rolling": {
+        "luna": {
+          "scheduled": 3,
+          "certified": 3,
+          "unfinished": 0,
+          "interrupted": 0,
+          "unattempted": 0,
+          "steps": 21,
+          "sensor_samples": 2,
+          "roles": {
+            "repair": {
+              "input": 49672,
+              "output": 2394
+            },
+            "writer": {
+              "input": 0,
+              "output": 0
+            }
+          },
+          "known_tokens": 52066,
+          "known_estimated_usd": 0.0061642,
+          "elapsed_seconds": 36.12796829198487
+        },
+        "sol": {
+          "scheduled": 3,
+          "certified": 3,
+          "unfinished": 0,
+          "interrupted": 0,
+          "unattempted": 0,
+          "steps": 21,
+          "sensor_samples": 2,
+          "roles": {
+            "repair": {
+              "input": 49615,
+              "output": 1240
+            },
+            "writer": {
+              "input": 0,
+              "output": 0
+            }
+          },
+          "known_tokens": 50855,
+          "known_estimated_usd": 0.11163000000000001,
+          "elapsed_seconds": 34.40362437494332
+        }
+      },
+      "structured": {
+        "luna": {
+          "scheduled": 3,
+          "certified": 3,
+          "unfinished": 0,
+          "interrupted": 0,
+          "unattempted": 0,
+          "steps": 21,
+          "sensor_samples": 2,
+          "roles": {
+            "repair": {
+              "input": 40053,
+              "output": 2160
+            },
+            "writer": {
+              "input": 7128,
+              "output": 2299
+            }
+          },
+          "known_tokens": 51640,
+          "known_estimated_usd": 0.006947600000000001,
+          "elapsed_seconds": 62.65781258302741
+        },
+        "sol": {
+          "scheduled": 3,
+          "certified": 3,
+          "unfinished": 0,
+          "interrupted": 0,
+          "unattempted": 0,
+          "steps": 21,
+          "sensor_samples": 2,
+          "roles": {
+            "repair": {
+              "input": 40015,
+              "output": 1242
+            },
+            "writer": {
+              "input": 7126,
+              "output": 1501
+            }
+          },
+          "known_tokens": 49884,
+          "known_estimated_usd": 0.0939131,
+          "elapsed_seconds": 51.33773329097312
+        }
+      }
+    }
+  }
+}
